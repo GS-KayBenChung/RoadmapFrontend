@@ -4,6 +4,9 @@ interface Props {
 
 export default function ScreenTitleName({title}: Props){
     return(
-        <h1 className="text-2xl font-bold mb-8">{title}</h1>
+        // <h1 className="text-2xl font-bold mb-8">{title}</h1>
+        <div className="flex justify-center w-full mb-8">
+            <h1 className="text-4xl font-bold">{title}</h1>
+        </div>
     )
 }
