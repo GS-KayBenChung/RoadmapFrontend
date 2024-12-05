@@ -1,10 +1,10 @@
 import { Outlet } from 'react-router-dom';
-import NavBar from './NavBar';
+//import NavBar from './NavBar';
 
 function App() {
   return (
     <>
-      <NavBar/>
+      {/* <NavBar/> */}
       <div>
         <Outlet />
       </div>
@@ -12,4 +12,4 @@ function App() {
   )
 }
 
-export default App
+export default App;

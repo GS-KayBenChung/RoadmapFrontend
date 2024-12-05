@@ -12,6 +12,8 @@ import { Button } from "@mui/material";
 import {v4 as uuid} from 'uuid'
 import apiClient from "../../app/api/apiClient";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import NavBar from "../../app/layout/NavBar";
+//import { useStore } from "../../app/stores/store";
 
 export default function RoadmapsPage() {
 
@@ -31,6 +33,8 @@ export default function RoadmapsPage() {
     },
   ];
   
+  //const {roadmapStore} = useStore();
+
   const [roadmaps, setRoadmaps] = useState<Roadmap[]>([]);
 
   const [viewType, setViewType] = useState("card"); 
@@ -50,6 +54,7 @@ export default function RoadmapsPage() {
   useEffect(() => {
     // .get<Roadmap[]>(API_URL.roadmap)
     apiClient.Roadmaps.list().then(response => {
+      
       setRoadmaps(response);
       setLoading(false);
     })
@@ -102,8 +107,9 @@ export default function RoadmapsPage() {
   if(loading) return <LoadingComponent content="Loading..."/>
 
   return (
+    <>
+    <NavBar/>
     <div className="p-16">
-
       <ScreenTitleName title="ROADMAPS"/>
       
       <div className="flex justify-end gap-4 mb-6">
@@ -183,5 +189,6 @@ export default function RoadmapsPage() {
         />
       }
     </div>
+    </>
   );
 }

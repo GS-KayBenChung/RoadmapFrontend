@@ -1,11 +1,13 @@
 import DashboardCard from "../../app/layout/DashboardCard";
+import NavBar from "../../app/layout/NavBar";
 import CircularProgress from "../CircularProgressBar";
 import ScreenTitleName from "../ScreenTitleName";
 
 export default function RoadmapDashboard() {
     const overallCompletionRate = 60;
     return (
-
+      <>
+      <NavBar/>
       <div className="min-h-screen w-full bg-gray-400 flex flex-col items-center m-0 py-12">
       
         <ScreenTitleName title="ROADMAP DASHBOARD"/>
@@ -25,6 +27,7 @@ export default function RoadmapDashboard() {
  
         
       </div>
+      </>
     );
   }
   
