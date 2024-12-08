@@ -1,14 +1,13 @@
 import { makeAutoObservable } from "mobx";
 
 export default class UserStore {
-  isLoggedIn = false; // Indicates login status
-  token: string | null = null; // Holds the token
-  user: any = null; // Holds user data (optional)
+  isLoggedIn = false;
+  token: string | null = null; 
+  user: any = null; 
 
   constructor() {
     makeAutoObservable(this);
 
-    // On initialization, check local storage for a saved token
     const savedToken = localStorage.getItem("token");
     if (savedToken) {
       this.token = savedToken;

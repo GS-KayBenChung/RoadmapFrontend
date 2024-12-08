@@ -1,15 +1,26 @@
-import { useStore } from "./store";
+import { useNavigate } from 'react-router-dom';
+import { useUser } from './userContext';
 
+const LogoutButton = () => {
 
-export default function LogoutButton() {
-  const { userStore } = useStore();
+  const { setUser } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/');
+  };
 
   return (
-    <button
-      onClick={() => userStore.logout()}
-      className="bg-red-500 text-white px-4 py-2 rounded-full"
+    <button 
+      onClick={handleLogout}
+      className="bg-black text-white text-sm px-4 py-2 rounded hover:bg-gray-800"
     >
       Logout
     </button>
   );
-}
+};
+
+export default LogoutButton;

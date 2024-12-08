@@ -7,7 +7,7 @@ interface Props {
 
 export default function RoadmapCard({ name, progress }: Props) {
   return (
-    <div className="bg-gray-100 -mx-12 p-2 rounded-lg flex flex-col items-center text-center shadow-md aspect-square scale-75">
+    <div className="bg-gray-100 p-2 rounded-lg flex flex-col items-center text-center shadow-md aspect-square scale-75">
       <div className="my-12 w-3/5">
         <CircularProgressBar percentage={progress} />
       </div>

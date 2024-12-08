@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 
 interface NavItemProps {
   to: string;
-  children: React.ReactNode; // Accept strings, JSX, or components
+  children: React.ReactNode;
 }
 
 export default function NavItem({ to, children }: NavItemProps) {
@@ -10,10 +10,10 @@ export default function NavItem({ to, children }: NavItemProps) {
     <NavLink
       to={to}
       className={({ isActive }) =>
-        `hover:text-black font-bold ${isActive ? "text-blue-500" : ""}`
+        `hover:text-black font-bold ${isActive ? "text-blue-500" : "text-black"}`
       }
     >
-      {children}
+      {children} 
     </NavLink>
   );
 }

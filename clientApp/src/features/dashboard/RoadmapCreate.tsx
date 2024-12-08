@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Stepper,
@@ -13,6 +12,7 @@ import {
 } from "@mui/material";
 import ScreenTitleName from "../ScreenTitleName";
 import { TrashIcon } from "@heroicons/react/16/solid";
+import NavBar from "../../app/layout/NavBar";
 
 interface Task {
   title: string;
@@ -93,16 +93,16 @@ const RoadmapStepper = () => {
 
   const renderStepContent = (step: number) => {
     switch (step) {
-      case 0: // Roadmap Details
+      case 0:
         return (
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", padding: 3 }}>
+          <Box className="flex flex-col items-center p-3">
             <TextField
               fullWidth
               margin="normal"
               label="Roadmap Title"
               value={roadmapTitle}
               onChange={(e) => setRoadmapTitle(e.target.value)}
-              sx={{ maxWidth: "600px", mb: 2 }}
+              className="max-w-[600px]"
             />
             <TextField
               fullWidth
@@ -112,186 +112,186 @@ const RoadmapStepper = () => {
               rows={4}
               value={roadmapDescription}
               onChange={(e) => setRoadmapDescription(e.target.value)}
-              sx={{ maxWidth: "600px" }}
+              className="max-w-[600px]"
             />
           </Box>
         );
   
-        case 1:
-          return (
-            <Box sx={{ padding: 3 }}>
-              <Button
-                variant="contained"
-                onClick={addMilestone}
-                sx={{ mb: 3, display: "block", margin: "0 auto" }}
-              >
-                Add Milestone
-              </Button>
-              {milestones.map((milestone, milestoneIndex) => (
-                <Card key={milestoneIndex} variant="outlined" sx={{ mb: 3, padding: 2, marginTop: 4 }}>
-                  <CardContent>
-                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                      <Typography variant="h6">{`Milestone ${milestoneIndex + 1}`}</Typography>
-                      <IconButton
-                        onClick={() => deleteMilestone(milestoneIndex)}
-                        color="error"
-                        aria-label="delete milestone"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </IconButton>
-                    </Box>
-                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Milestone Title"
-                        value={milestone.title}
-                        onChange={(e) => {
-                          const updatedMilestones = [...milestones];
-                          updatedMilestones[milestoneIndex].title = e.target.value;
-                          setMilestones(updatedMilestones);
-                        }}
-                        sx={{ maxWidth: "500px", mb: 2 }}
-                      />
-                      <TextField
-                        fullWidth
-                        margin="normal"
-                        label="Milestone Description"
-                        multiline
-                        rows={2}
-                        value={milestone.description}
-                        onChange={(e) => {
-                          const updatedMilestones = [...milestones];
-                          updatedMilestones[milestoneIndex].description = e.target.value;
-                          setMilestones(updatedMilestones);
-                        }}
-                        sx={{ maxWidth: "500px", mb: 2 }}
-                      />
-                      <Button
-                        variant="outlined"
-                        onClick={() => addSection(milestoneIndex)}
-                        sx={{ mt: 2, display: "block", margin: "0 auto" }}
-                      >
-                        Add Section
-                      </Button>
-                      {milestone.sections.map((section, sectionIndex) => (
-                        <Card key={sectionIndex} variant="outlined" sx={{ mt: 3, ml: 2, padding: 2 }}>
-                          <CardContent>
-                            <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                              <Typography variant="subtitle1">{`Section ${sectionIndex + 1}`}</Typography>
-                              <IconButton
-                                onClick={() => deleteSection(milestoneIndex, sectionIndex)}
-                                color="error"
-                                aria-label="delete section"
-                              >
-                                <TrashIcon className="h-5 w-5" />
-                              </IconButton>
-                            </Box>
-                            <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                              <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Section Title"
-                                value={section.title}
-                                onChange={(e) => {
-                                  const updatedMilestones = [...milestones];
-                                  updatedMilestones[milestoneIndex].sections[sectionIndex].title =
-                                    e.target.value;
-                                  setMilestones(updatedMilestones);
-                                }}
-                                sx={{ maxWidth: "400px", mb: 2 }}
-                              />
-                              <TextField
-                                fullWidth
-                                margin="normal"
-                                label="Section Description"
-                                multiline
-                                rows={2}
-                                value={section.description}
-                                onChange={(e) => {
-                                  const updatedMilestones = [...milestones];
-                                  updatedMilestones[milestoneIndex].sections[sectionIndex].description =
-                                    e.target.value;
-                                  setMilestones(updatedMilestones);
-                                }}
-                                sx={{ maxWidth: "400px", mb: 2 }}
-                              />
-                              <Button
-                                variant="outlined"
-                                onClick={() => addTask(milestoneIndex, sectionIndex)}
-                                sx={{ mt: 2, display: "block", margin: "0 auto" }}
-                              >
-                                Add Task
-                              </Button>
-                              {section.tasks.map((task, taskIndex) => (
-                                <Card key={taskIndex} variant="outlined" sx={{ mt: 2, ml: 2, padding: 2 }}>
-                                  <CardContent>
-                                    <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                                      <Typography>{`Task ${taskIndex + 1}`}</Typography>
-                                      <IconButton
-                                        onClick={() => deleteTask(milestoneIndex, sectionIndex, taskIndex)}
-                                        color="error"
-                                        aria-label="delete task"
-                                      >
-                                        <TrashIcon className="h-5 w-5" />
-                                      </IconButton>
-                                    </Box>
-                                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                                      <TextField
-                                        fullWidth
-                                        margin="normal"
-                                        label="Task Title"
-                                        value={task.title}
-                                        onChange={(e) => {
-                                          const updatedMilestones = [...milestones];
-                                          updatedMilestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex].title =
-                                            e.target.value;
-                                          setMilestones(updatedMilestones);
-                                        }}
-                                        sx={{ maxWidth: "300px", mb: 2 }}
-                                      />
-                                      <TextField
-                                        margin="normal"
-                                        type="date"
-                                        label="Start Date"
-                                        InputLabelProps={{ shrink: true }}
-                                        value={task.startDate}
-                                        onChange={(e) => {
-                                          const updatedMilestones = [...milestones];
-                                          updatedMilestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex].startDate =
-                                            e.target.value;
-                                          setMilestones(updatedMilestones);
-                                        }}
-                                        sx={{ maxWidth: "300px", mb: 2 }}
-                                      />
-                                      <TextField
-                                        margin="normal"
-                                        type="date"
-                                        label="End Date"
-                                        InputLabelProps={{ shrink: true }}
-                                        value={task.endDate}
-                                        onChange={(e) => {
-                                          const updatedMilestones = [...milestones];
-                                          updatedMilestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex].endDate =
-                                            e.target.value;
-                                          setMilestones(updatedMilestones);
-                                        }}
-                                        sx={{ maxWidth: "300px", mb: 2 }}
-                                      />
-                                    </Box>
-                                  </CardContent>
-                                </Card>
-                              ))}
-                            </Box>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              ))}
-            </Box>
-          );
+      case 1:
+        return (
+          <Box>
+            <button
+              onClick={addMilestone}
+              className="mb-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Add Milestone
+            </button>
+            {milestones.map((milestone, milestoneIndex) => (
+              <Card 
+                key={milestoneIndex} 
+                className="mb-3 p-2 mt-8 border-2 border-black">
+                <CardContent>
+                  <Box className="flex justify-between">
+                    <h6 className="font-extrabold text-xl">{`Milestone ${milestoneIndex + 1}`}</h6>
+                    <IconButton
+                      onClick={() => deleteMilestone(milestoneIndex)}
+                    >
+                      <TrashIcon className="h-5 w-5 text-red-600" />
+                    </IconButton>
+                  </Box>
+                  <Box className="flex flex-col items-center">
+                    <TextField
+                      fullWidth
+                      margin="normal"
+                      label="Milestone Title"
+                      value={milestone.title}
+                      onChange={(e) => {
+                        const updatedMilestones = [...milestones];
+                        updatedMilestones[milestoneIndex].title = e.target.value;
+                        setMilestones(updatedMilestones);
+                      }}
+                      className="max-w-[500px]"
+                    />
+                    <TextField
+                      fullWidth
+                      margin="normal"
+                      label="Milestone Description"
+                      multiline
+                      rows={2}
+                      value={milestone.description}
+                      onChange={(e) => {
+                        const updatedMilestones = [...milestones];
+                        updatedMilestones[milestoneIndex].description = e.target.value;
+                        setMilestones(updatedMilestones);
+                      }}
+                      className="max-w-[500px]"
+                    />
+                    <button
+                      onClick={() => addSection(milestoneIndex)}
+                      className="my-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      Add Section
+                    </button>
+
+                    {milestone.sections.map((section, sectionIndex) => (
+                      <Card 
+                        key={sectionIndex} 
+                        className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
+                        <CardContent>
+                          <Box className="flex justify-between">
+                            <h6 className="font-extrabold text-xl">{`Section ${sectionIndex + 1}`}</h6>
+                            <IconButton
+                              onClick={() => deleteSection(milestoneIndex, sectionIndex)}
+                              aria-label="delete section"
+                            >
+                              <TrashIcon className="h-5 w-5 text-red-600"/>
+                            </IconButton>
+                            
+                          </Box>
+                          <Box className="flex flex-col items-center">
+                            <TextField
+                              fullWidth
+                              margin="normal"
+                              label="Section Title"
+                              value={section.title}
+                              onChange={(e) => {
+                                const updatedMilestones = [...milestones];
+                                updatedMilestones[milestoneIndex].sections[sectionIndex].title =
+                                  e.target.value;
+                                setMilestones(updatedMilestones);
+                              }}
+                              className="max-w-[400px]"
+                            />
+                            <TextField
+                              fullWidth
+                              margin="normal"
+                              label="Section Description"
+                              multiline
+                              rows={2}
+                              value={section.description}
+                              onChange={(e) => {
+                                const updatedMilestones = [...milestones];
+                                updatedMilestones[milestoneIndex].sections[sectionIndex].description =
+                                  e.target.value;
+                                setMilestones(updatedMilestones);
+                              }}
+                              className="max-w-[400px]"
+                            />
+                            <button
+                              onClick={() => addTask(milestoneIndex, sectionIndex)}
+                              className="my-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              Add Task
+                            </button>
+                            {section.tasks.map((task, taskIndex) => (
+                              <Card key={taskIndex} 
+                                className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
+                                <CardContent>
+                                  <Box className="flex justify-between">
+                                    <h6 className="font-extrabold text-xl">{`Task ${taskIndex + 1}`}</h6>
+                                    <IconButton
+                                      onClick={() => deleteTask(milestoneIndex, sectionIndex, taskIndex)}
+                                      aria-label="delete task"
+                                    >
+                                      <TrashIcon className="h-5 w-5 text-red-600" />
+                                    </IconButton>
+                                  </Box>
+                                  <Box className="flex flex-col items-center">
+                                    <TextField
+                                      fullWidth
+                                      margin="normal"
+                                      label="Task Title"
+                                      value={task.title}
+                                      onChange={(e) => {
+                                        const updatedMilestones = [...milestones];
+                                        updatedMilestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex].title =
+                                          e.target.value;
+                                        setMilestones(updatedMilestones);
+                                      }}
+                                      className="max-w-[400px]"
+                                    />
+                                    <TextField
+                                      margin="normal"
+                                      type="date"
+                                      label="Start Date"
+                                      InputLabelProps={{ shrink: true }}
+                                      value={task.startDate}
+                                      onChange={(e) => {
+                                        const updatedMilestones = [...milestones];
+                                        updatedMilestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex].startDate =
+                                          e.target.value;
+                                        setMilestones(updatedMilestones);
+                                      }}
+                                      className="w-[400px]"
+                                    />
+                                    <TextField
+                                      margin="normal"
+                                      type="date"
+                                      label="End Date"
+                                      InputLabelProps={{ shrink: true }}
+                                      value={task.endDate}
+                                      onChange={(e) => {
+                                        const updatedMilestones = [...milestones];
+                                        updatedMilestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex].endDate =
+                                          e.target.value;
+                                        setMilestones(updatedMilestones);
+                                      }}
+                                      className="w-[400px]"
+                                    />
+                                  </Box>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
+            ))}
+          </Box>
+        );
   
       case 2: // Overview & Submit
         return (
@@ -360,29 +360,44 @@ const RoadmapStepper = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", padding: 3 }}>
-      <ScreenTitleName title="Create Roadmap" />
-      <Stepper activeStep={activeStep} alternativeLabel>
-        {steps.map((label, index) => (
-          <Step key={index}>
-            <StepLabel>{label}</StepLabel>
-          </Step>
-        ))}
-      </Stepper>
-      <Box sx={{ width: "100%" }}>{renderStepContent(activeStep)}</Box>
-      <Box sx={{ display: "flex", justifyContent: "center", width: "100%", mt: 3 }}>
-        <Button variant="outlined" onClick={handleBack} disabled={activeStep === 0}>
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleNext}
-          disabled={activeStep === steps.length - 1}
-        >
-          Next
-        </Button>
-      </Box>
-    </Box>
+    <>
+        <NavBar/>
+        <div className="flex flex-col items-center justify-center mx-32">
+          <div className="mt-36">
+            <ScreenTitleName title="Create Roadmap"/>
+          </div>
+          <Stepper activeStep={activeStep} alternativeLabel>
+            {steps.map((label, index) => (
+              <Step key={index}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <Box className="w-full mt-12">
+              {renderStepContent(activeStep)}
+          </Box>
+          <Box className="flex justify-center w-full my-12 space-x-4">
+            <button 
+               className={`py-2 px-6 rounded-lg
+                ${activeStep === 0 
+                  ? "bg-gray-300 text-gray-600 cursor-not-allowed" 
+                  : "bg-gray-400 text-white hover:bg-gray-600"
+                }`}
+              onClick={handleBack} 
+              disabled={activeStep === 0}
+            >
+              Back
+            </button>
+            <button
+              className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600"
+              onClick={handleNext}
+            >
+              Next
+            </button>
+          </Box>
+
+        </div>
+    </>
   );
 };
 

@@ -1,13 +1,30 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useStore } from "./store";
+// import { Navigate } from 'react-router-dom';
+// import { useUser } from './userContext';
 
-export default function RequireAuth() {
-  const { userStore } = useStore();
-  const location = useLocation();
+// const RequireAuth = ({ children }: { children: JSX.Element }) => {
+//   const { user } = useUser();
 
-  if (!userStore.isLoggedIn) {
-    return <Navigate to="/login" state={{ from: location }} />;
+//   // If no user is logged in, redirect to the login page ("/")
+//   if (!user) {
+//     return <Navigate to="/" />;
+//   }
+
+//   return children; // If authenticated, allow access to the protected route
+// };
+
+// export default RequireAuth;
+
+// RequireAuth.tsx
+import { Navigate } from "react-router-dom";
+
+const RequireAuth = ({ children }: { children: React.ReactNode }) => {
+  const user = localStorage.getItem("user");
+
+  if (!user) {
+    return <Navigate to="/login" />;
   }
 
-  return <Outlet />;
-}
+  return <>{children}</>;
+};
+
+export default RequireAuth;

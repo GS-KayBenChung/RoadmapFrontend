@@ -3,7 +3,6 @@ import axios from 'axios';
 import { useStore } from '../../store';
 import { useNavigate } from 'react-router-dom';
 
-
 export default function LoginDashboard() {
   const { userStore } = useStore();
   const navigate = useNavigate(); 
@@ -19,33 +18,16 @@ export default function LoginDashboard() {
 
         console.log(res.data);
 
-        // Save token and user data in the store
         userStore.login(response.access_token, res.data);
-        navigate("/roadmaps");
+        navigate("/dashboard");
       } catch (err) {
         console.log(err);
       }
     },
   });
-  // const login = useGoogleLogin({
-  //   onSuccess: async (response) => {
-  //     try {
-  //       const res = await axios.get(
-  //         "https://www.googleapis.com/oauth2/v3/userinfo",
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${response.access_token}`,
-  //           },
-  //         }
-  //       );
-  //       console.log(res);
-  //     } catch (err) {
-  //       console.log(err);
-  //     }
-  //   },
-  // });
 
   return (
+    
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-12 w-full max-w-md">
         <div className="flex justify-center mb-6">
