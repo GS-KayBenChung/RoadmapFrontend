@@ -17,11 +17,9 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Optionally check localStorage or sessionStorage for a token
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
-      // Assuming token validation process, if valid set the user
       setUser({ email: 'user@example.com', name: 'User', token: storedToken });
     }
   }, []);
@@ -44,4 +42,4 @@ export const useUser = () => {
     throw new Error('useUser must be used within a UserProvider');
   }
   return context;
-};
+}; 

@@ -18,7 +18,6 @@ export default function RoadmapDashboard() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto mt-24">
                     <DashboardCard title="Current Roadmaps" value="13" />
                     <DashboardCard title="Completed Roadmap" value="1/3" />
-                    {/* <DashboardCard title="Overall Completion Rate" value="60 %" />              */}
                     <DashboardCard
                         title="Overall Completion Rate"
                         progress={

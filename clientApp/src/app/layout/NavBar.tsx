@@ -1,19 +1,13 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import NavLinks from "./NavLinks";
+import { useStore } from "../../store";
+
 
 export default function NavBar() {
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [user, setUser] = useState<any>(null);
-
-    useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            setUser(JSON.parse(storedUser));
-            console.log(storedUser);
-        }
-    }, []);
+    const { userStore } = useStore(); // Access userStore to get the user's information
 
     return (
         <nav className="bg-white px-6 py-2 shadow-md top-0 z-10 sticky">
@@ -22,7 +16,7 @@ export default function NavBar() {
 
                 <div className="flex items-center space-x-2">
                     <img src="/logoGoSaas.png" alt="GoSaas" className="h-12 w-24"/>
-                    <h1 className="text-2xl font-bold pl-24"> {user?.name || "User"}</h1>
+                    <h1 className="text-2xl font-bold pl-24"> {userStore.user?.name || "User"}</h1>
                 </div>
 
                 <div className="hidden md:flex items-center space-x-6">

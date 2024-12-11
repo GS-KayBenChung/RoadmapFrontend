@@ -9,7 +9,6 @@ const sleep = (delay: number) => {
 }
 
 axios.defaults.baseURL = API_URL.base;
-// 'http://localhost:5000/api';
 
 axios.interceptors.response.use(async response => {
     try {
@@ -20,17 +19,6 @@ axios.interceptors.response.use(async response => {
         return await Promise.reject(error);
     }
 })
-
-// axios.interceptors.response.use(
-//     async (response) => {
-//         console.log('API Response:', response.data); 
-//         return response;
-//     },
-//     async (error) => {
-//         console.error('API Error:', error.response?.data); 
-//         return Promise.reject(error);
-//     }
-// );
 
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 

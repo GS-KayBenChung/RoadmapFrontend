@@ -1,11 +1,18 @@
-import { useGoogleLogin } from '@react-oauth/google';
-import axios from 'axios';
-import { useStore } from '../../store';
-import { useNavigate } from 'react-router-dom';
+import { useGoogleLogin } from "@react-oauth/google";
+import axios from "axios";
+import { useStore } from "../../store";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 export default function LoginDashboard() {
   const { userStore } = useStore();
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (userStore.isLoggedIn) {
+      navigate("/dashboard");
+    }
+  }, [userStore.isLoggedIn, navigate]);
 
   const login = useGoogleLogin({
     onSuccess: async (response) => {
@@ -16,27 +23,22 @@ export default function LoginDashboard() {
           },
         });
 
-        console.log(res.data);
-
-        userStore.login(response.access_token, res.data);
+        userStore.login(response.access_token, { email: res.data.email, name: res.data.name });
         navigate("/dashboard");
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     },
   });
 
   return (
-    
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="bg-white shadow-lg rounded-lg p-12 w-full max-w-md">
         <div className="flex justify-center mb-6">
-          <img src="/logoGoSaas.png" alt="GoSaas" className="h-24 w-auto"/>
+          <img src="/logoGoSaas.png" alt="GoSaas" className="h-24 w-auto" />
         </div>
 
-        <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          Welcome Back
-        </h1>
+        <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">Welcome Back</h1>
 
         <button
           onClick={() => login()}
