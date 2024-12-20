@@ -1,5 +1,5 @@
 import { Box, Card, CardContent, IconButton, TextField } from "@mui/material";
-import { roadmapCreateStore } from "../../roadmapCreateStore";
+import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";

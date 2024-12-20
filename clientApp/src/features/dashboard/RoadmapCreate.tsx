@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { Box } from "@mui/material";
 import NavBar from "../../app/layout/NavBar";
 import ScreenTitleName from "../ScreenTitleName";
-import { roadmapCreateStore } from "../../roadmapCreateStore";
+import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
 import StepperComponent from "../roadmapCreate/stepperComponent";
 import StepperFirst from "../roadmapCreate/stepperFirst";
 import StepperSecond from "../roadmapCreate/stepperSecond";
@@ -30,6 +30,7 @@ export default observer(function RoadmapCreate() {
 
   return (
     <>
+      
       <NavBar />
       <div className="flex flex-col items-center justify-center mx-32">
         <div className="mt-36">

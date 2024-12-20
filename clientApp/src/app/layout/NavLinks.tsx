@@ -7,7 +7,7 @@ export default function NavLinks() {
     <>
       <NavItem to="/dashboard">Dashboard</NavItem>
       <NavItem to="/content">Roadmaps</NavItem>
-      <NavItem to="/logs">Logs</NavItem>
+      <NavItem to="/audit">Logs</NavItem>
       <LogoutButton/>
     </>
   );

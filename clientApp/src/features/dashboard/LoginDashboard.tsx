@@ -1,6 +1,6 @@
 import { useGoogleLogin } from "@react-oauth/google";
 import axios from "axios";
-import { useStore } from "../../store";
+import { useStore } from "../../app/stores/store";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 

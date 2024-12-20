@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { Roadmap } from "../models/roadmap";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
@@ -25,6 +25,7 @@ export default class RoadmapStore {
       roadmaps.forEach((roadmap) => {
         this.setRoadmap(roadmap);
       });
+      
     } catch (error) {
       console.error("Error loading roadmaps:", error);
     } finally {
@@ -86,22 +87,26 @@ export default class RoadmapStore {
   };
 
   loadRoadmap = async (id: string) => {
+    this.loadingInitial = true;
     let roadmap = this.getRoadmap(id);
-    if (roadmap) this.selectedRoadmap = roadmap;
-    else {
-      this.loadingInitial = true;
-      try {
-        roadmap = await apiClient.Roadmaps.details(id);
-        this.setRoadmap(roadmap);
+    try {
+      roadmap = await apiClient.Roadmaps.details(id);
+      this.setRoadmap(roadmap);
+      runInAction(() => {
+        console.log(roadmap);
         this.selectedRoadmap = roadmap;
         this.loadingInitial = false;
-      } catch (error) {
+      });
+      return roadmap;
+      
+    } catch (error) {
+      runInAction(() => {
         console.log(error);
         this.loadingInitial = false;
-      }
+      });
     }
   }
-
+  
   private getRoadmap = (id: string) => {
     return this.roadmapRegistry.get(id)
   }

@@ -31,7 +31,13 @@ const requests = {
 
 const Roadmaps = {
     list: () => requests.get<Roadmap[]>('/roadmaps'),
-    details:(id: string) => requests.get<Roadmap>(`/roadmaps/${id}`),
+    // details:(id: string) => requests.get<Roadmap>(`/roadmaps/${id}`),
+    // details: (id: string) => requests.get<Roadmap>(`/roadmaps/details/${id}`),
+    details: (id: string) => {
+        console.log(`Making request to fetch roadmap with ID: ${id}`);
+        return requests.get<Roadmap>(`/roadmaps/details/${id}`);
+    },
+      
     create: (roadmap: Roadmap) => requests.post<void>('/roadmaps', roadmap),
     update: (roadmap: Roadmap) => requests.put<void>(`/roadmaps/${roadmap.roadmapId}`, roadmap),
     delete: (id: string) => requests.delete<void>(`/roadmaps/${id}`)

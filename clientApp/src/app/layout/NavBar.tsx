@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import NavLinks from "./NavLinks";
-import { useStore } from "../../store";
+import { useStore } from "../stores/store";
+import { NavLink } from "react-router-dom";
 
 
 export default function NavBar() {
@@ -15,7 +16,9 @@ export default function NavBar() {
             <div className="w-full flex items-center justify-between">
 
                 <div className="flex items-center space-x-2">
-                    <img src="/logoGoSaas.png" alt="GoSaas" className="h-12 w-24"/>
+                    <NavLink to={"/dashboard"}>
+                        <img src="/logoGoSaas.png" alt="GoSaas" className="h-12 w-24"/>
+                    </NavLink>
                     <h1 className="text-2xl font-bold pl-24"> {userStore.user?.name || "User"}</h1>
                 </div>
 

@@ -18,8 +18,14 @@ export default function TestList({roadmaps, selectRoadmap, deleteRoadmap, submit
         deleteRoadmap(id);
     }
 
+    function handleGet(){
+        console.log(roadmaps);
+        
+    }
+
     return(
         <div className="p-4 space-y-4">
+            <button onClick={handleGet}>test Get</button>
             {roadmaps.map((roadmap) => (
                 <div
                 key={roadmap.roadmapId}
@@ -33,11 +39,20 @@ export default function TestList({roadmaps, selectRoadmap, deleteRoadmap, submit
                     <p>{roadmap.description}</p>
                     <p className="mt-1 text-xs text-gray-400">{roadmap.isDraft}</p>
                 </div>
+                <div className="text-sm text-gray-700 border-2 border-black">
+                    <p>Created By: {roadmap.createdBy}</p>
+                    <p>Completed: {roadmap.isCompleted === true ? 'yes': 'no'}</p>
+                    <p>Draft: {roadmap.isDraft === true ? 'yes': 'no'}</p>
+                    <p>Overall Duration: {roadmap.overallDuration}</p>
+                    <p>Overall Progress: {roadmap.overallProgress}</p>
+                    <p>Created At: {roadmap.createdAt}</p>
+                    <p>Updated At: {roadmap.updatedAt}</p>
+                </div>
                 <div className="mt-2">
                     <button 
                         onClick={() => selectRoadmap(roadmap.roadmapId)} 
                         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 m-2">
-                    View
+                        View
                     </button>
                     <button 
                         name={roadmap.roadmapId}

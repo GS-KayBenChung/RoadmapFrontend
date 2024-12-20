@@ -1,61 +1,60 @@
+import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/16/solid";
+import { SelectChangeEvent, FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { FaTh, FaListUl } from "react-icons/fa"; 
-import { useEffect, useRef, useState } from "react";
-import { FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from "@mui/material";
+import { useState, useRef, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import NavBar from "../../app/layout/NavBar";
 import RoadmapCard from "../../app/layout/RoadmapCard";
-import ScreenTitleName from "../ScreenTitleName";
-import { useStore } from "../../store";
-import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { Link, NavLink } from "react-router-dom";
 import TableComponent from "../../app/layout/TableComponent";
+import { useStore } from "../../app/stores/store";
+import ScreenTitleName from "../ScreenTitleName";
+import { FaTh, FaListUl } from "react-icons/fa"; 
 
 export default observer(function RoadmapsPage() {
   const { roadmapStore } = useStore();
-  // const { loadRoadmaps, roadmaps, selectedRoadmap, editMode, openForm, closeForm, createOrEditRoadmap, deleteRoadmap, submitting } = roadmapStore;
-  const { loadRoadmaps, roadmaps} = roadmapStore;
-  //For Filter
-  const [filter, setFilter] = useState("");
-  const handleChange = (event: SelectChangeEvent<string>) => {
-    setFilter(event.target.value);
-  };
-  //For Search
-  const [value, setValue] = useState("");
-  const inputRef = useRef<HTMLInputElement>(null);
-  const handleClear = () => {
-    setValue("");
-  };
-  //Toggle View
-  const handleFocus = () => {
-    inputRef.current?.focus();
-  };
-  const [viewType, setViewType] = useState("card"); 
-  const toggleView = (type: string) => {
-    setViewType(type);
-  };
+  const { loadRoadmaps, roadmaps } = roadmapStore;
+
   //Table View
   const columns = [
     { header: 'Title', accessor: 'title' },
     { header: 'Created Date', accessor: 'createdAt' },
     { header: 'Description', accessor: 'description' },
     { header: 'Status', accessor: 'status' },
-    {
-      header: 'Link',
-      accessor: 'link',
-      Cell: ({ value }: { value: string }) => (
-        <Link to={value} className="text-blue-500 hover:underline">
-          Go to Roadmap
-        </Link>
-      ),
-    },
+    { header: 'Link', accessor: 'lel'},
   ];
 
+  // For Filter
+  const [filter, setFilter] = useState(""); // Default: no filter (all roadmaps)
+  const handleChange = (event: SelectChangeEvent<string>) => {
+    setFilter(event.target.value); // Update the selected filter
+  };
+
+  // For Search
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const handleClear = () => setValue("");
+
+  // Toggle View
+  const [viewType, setViewType] = useState("card");
+  const toggleView = (type: string) => setViewType(type);
+
+  // Fetch roadmaps on component mount
   useEffect(() => {
-    if (roadmaps.length === 0) loadRoadmaps();
-  }, [loadRoadmaps, roadmaps.length]);
+    loadRoadmaps();
+  }, [loadRoadmaps]);
 
   if (roadmapStore.loadingInitial) return <LoadingComponent content="Loading..." />;
+
+  // Filter roadmaps based on the selected filter
+  const filteredRoadmaps = roadmaps.filter((roadmap) => {
+    if (filter === "all" || filter === "") return true; // Show all roadmaps if no filter is applied
+    if (filter === "draft") return roadmap.isDraft;
+    if (filter === "completed") return roadmap.isCompleted;
+    if (filter === "inProgress") return !roadmap.isCompleted && !roadmap.isDraft;
+    if (filter === "overdue") return roadmap.isCompleted; // Assuming `isOverdue` is a property in the roadmap
+    return false;
+  });
 
   return (
     <>
@@ -65,16 +64,14 @@ export default observer(function RoadmapsPage() {
         <div className="mx-80 mt-24">
           <div className="flex justify-between items-center gap-4 mb-6 flex-wrap mx-10">
             <div className="flex items-center gap-4">
-            
-              <FormControl variant="outlined" size="small" style={{ minWidth: 150 }}>
+              <FormControl variant="outlined" size="small" className="w-52">
                 <InputLabel>Filter By</InputLabel>
                 <Select value={filter} onChange={handleChange} label="Filter By">
                   <MenuItem value="all">All</MenuItem>
                   <MenuItem value="draft">Draft</MenuItem>
                   <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="nearDue">Near Due</MenuItem>
-                  <MenuItem value="overdue">Overdue</MenuItem>
                   <MenuItem value="inProgress">In Progress</MenuItem>
+                  <MenuItem value="overdue">Overdue</MenuItem>
                 </Select>
               </FormControl>
               <TextField
@@ -92,14 +89,14 @@ export default observer(function RoadmapsPage() {
                           <XMarkIcon className="h-5 w-5 text-gray-500" />
                         </IconButton>
                       ) : (
-                        <IconButton onClick={handleFocus} edge="end">
+                        <IconButton onClick={() => inputRef.current?.focus()} edge="end">
                           <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
                         </IconButton>
                       )}
                     </InputAdornment>
                   ),
                 }}
-                style={{ width: 250 }}
+                className="w-52"
               />
             </div>
 
@@ -126,44 +123,23 @@ export default observer(function RoadmapsPage() {
 
           {viewType === "card" ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-0">
-              {roadmaps.map((roadmap) => (
+              {filteredRoadmaps.map((roadmap) => (
                 <div key={roadmap.roadmapId}>
-                  <RoadmapCard name={roadmap.title} progress={roadmap.overallProgress} roadmapId={roadmap.roadmapId} />
+                  <RoadmapCard
+                    name={roadmap.title}
+                    progress={roadmap.overallProgress}
+                    roadmapId={roadmap.roadmapId}
+                  />
                 </div>
               ))}
             </div>
           ) : (
             <div className="pt-4">
-              <TableComponent columns={columns} data={roadmaps} />
+              <TableComponent columns={columns} data={filteredRoadmaps} />
             </div>
           )}
         </div>
-
-          {/* FOR TEST */}
-      {/* <Button className="" onClick={() => openForm()}>Create Roadmap</Button>
-
-      <TestList 
-        roadmaps={roadmapStore.roadmaps} 
-        selectRoadmap={roadmapStore.selectRoadmap} 
-        deleteRoadmap={roadmapStore.deleteRoadmap}
-        submitting={roadmapStore.submitting}
-      />
-      {selectedRoadmap && !editMode &&
-        <TestDetails 
-          roadmap={selectedRoadmap} 
-          cancelSelectRoadmap={roadmapStore.cancelSelectRoadmap}
-          openForm={roadmapStore.openForm}
-        />
-      }
-      {editMode && 
-        <RoadmapForm 
-          closeForm={closeForm} 
-          roadmap={selectedRoadmap}
-          createOrEdit={createOrEditRoadmap}
-          submitting={submitting}
-        />
-      } */}
-    </div>
+      </div>
     </>
   );
-})
+});

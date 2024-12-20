@@ -1,109 +1,48 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import NavBar from '../../app/layout/NavBar';
 import CircularProgressBar from '../CircularProgressBar';
 import ScreenTitleName from '../ScreenTitleName';
 import { Checkbox } from '@mui/material';
+import { useStore } from '../../app/stores/store';
+import { observer } from 'mobx-react-lite';
+import { useParams } from 'react-router-dom';
+import LoadingComponent from '../../app/layout/LoadingComponent';
 
-type Task = {
+interface Task{
   name: string;
   completed: boolean;
+  dateStart: string;
+  dateEnd: string;
 };
 
-type Section = {
+interface Section{
   name: string;
   tasks: Task[];
 };
 
-type Milestone = {
-  name: string;
-  description: string;
-  completionRate: number;
-  duration: string;
-  sections: Section[];
-};
+const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
 
-const RoadmapContentPage: React.FC = () => {
+
+export default observer( function RoadmapDetails() {
+  const {roadmapStore} = useStore();
+  const {selectedRoadmap, loadRoadmap, loadingInitial} = roadmapStore;
+  const {id} = useParams();
+
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
-  const [expandedSections, setExpandedSections] = useState<boolean[]>([]);  // Use an array for section expansion states
-  const [milestones] = useState<Milestone[]>([ 
-    {
-      name: "Milestone 1",
-      description: "Milestone Description ... when an unknown printer took a galley of type and scrambled it to make a type specimen book. bebsrtbrtttttttttttttttttttttttttttttttttttttttttttt",
-      completionRate: 10,
-      duration: "1 Month",
-      sections: [
-        {
-          name: "Section 1",
-          tasks: [
-            { name: "Getting Started", completed: true },
-            { name: "Basics", completed: true },
-            { name: "Operators", completed: false },
-          ],
-        },
-        {
-          name: "Section 2",
-          tasks: [
-            { name: "Getting Started", completed: true },
-            { name: "Basics", completed: false },
-            { name: "Operators", completed: false },
-          ],
-        },
-        {
-          name: "Section 3",
-          tasks: [
-            { name: "Getting Started", completed: false },
-            { name: "Basics", completed: false },
-            { name: "Operators", completed: false },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Milestone 2",
-      description: "This is a description for Milestone 2.",
-      completionRate: 10,
-      duration: "1 Month",
-      sections: [
-        {
-          name: "Section 1",
-          tasks: [
-            { name: "Task A", completed: true },
-            { name: "Task B", completed: false },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Milestone 3",
-      description: "This is a description for Milestone 3.",
-      completionRate: 10,
-      duration: "1 Month",
-      sections: [
-        {
-          name: "Section 1",
-          tasks: [
-            { name: "Task A", completed: true },
-            { name: "Task B", completed: false },
-          ],
-        },
-      ],
-    },
-    {
-      name: "Milestone 4",
-      description: "This is a description for Milestone 4.",
-      completionRate: 10,
-      duration: "1 Month",
-      sections: [
-        {
-          name: "Section 1",
-          tasks: [
-            { name: "Task A", completed: true },
-            { name: "Task B", completed: false },
-          ],
-        },
-      ],
-    }, 
-  ]);
+  const [expandedSections, setExpandedSections] = useState<boolean[]>([]); 
+
+  useEffect(() => {      
+    if(id) {
+      loadRoadmap(id);
+      console.log("SelectedRoadmap"+ selectedRoadmap?.milestones);
+      console.log("Roadmap"+ roadmapStore.roadmaps);
+    }
+    else {
+      console.log("Failed");    
+    }
+  }, [id, loadRoadmap])
+
+  if(loadingInitial || !selectedRoadmap) return <LoadingComponent/>;
 
   const toggleMilestone = (index: number) => {
     setExpandedMilestone(expandedMilestone === index ? null : index);
@@ -120,30 +59,62 @@ const RoadmapContentPage: React.FC = () => {
   return (
     <>
       <NavBar />
-      <ScreenTitleName title="Roadmap Details" />
+      <ScreenTitleName title={selectedRoadmap.title || 'Roadmap Details'} />
       <div className="max-w-screen-lg mx-auto p-4">
-        <div className="w-24 h-24 mb-2"> <CircularProgressBar percentage={50} /> </div>
-        <div className="text-gray-600 text-sm mt-8"> Durations: 3 Months (02 January 2024 - 02 March 2024) </div>
+        <div className="w-24 h-24 mb-2">
+          <CircularProgressBar percentage={selectedRoadmap.overallProgress} />
+        </div>
+        <div className="text-gray-600 text-sm mt-8">
+          Duration: {(() => {
+            if (selectedRoadmap) {
+              const totalDuration = selectedRoadmap.milestones?.reduce((acc, milestone) => {
+                const allTasks = milestone.sections.flatMap((section: Section) => section.tasks || []);
+                if (allTasks.length) {
+                  const sortedTasks = allTasks.sort((a: { dateStart: string }, b: { dateStart: string }) =>
+                    new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+                  );
+
+                  const firstTaskDate = new Date(sortedTasks[0].dateStart);
+                  const lastTaskDate = new Date(sortedTasks[sortedTasks.length - 1].dateEnd);
+                  const durationInDays = Math.ceil((lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24));
+
+                  return acc + durationInDays;
+                }
+                return acc; 
+              }, 0); 
+
+              return `${totalDuration} ${totalDuration === 1 ? 'day' : 'days'}`;
+            }
+            return 'Duration';
+          })()}
+        </div>
 
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold leading-none flex-shrink-0">ROADMAPNAME</h1>
+            <h1 className="text-xl font-bold leading-none flex-shrink-0">{selectedRoadmap.title}</h1>
             <Checkbox />
           </div>
-          <button className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 text-sm"> DELETE ROADMAP </button>
+          <button
+            className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 text-sm"
+            onClick={() => roadmapStore.deleteRoadmap(selectedRoadmap.roadmapId || '')}
+          >
+            DELETE ROADMAP
+          </button>
         </div>
-        <div>Lorem Ipsum is simply dummy text of the printing and typesetting industry...</div>
+        <div>{selectedRoadmap.description}</div>
       </div>
 
       <div className="max-w-screen-lg mx-auto p-4 mb-12">
-        {milestones.map((milestone, milestoneIndex) => (
+        {selectedRoadmap.milestones?.map((milestone, milestoneIndex) => (
           <div key={milestoneIndex}>
             <div className="p-4 rounded-lg border-2 border-gray-300">
               <div
                 onClick={() => toggleMilestone(milestoneIndex)}
                 className="flex items-center space-x-4 cursor-pointer hover:bg-gray-100"
               >
-                <div className="relative w-16 h-16"> <CircularProgressBar percentage={50} /> </div>
+                <div className="relative w-16 h-16">
+                  <CircularProgressBar percentage={milestone.completionRate || 0} />
+                </div>
                 <div className="flex-grow">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
@@ -152,7 +123,23 @@ const RoadmapContentPage: React.FC = () => {
                         <Checkbox onClick={(e) => e.stopPropagation()} />
                       )}
                     </div>
-                    <span className="text-sm text-gray-500">Duration: {milestone.duration}</span>
+                    <span className="text-sm text-gray-500">
+                      Duration: {(() => {
+                        if (milestone.sections?.length) {    
+                          const allTasks = milestone.sections.flatMap((section: Section) => section.tasks || []);
+                          if (allTasks.length) {
+                            const sortedTasks = allTasks.sort((a: { dateStart: string }, b: { dateStart: string }) => 
+                              new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+                            );
+                            const firstTaskDate = new Date(sortedTasks[0].dateStart);
+                            const lastTaskDate = new Date(sortedTasks[sortedTasks.length - 1].dateEnd);
+                            const durationInDays = Math.ceil((lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24));
+                            return `${durationInDays} ${durationInDays === 1 ? 'day' : 'days'}`;
+                          }
+                        }
+                        return 'Duration ';
+                      })()}
+                    </span>
                   </div>
                   {expandedMilestone === milestoneIndex && (
                     <p className="text-sm text-gray-600 mt-2">{milestone.description}</p>
@@ -162,7 +149,7 @@ const RoadmapContentPage: React.FC = () => {
 
               {expandedMilestone === milestoneIndex && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                  {milestone.sections.map((section, sectionIndex) => (
+                  {milestone.sections?.map((section: Section, sectionIndex: number) => (
                     <div
                       onClick={() => toggleSection(milestoneIndex, sectionIndex)}
                       key={sectionIndex}
@@ -174,16 +161,23 @@ const RoadmapContentPage: React.FC = () => {
                     >
                       <div className="flex items-center space-x-3 w-full cursor-pointer hover:bg-gray-100">
                         <h3 className="pl-3 font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.name}</h3>
-                        {expandedSections[sectionIndex] &&
-                          <Checkbox onClick={(e) => e.stopPropagation()} />
-                        }
+                        {expandedSections[sectionIndex] && <Checkbox onClick={(e) => e.stopPropagation()} />}
                       </div>
                       {expandedSections[sectionIndex] && expandedMilestone === milestoneIndex && (
                         <ul>
-                          {section.tasks.map((task, taskIndex) => (
+                          {section.tasks?.map((task: Task, taskIndex: number) => (
                             <li key={taskIndex} className="flex items-center space-x-2">
-                              <Checkbox />
-                              <span className="text-sm">{task.name}</span>
+                              
+                              <div className="flex items-center h-full">
+                                <Checkbox checked={task.completed} onClick={(e) => e.stopPropagation()} />
+                              </div>
+
+                              <div>
+                                <span className="block text-sm font-medium text-gray-800">{task.name}</span>
+                                <span className="block text-xs text-gray-600">
+                                  ({formatDate(task.dateStart)} - {formatDate(task.dateEnd)})
+                                </span>
+                              </div>
                             </li>
                           ))}
                         </ul>
@@ -193,7 +187,7 @@ const RoadmapContentPage: React.FC = () => {
                 </div>
               )}
             </div>
-            {milestoneIndex < milestones.length - 1 && (
+            {milestoneIndex < selectedRoadmap.milestones.length - 1 && (
               <div className="flex justify-center items-center">
                 <div className="w-1 h-12 bg-blue-400"></div>
               </div>
@@ -203,6 +197,4 @@ const RoadmapContentPage: React.FC = () => {
       </div>
     </>
   );
-};
-
-export default RoadmapContentPage;
+})

@@ -1,11 +1,13 @@
 import { Box } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { roadmapCreateStore } from "../../roadmapCreateStore";
+import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
 import createRoadmapHierarchy from "./createRoadmapLevel";
 import { createRoadmap, RoadmapDto } from "../../services/roadmapServices"; 
 import { formatDate } from "../DateTimeFormat";
+import { useNavigate } from "react-router-dom";
 
 export default observer(function StepperThird() {
+  const navigate = useNavigate();
   const { roadmapTitle, roadmapDescription, milestones } = roadmapCreateStore;
 
   const handleSubmit = async () => {
@@ -20,8 +22,6 @@ export default observer(function StepperThird() {
       isCompleted: false, 
       isDraft: true, 
       isDeleted: false, 
-      // created_at: "",
-      // updated_at: "",
       milestones: milestones.map((milestone) => ({
         name: milestone.title,
         description: milestone.description,
@@ -54,6 +54,7 @@ export default observer(function StepperThird() {
       console.log("Roadmap data being sent:", roadmapData);
       const result = await createRoadmap(roadmapData);
       console.log("Roadmap created successfully:", result);
+      navigate('/content');
     } catch (error) {
       console.error("Error creating roadmap:", error);
     }

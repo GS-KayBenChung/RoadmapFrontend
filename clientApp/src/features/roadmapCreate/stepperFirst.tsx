@@ -1,6 +1,6 @@
 // stepperFirst.tsx
 import { Box, TextField } from "@mui/material";
-import { roadmapCreateStore } from "../../roadmapCreateStore";
+import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
 import { observer } from "mobx-react-lite";
 
 export default observer (function stepperFirst() {

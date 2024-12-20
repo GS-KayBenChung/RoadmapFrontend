@@ -9,7 +9,7 @@ interface Props {
 
 export default function RoadmapCard({ name, progress, roadmapId }: Props) {
   return (
-    <NavLink to={`/dashboard/${roadmapId}`}>
+    <NavLink to={`/roadmap/${roadmapId}`}>
       <div className="bg-gray-100 p-2 rounded-lg flex flex-col items-center text-center shadow-md aspect-square scale-75">
         <div className="my-12 w-3/5">
           <CircularProgressBar percentage={progress} />

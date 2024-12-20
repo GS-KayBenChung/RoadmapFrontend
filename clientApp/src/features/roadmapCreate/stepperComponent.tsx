@@ -1,6 +1,6 @@
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { roadmapCreateStore } from "../../roadmapCreateStore";
+import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
 
 interface Props {
   steps: string[];
@@ -12,6 +12,7 @@ export default observer(function StepperComponent({ steps, activeStep }: Props) 
 
   const handleNext = () => {
     setActiveStep(activeStep + 1);
+    
   };
 
   const handleBack = () => {
@@ -32,7 +33,7 @@ export default observer(function StepperComponent({ steps, activeStep }: Props) 
         <button
           className={`py-2 px-6 rounded-lg ${
             activeStep === 0
-              ? "bg-gray-300 text-gray-600 cursor-not-allowed"
+              ? "hidden"
               : "bg-gray-400 text-white hover:bg-gray-600"
           }`}
           onClick={handleBack}
@@ -41,7 +42,13 @@ export default observer(function StepperComponent({ steps, activeStep }: Props) 
           Back
         </button>
         <button
-          className="bg-blue-500 text-white py-2 px-6 rounded-lg hover:bg-blue-600"
+          className={`bg-blue-500 text-white py-2 px-6 rounded-lg
+            ${ 
+              activeStep === 2
+              ? "hidden"
+              : "hover:bg-blue-600"
+            }
+          `}
           onClick={handleNext}
         >
           Next
