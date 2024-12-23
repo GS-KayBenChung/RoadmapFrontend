@@ -7,6 +7,8 @@ import StepperComponent from "../roadmapCreate/stepperComponent";
 import StepperFirst from "../roadmapCreate/stepperFirst";
 import StepperSecond from "../roadmapCreate/stepperSecond";
 import StepperThird from "../roadmapCreate/stepperThird";
+import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
 
 export default observer(function RoadmapCreate() {
@@ -30,7 +32,14 @@ export default observer(function RoadmapCreate() {
 
   return (
     <>
-      
+      <ToastContainer
+        autoClose={2000}
+        hideProgressBar={true}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+        position="top-center"
+      />
       <NavBar />
       <div className="flex flex-col items-center justify-center mx-32">
         <div className="mt-36">

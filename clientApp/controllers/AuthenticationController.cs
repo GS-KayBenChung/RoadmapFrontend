@@ -26,18 +26,17 @@ public class AuthenticationController : ControllerBase
     {
         try
         {
-            // Validate the Google token
+    
             var payload = await GoogleJsonWebSignature.ValidateAsync(token);
             var email = payload.Email;
             var name = payload.Name;
             var googleId = payload.Subject;
 
-            // Check if user exists in the database
             var user = await _context.Users.FirstOrDefaultAsync(u => u.GoogleId == googleId);
 
             if (user == null)
             {
-                // If not, create a new user
+           
                 user = new User
                 {
                     Name = name,
@@ -49,7 +48,7 @@ public class AuthenticationController : ControllerBase
                 await _context.SaveChangesAsync();
             }
 
-            // Generate JWT
+       
             var jwtToken = GenerateJwtToken(user);
 
             return Ok(new

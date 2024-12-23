@@ -1,12 +1,14 @@
 import { Box, Modal } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
-import createRoadmapHierarchy from "./createRoadmapLevel";
-import { createRoadmap, RoadmapDto } from "../../services/roadmapServices"; 
+import createRoadmapHierarchy from "./EditRoadmapLevel";
+import { RoadmapDto } from "../../services/roadmapServices"; 
 import { formatDate, formatDateOnly } from "../DateTimeFormat";
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import ScreenTitleName from "../ScreenTitleName";
+import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
+import { useStore } from "../../app/stores/store";
+import { EditRoadmap } from "../../services/roadmapEditServices";
 
 // interface Task{
 //   name: string;
@@ -21,13 +23,35 @@ import ScreenTitleName from "../ScreenTitleName";
 // };
 
 export default observer(function StepperThird() {
-
+  const { roadmapStore } = useStore();
   const navigate = useNavigate();
-  const { roadmapTitle, roadmapDescription, milestones } = roadmapCreateStore;
+  const { roadmapTitle, roadmapDescription, milestones } = roadmapEditStore;
+  const { loadRoadmap } = roadmapStore;
+  const { id } = useParams();
 
   const [openPreview, setOpenPreview] = useState(false);
 
-  const handleSubmit = async (isDraft: boolean) => {
+  const [roadmapData, setRoadmapData] = useState({
+    title: "",
+    description: "",
+    roadmapId: "",
+  });
+  
+  useEffect(() => {
+    if (id) {
+      loadRoadmap(id).then(() => {
+        if (roadmapStore.selectedRoadmap) {
+          setRoadmapData({
+            title: roadmapStore.selectedRoadmap.title || "",
+            description: roadmapStore.selectedRoadmap.description || "",
+            roadmapId: roadmapStore.selectedRoadmap.roadmapId,
+          });
+        }
+      });
+    }
+  }, [id, loadRoadmap, roadmapStore]);
+
+  const handleSubmit = async (isDraft: boolean, roadmapId: string) => {
     createRoadmapHierarchy();
 
     const roadmapData: RoadmapDto = {
@@ -69,7 +93,7 @@ export default observer(function StepperThird() {
         
     try {
       console.log("Roadmap data being sent:", roadmapData);
-      const result = await createRoadmap(roadmapData);
+      const result = await EditRoadmap(roadmapId, roadmapData)
       console.log("Roadmap created successfully:", result);
       navigate('/content');
     } catch (error) {
@@ -140,13 +164,13 @@ export default observer(function StepperThird() {
 
       <div className="flex justify-center space-x-4 my-6">
         <button
-          onClick={() => handleSubmit(true)} 
+          onClick={() => handleSubmit(true, roadmapData.roadmapId)} 
           className="bg-gray-500 text-white p-4 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
           Save As Draft
         </button>
         <button
-          onClick={() => handleSubmit(false)} 
+          onClick={() => handleSubmit(false, roadmapData.roadmapId)} 
           className="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           Publish Roadmap
@@ -187,9 +211,8 @@ export default observer(function StepperThird() {
                         className="p-4 border rounded-lg bg-gray-100"
                       >
                         <div className="flex items-center space-x-3 w-full">
-                          <h3 className="font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.title}</h3>
+                          <h3 className="pl-3 font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.title}</h3>
                         </div>
-                        <hr className="border-t border-gray-300 my-3" />
                         <ul>
                           {section.tasks?.map((task, taskIndex) => (
                             <li key={taskIndex} className="flex items-center space-x-2">

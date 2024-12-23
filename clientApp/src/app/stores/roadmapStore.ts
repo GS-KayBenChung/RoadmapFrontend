@@ -2,6 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { Roadmap } from "../models/roadmap";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
+import { RoadmapDto } from "../../services/roadmapServices";
 
 export default class RoadmapStore {
   roadmapRegistry = new Map<string, Roadmap>();
@@ -33,29 +34,7 @@ export default class RoadmapStore {
     }
   };
 
-  //FOR TESTING --------------------------------------------
-  // selectRoadmap = (id: string) => {
-  //   this.selectedRoadmap = this.roadmapRegistry.get(id);
-  // };
-
-  // cancelSelectRoadmap = () => {
-  //   this.selectedRoadmap = undefined;
-  // };
-
-  // openForm = (id?: string) => {
-  //   if (id) {
-  //     this.selectRoadmap(id);
-  //   } else {
-  //     this.cancelSelectRoadmap();
-  //   }
-  //   this.editMode = true;
-  // };
-
-  // closeForm = () => {
-  //   this.editMode = false;
-  // };
-
-  createOrEditRoadmap = async (roadmap: Roadmap) => {
+  EditRoadmap = async (roadmap: Roadmap, roadmapData: RoadmapDto) => {
     this.submitting = true;
     try {
       if (roadmap.roadmapId) {
@@ -75,16 +54,18 @@ export default class RoadmapStore {
     }
   };
 
-  deleteRoadmap = async (id: string) => {
+  deleteRoadmap = async (id: string, navigate: (path: string) => void) => {
     this.submitting = true;
     try {
       await apiClient.Roadmaps.delete(id);
       this.roadmapRegistry.delete(id);
+      navigate('/content');
     } catch (error) {
       console.error("Error deleting roadmap:", error);
       this.submitting = false;
     } 
-  };
+  }
+
 
   loadRoadmap = async (id: string) => {
     this.loadingInitial = true;
@@ -93,7 +74,7 @@ export default class RoadmapStore {
       roadmap = await apiClient.Roadmaps.details(id);
       this.setRoadmap(roadmap);
       runInAction(() => {
-        console.log(roadmap);
+        //console.log(roadmap);
         this.selectedRoadmap = roadmap;
         this.loadingInitial = false;
       });

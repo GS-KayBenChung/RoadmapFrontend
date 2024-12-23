@@ -39,12 +39,12 @@ public class JwtMiddleware
                 var jwtToken = (JwtSecurityToken)validatedToken;
                 var userId = jwtToken.Claims.First(x => x.Type == JwtRegisteredClaimNames.Sub).Value;
 
-                // Attach user to context
+            
                 context.Items["User"] = await dbContext.Users.FindAsync(int.Parse(userId));
             }
             catch
             {
-                // Do nothing if JWT validation fails
+             
             }
         }
 

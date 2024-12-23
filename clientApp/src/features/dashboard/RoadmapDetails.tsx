@@ -7,6 +7,7 @@ import { useStore } from '../../app/stores/store';
 import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import LoadingComponent from '../../app/layout/LoadingComponent';
+import { useNavigate } from 'react-router-dom';
 
 interface Task{
   name: string;
@@ -22,11 +23,11 @@ interface Section{
 
 const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
 
-
 export default observer( function RoadmapDetails() {
   const {roadmapStore} = useStore();
   const {selectedRoadmap, loadRoadmap, loadingInitial} = roadmapStore;
   const {id} = useParams();
+  const navigate = useNavigate();
 
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
   const [expandedSections, setExpandedSections] = useState<boolean[]>([]); 
@@ -34,8 +35,8 @@ export default observer( function RoadmapDetails() {
   useEffect(() => {      
     if(id) {
       loadRoadmap(id);
-      console.log("SelectedRoadmap"+ selectedRoadmap?.milestones);
-      console.log("Roadmap"+ roadmapStore.roadmaps);
+      //console.log("SelectedRoadmap"+ selectedRoadmap?.milestones);
+      //console.log("Roadmap"+ roadmapStore.roadmaps);
     }
     else {
       console.log("Failed");    
@@ -54,6 +55,35 @@ export default observer( function RoadmapDetails() {
       updatedSections[sectionIndex] = !updatedSections[sectionIndex];
       return updatedSections;
     });
+  };
+
+  const handleDelete = async (id: string) => {
+    await roadmapStore.deleteRoadmap(id, navigate);
+  };
+
+  const calculateMilestoneDuration = (milestone: any) => {
+    if (milestone.sections?.length) {
+      // Get the first section and its first task
+      const firstSection = milestone.sections[0];
+      const firstTask = firstSection.tasks?.[0];
+      
+      // Get the last section and its last task
+      const lastSection = milestone.sections[milestone.sections.length - 1];
+      const lastTask = lastSection.tasks?.[lastSection.tasks.length - 1];
+  
+      if (firstTask && lastTask) {
+        // Parse the dates of the first and last tasks
+        const firstTaskDate = new Date(firstTask.dateStart);
+        const lastTaskDate = new Date(lastTask.dateEnd);
+  
+        // Calculate the duration in days
+        const durationInDays = Math.ceil((lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        return `${durationInDays} ${durationInDays === 1 ? 'day' : 'days'}`;
+      }
+    }
+  
+    return 'Duration not available';
   };
 
   return (
@@ -94,12 +124,20 @@ export default observer( function RoadmapDetails() {
             <h1 className="text-xl font-bold leading-none flex-shrink-0">{selectedRoadmap.title}</h1>
             <Checkbox />
           </div>
-          <button
-            className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 text-sm"
-            onClick={() => roadmapStore.deleteRoadmap(selectedRoadmap.roadmapId || '')}
-          >
-            DELETE ROADMAP
-          </button>
+          <div className="flex space-x-4">
+            <button
+              className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-sm"
+              onClick={() => navigate(`/roadmapEdit/${selectedRoadmap.roadmapId}`)}
+            >
+              EDIT
+            </button>
+            <button
+              className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 text-sm"
+              onClick={() => handleDelete(roadmapStore.selectedRoadmap?.roadmapId || '')}
+            >
+              DELETE
+            </button>
+          </div>
         </div>
         <div>{selectedRoadmap.description}</div>
       </div>
@@ -113,7 +151,7 @@ export default observer( function RoadmapDetails() {
                 className="flex items-center space-x-4 cursor-pointer hover:bg-gray-100"
               >
                 <div className="relative w-16 h-16">
-                  <CircularProgressBar percentage={milestone.completionRate || 0} />
+                  <CircularProgressBar percentage={ milestone.milestoneProgress || 0} />
                 </div>
                 <div className="flex-grow">
                   <div className="flex items-center justify-between">
@@ -124,21 +162,7 @@ export default observer( function RoadmapDetails() {
                       )}
                     </div>
                     <span className="text-sm text-gray-500">
-                      Duration: {(() => {
-                        if (milestone.sections?.length) {    
-                          const allTasks = milestone.sections.flatMap((section: Section) => section.tasks || []);
-                          if (allTasks.length) {
-                            const sortedTasks = allTasks.sort((a: { dateStart: string }, b: { dateStart: string }) => 
-                              new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-                            );
-                            const firstTaskDate = new Date(sortedTasks[0].dateStart);
-                            const lastTaskDate = new Date(sortedTasks[sortedTasks.length - 1].dateEnd);
-                            const durationInDays = Math.ceil((lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24));
-                            return `${durationInDays} ${durationInDays === 1 ? 'day' : 'days'}`;
-                          }
-                        }
-                        return 'Duration ';
-                      })()}
+                      Duration: {calculateMilestoneDuration(milestone)}
                     </span>
                   </div>
                   {expandedMilestone === milestoneIndex && (
