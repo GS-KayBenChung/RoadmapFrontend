@@ -2,7 +2,6 @@ import NavItem from "./NavItem";
 import LogoutButton from "../../Logout";
 
 export default function NavLinks() {
-
   return (
     <>
       <NavItem to="/dashboard">Dashboard</NavItem>

@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import CircularProgressBar from "../../features/CircularProgressBar"; // Import Circular Progress bar component
+import CircularProgressBar from "../../features/CircularProgressBar";
 
 interface Props {
   name: string;

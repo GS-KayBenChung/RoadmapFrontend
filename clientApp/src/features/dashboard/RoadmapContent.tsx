@@ -44,7 +44,7 @@ export default observer(function RoadmapsPage() {
     loadRoadmaps();
   }, [loadRoadmaps]);
 
-  if (roadmapStore.loadingInitial) return <LoadingComponent content="Loading..." />;
+  if (roadmapStore.loadingInitial) return <LoadingComponent/>;
 
   // Filter roadmaps based on the selected filter
   const filteredRoadmaps = roadmaps.filter((roadmap) => {
