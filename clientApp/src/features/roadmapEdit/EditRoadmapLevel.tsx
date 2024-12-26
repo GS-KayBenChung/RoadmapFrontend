@@ -1,7 +1,5 @@
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
 
-
-
 export default function EditRoadmapLevel(){
   const { roadmapTitle, roadmapDescription, milestones } = roadmapEditStore;
 

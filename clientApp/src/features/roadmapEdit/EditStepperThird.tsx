@@ -1,106 +1,21 @@
 import { Box, Modal } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import createRoadmapHierarchy from "./EditRoadmapLevel";
-import { RoadmapDto } from "../../services/roadmapServices"; 
-import { formatDate, formatDateOnly } from "../DateTimeFormat";
-import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import ScreenTitleName from "../ScreenTitleName";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
-import { useStore } from "../../app/stores/store";
-import { EditRoadmap } from "../../services/roadmapEditServices";
+import EditRoadmapLevel from "./EditRoadmapLevel";
 
-// interface Task{
-//   name: string;
-//   completed: boolean;
-//   dateStart: string;
-//   dateEnd: string;
-// };
-
-// interface Section{
-//   name: string;
-//   tasks: Task[];
-// };
-
-export default observer(function StepperThird() {
-  const { roadmapStore } = useStore();
+export default observer(function EditStepperThird() {
   const navigate = useNavigate();
-  const { roadmapTitle, roadmapDescription, milestones } = roadmapEditStore;
-  const { loadRoadmap } = roadmapStore;
-  const { id } = useParams();
-
+  const { roadmapTitle, roadmapDescription, milestones, testingLog } = roadmapEditStore;
   const [openPreview, setOpenPreview] = useState(false);
 
-  const [roadmapData, setRoadmapData] = useState({
-    title: "",
-    description: "",
-    roadmapId: "",
-  });
-  
-  useEffect(() => {
-    if (id) {
-      loadRoadmap(id).then(() => {
-        if (roadmapStore.selectedRoadmap) {
-          setRoadmapData({
-            title: roadmapStore.selectedRoadmap.title || "",
-            description: roadmapStore.selectedRoadmap.description || "",
-            roadmapId: roadmapStore.selectedRoadmap.roadmapId,
-          });
-        }
-      });
-    }
-  }, [id, loadRoadmap, roadmapStore]);
-
-  const handleSubmit = async (isDraft: boolean, roadmapId: string) => {
-    createRoadmapHierarchy();
-
-    const roadmapData: RoadmapDto = {
-      title: roadmapTitle,
-      description: roadmapDescription,
-      createdBy: "0e7d3f8c-845c-4c69-b50d-9f07c0c7b98f",  
-      overall_progress: 0, 
-      overall_duration: 0, 
-      isCompleted: false, 
-      isDraft: isDraft, 
-      isDeleted: false, 
-      milestones: milestones.map((milestone) => ({
-        name: milestone.title,
-        description: milestone.description,
-        milestone_progress: 0, 
-        isCompleted: false, 
-        isDeleted: false, 
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-        sections: milestone.sections.map((section) => ({
-          name: section.title,
-          description: section.description,
-          isCompleted: false, 
-          isDeleted: false, 
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          tasks: section.tasks.map((task) => ({
-            name: task.title,
-            dateStart: new Date(task.startDate).toISOString(), 
-            dateEnd: new Date(task.endDate).toISOString(),
-            isCompleted: false, 
-            isDeleted: false, 
-            created_at: new Date().toISOString(),
-            updated_at: formatDate(new Date()),
-          })),
-        })),
-      })),
-    };
-        
-    try {
-      console.log("Roadmap data being sent:", roadmapData);
-      const result = await EditRoadmap(roadmapId, roadmapData)
-      console.log("Roadmap created successfully:", result);
-      navigate('/content');
-    } catch (error) {
-      console.error("Error creating roadmap:", error);
-    }
+  const handleSubmit = async () => {
+    EditRoadmapLevel()
+    navigate('content')
   };
-
+  
   const handlePreview = () => {
     setOpenPreview(true);
   };
@@ -120,6 +35,7 @@ export default observer(function StepperThird() {
       >
         Preview Roadmap Structure
       </button>
+      <button onClick={testingLog}>hereTest</button>
       <div className="space-y-4 mb-8">
         <div>
           <p className="text-xl font-semibold text-gray-800">Roadmap Title:</p>
@@ -134,7 +50,7 @@ export default observer(function StepperThird() {
       {milestones.map((milestone, milestoneIndex) => (
         <div key={milestoneIndex} className="bg-white p-6 rounded-lg shadow-md mb-6">
           <div className="flex items-center justify-between border-b pb-4 mb-4">
-            <h6 className="text-2xl font-semibold text-indigo-800">{`Milestone ${milestoneIndex + 1}: ${milestone.title}`}</h6>
+            <h6 className="text-2xl font-semibold text-indigo-800">{`Milestone ${milestoneIndex + 1}: ${milestone.name}`}</h6>
             <p className="text-gray-600 text-sm">{milestone.description}</p>
           </div>
 
@@ -164,17 +80,12 @@ export default observer(function StepperThird() {
 
       <div className="flex justify-center space-x-4 my-6">
         <button
-          onClick={() => handleSubmit(true, roadmapData.roadmapId)} 
+          onClick={() => handleSubmit()} 
           className="bg-gray-500 text-white p-4 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
         >
-          Save As Draft
+          Save Roadmap
         </button>
-        <button
-          onClick={() => handleSubmit(false, roadmapData.roadmapId)} 
-          className="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Publish Roadmap
-        </button>
+
       </div>
       <Modal
         open={openPreview}
@@ -198,7 +109,7 @@ export default observer(function StepperThird() {
                   <div className="flex items-center space-x-4">
                     <div className="flex-grow">
                       <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold">{milestone.title}</h2>
+                        <h2 className="text-lg font-bold">{milestone.name}</h2>
                       </div>
                       <p className="text-sm text-gray-600 mt-2">{milestone.description}</p>
                     </div>
@@ -211,15 +122,16 @@ export default observer(function StepperThird() {
                         className="p-4 border rounded-lg bg-gray-100"
                       >
                         <div className="flex items-center space-x-3 w-full">
-                          <h3 className="pl-3 font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.title}</h3>
+                          <h3 className="font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.title}</h3>
                         </div>
+                        <hr className="border-t border-gray-300 my-3" />
                         <ul>
                           {section.tasks?.map((task, taskIndex) => (
                             <li key={taskIndex} className="flex items-center space-x-2">
                               <div>
                                 <span className="block text-sm font-medium text-gray-800">{task.title}</span>
                                 <span className="block text-xs text-gray-600">
-                                  {formatDateOnly(new Date(task.startDate))} to {formatDateOnly(new Date(task.endDate))}
+                                  {`Start: ${task.startDate}, End: ${task.endDate}`}
                                 </span>
                               </div>
                             </li>

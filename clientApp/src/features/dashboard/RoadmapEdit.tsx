@@ -1,69 +1,86 @@
-import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
+import { observer } from "mobx-react-lite";
+import { useParams, useNavigate } from "react-router-dom";
 import { useStore } from "../../app/stores/store";
-import { useParams } from "react-router-dom";
-import { Box } from "@mui/material";
-import { ToastContainer } from "react-toastify";
 import NavBar from "../../app/layout/NavBar";
-import StepperComponent from "../roadmapCreate/stepperComponent";
-import ScreenTitleName from "../ScreenTitleName";
-import StepperFirst from "../roadmapCreate/stepperFirst";
-import StepperSecond from "../roadmapCreate/stepperSecond";
-import StepperThird from "../roadmapCreate/stepperThird";
+import ScreenTitleName from "../ScreenTitleName";;
+import LoadingComponent from "../../app/layout/LoadingComponent";
+import EditStepperFirst from "../roadmapEdit/EditStepperFirst";
+import EditStepperSecond from "../roadmapEdit/EditStepperSecond";
+import EditStepperComponent from "../roadmapEdit/EditStepperComponent";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
+import { ToastContainer } from "react-toastify";
+import EditStepperThird from "../roadmapEdit/EditStepperThird";
 
-export default observer(function RoadmapEdit() {
+const steps = ["Roadmap Details", "Milestones & Sections", "Overview & Submit"];
+
+const RoadmapEdit = observer(() => {
   const { roadmapStore } = useStore();
-  const { selectedRoadmap, loadRoadmap } = roadmapStore;
+  const { selectedRoadmap, loadRoadmap, loadingInitial } = roadmapStore;
   const { id } = useParams();
-  const {activeStep} = roadmapEditStore;
+  const navigate = useNavigate();
 
-  const steps = ["Roadmap Details", "Milestones & Sections", "Overview & Submit"];
+  const { activeStep, setActiveStep } = roadmapEditStore;
+
+  useEffect(() => {
+    if (selectedRoadmap) {
+      roadmapEditStore.setRoadmapTitle(selectedRoadmap.title);
+      roadmapEditStore.setRoadmapDescription(selectedRoadmap.description);
+      roadmapEditStore.setMilestones(selectedRoadmap.milestones || []); 
+    }
+  }, [selectedRoadmap]);
+
+  useEffect(() => {
+    if (id) {
+      loadRoadmap(id);
+    }
+  }, [id, loadRoadmap]);
+
+  const handleSave = () => {
+    navigate(`/roadmapDetails/${id}`);
+  };
 
   const renderStepContent = (step: number) => {
     switch (step) {
       case 0:
-      return <StepperFirst/>;
+        return <EditStepperFirst />;
       case 1:
-      return <StepperSecond/>
+        return <EditStepperSecond />;
       case 2:
-      return <StepperThird/>
+        return <EditStepperThird />
       default:
-      return <div>Unknown step</div>;
+        return <div>Unknown step</div>;
     }
   };
 
-  useEffect(() => {
-    if (id) {
-      loadRoadmap(id).then(() => {
-        if (selectedRoadmap) {
-          roadmapEditStore.populateFromRoadmap(selectedRoadmap);
-        }
-      });
-    }
-  }, [id, loadRoadmap, selectedRoadmap]);
+  if (loadingInitial) {
+    return <LoadingComponent />;
+  }
+
+  if (!selectedRoadmap) {
+    return <div>Failed to load roadmap. Please try again.</div>;
+  }
 
   return (
     <>
       <ToastContainer
-          autoClose={2000}
-          hideProgressBar={true}
-          closeOnClick={true}
-          pauseOnHover={true}
-          draggable={true}
-          position="top-center"
+        autoClose={2000}
+        hideProgressBar={true}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+        position="top-center"
       />
       <NavBar />
-      <div className="flex flex-col items-center justify-center mx-32">
-          <div className="mt-36">
-            <ScreenTitleName title="Edit Roadmap" />
-          </div>
-          <StepperComponent
-            steps={steps}
-            activeStep={activeStep}  
-          />
-          <Box className="w-full mt-12">{renderStepContent(activeStep)}</Box>
+      <div className="flex flex-col items-center mx-32">
+        <ScreenTitleName title="Edit Roadmap" />
+        <EditStepperComponent steps={steps} activeStep={activeStep} />
+        <div className="w-full mt-8">
+          {renderStepContent(activeStep)}
+        </div>
       </div>
     </>
   );
 });
+
+export default RoadmapEdit;

@@ -2,7 +2,6 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { Roadmap } from "../models/roadmap";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
-import { RoadmapDto } from "../../services/roadmapServices";
 
 export default class RoadmapStore {
   roadmapRegistry = new Map<string, Roadmap>();
@@ -26,15 +25,14 @@ export default class RoadmapStore {
       roadmaps.forEach((roadmap) => {
         this.setRoadmap(roadmap);
       });
-      
+      this.loadingInitial = false;
     } catch (error) {
       console.error("Error loading roadmaps:", error);
-    } finally {
       this.loadingInitial = false;
     }
   };
 
-  EditRoadmap = async (roadmap: Roadmap, roadmapData: RoadmapDto) => {
+  EditRoadmap = async (roadmap: Roadmap) => {
     this.submitting = true;
     try {
       if (roadmap.roadmapId) {
@@ -45,7 +43,7 @@ export default class RoadmapStore {
         await apiClient.Roadmaps.create(roadmap);
         this.roadmapRegistry.set(roadmap.roadmapId, roadmap);
       }
-      this.selectedRoadmap = roadmap;
+      //this.selectedRoadmap = roadmap;
       this.editMode = false;
     } catch (error) {
       console.error("Error creating or editing roadmap:", error);
@@ -66,7 +64,6 @@ export default class RoadmapStore {
     } 
   }
 
-
   loadRoadmap = async (id: string) => {
     this.loadingInitial = true;
     let roadmap = this.getRoadmap(id);
@@ -74,7 +71,6 @@ export default class RoadmapStore {
       roadmap = await apiClient.Roadmaps.details(id);
       this.setRoadmap(roadmap);
       runInAction(() => {
-        //console.log(roadmap);
         this.selectedRoadmap = roadmap;
         this.loadingInitial = false;
       });
@@ -83,6 +79,7 @@ export default class RoadmapStore {
     } catch (error) {
       runInAction(() => {
         console.log(error);
+        // ADD ERROR MSG 
         this.loadingInitial = false;
       });
     }

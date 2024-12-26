@@ -1,45 +1,38 @@
 import axios from "axios";
 
 export interface Task {
-  name: string;
-  dateStart: string;
-  dateEnd: string;
-  isCompleted: boolean; 
-  isDeleted: boolean; 
-  created_at: string; 
-  updated_at: string; 
+  taskId: string;          
+  title: string;
+  description: string;
+  startDate: string;        
+  endDate: string;        
+  completed: boolean;
 }
 
 export interface Section {
-  name: string;
+  sectionId: string;      
+  title: string;
   description: string;
-  isCompleted: boolean; 
-  isDeleted: boolean; 
-  created_at: string; 
-  updated_at: string; 
-  tasks: Task[];
+  tasks: Task[];          
 }
 
 export interface Milestone {
+  milestoneId: string;    
   name: string;
   description: string;
-  milestone_progress: number; 
-  isCompleted: boolean; 
-  isDeleted: boolean; 
-  created_at: string; 
-  updated_at: string; 
-  sections: Section[];
+  progress: number;        
+  sections: Section[];     
 }
 
 export interface RoadmapDto {
   title: string;
   description: string;
   createdBy: string;
-  overall_progress: number; 
-  overall_duration: number; 
-  isCompleted: boolean; 
-  isDraft: boolean; 
-  isDeleted: boolean; 
+  overall_progress: number;
+  overall_duration: number;
+  isCompleted: boolean;
+  isDraft: boolean;
+  isDeleted: boolean;
   milestones: Milestone[];
 }
 
@@ -48,7 +41,7 @@ export const EditRoadmap = async (roadmapId: string, roadmapData: RoadmapDto) =>
     const response = await axios.put(`/roadmaps/${roadmapId}`, roadmapData);
     return response.data;
   } catch (error) {
-    console.error("Error Editing roadmap:", error);
+    console.error("Error editing roadmap:", error);
     throw error;
   }
 };

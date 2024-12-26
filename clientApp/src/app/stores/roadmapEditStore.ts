@@ -1,11 +1,12 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction, toJS } from "mobx";
+import { Milestone } from "../../services/roadmapEditServices";
 
 class RoadmapEditStore {
   activeStep = 0;
-  roadmapTitle = '';
+  roadmapTitle = "";
   roadmapDescription = "";
   milestones = [] as Array<{
-    title: string;
+    name: string;
     description: string;
     sections: Array<{
       title: string;
@@ -16,6 +17,10 @@ class RoadmapEditStore {
 
   constructor() {
     makeAutoObservable(this);
+  }
+
+  testingLog = () => {
+    console.log("Milestones:", toJS(roadmapEditStore.milestones));
   }
 
   setActiveStep = (step: number) => {
@@ -36,31 +41,29 @@ class RoadmapEditStore {
     });
   };
 
-  initializeRoadmap = (data: {
-    title: string;
-    description: string;
-    milestones: Array<{
-      title: string;
-      description: string;
-      sections: Array<{
-        title: string;
-        description: string;
-        tasks: Array<{ title: string; startDate: string; endDate: string }>;
-      }>;
-    }>;
-  }) => {
+  setMilestones = (milestones: Milestone[]) => {
     runInAction(() => {
-      console.log(data.title);
-      this.roadmapTitle = data.title;
-      this.roadmapDescription = data.description;
-      this.milestones = data.milestones;
+      this.milestones = milestones.map((milestone) => ({
+        name: milestone.name || "",
+        description: milestone.description || "",
+        sections: milestone.sections.map((section) => ({
+          title: section.title || "",
+          description: section.description || "",
+          tasks: section.tasks.map((task) => ({
+            title: task.title || "",
+            startDate: task.startDate || "",
+            endDate: task.endDate || "",
+          })),
+        })),
+      }));
     });
   };
+  
 
   addMilestone = () => {
     runInAction(() => {
       this.milestones.push({
-        title: "",
+        name: "",
         description: "",
         sections: [],
       });
@@ -104,12 +107,6 @@ class RoadmapEditStore {
       this.milestones[milestoneIndex].sections[sectionIndex].tasks.splice(taskIndex, 1);
     });
   };
-
-  populateFromRoadmap(roadmap: any) {
-    this.roadmapTitle = roadmap.title;
-    this.roadmapDescription = roadmap.description;
-    //console.log("After populating:", this.roadmapTitle, this.roadmapDescription);
-  }
 }
 
 export const roadmapEditStore = new RoadmapEditStore();

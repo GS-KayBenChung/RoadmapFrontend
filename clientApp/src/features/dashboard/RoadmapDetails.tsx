@@ -35,8 +35,6 @@ export default observer( function RoadmapDetails() {
   useEffect(() => {      
     if(id) {
       loadRoadmap(id);
-      //console.log("SelectedRoadmap"+ selectedRoadmap?.milestones);
-      //console.log("Roadmap"+ roadmapStore.roadmaps);
     }
     else {
       console.log("Failed");    

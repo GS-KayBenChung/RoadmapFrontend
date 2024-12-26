@@ -9,10 +9,8 @@ import RoadmapDetails from "../../features/dashboard/RoadmapDetails";
 import RoadmapAudit from "../../features/dashboard/RoadmapAudit";
 import RoadmapEdit from "../../features/dashboard/RoadmapEdit";
 
-
 function ProtectedRoute({ element }: { element: JSX.Element }) {
   const { userStore } = useStore();
-
   return userStore.isLoggedIn ? element : <LoginDashboard />;
 }
 
@@ -24,8 +22,8 @@ export const router = createBrowserRouter([
       { path: "", element: <LoginDashboard /> },
       { path: "content", element: <ProtectedRoute element={<RoadmapsPage />} /> },
       { path: "dashboard", element: <ProtectedRoute element={<RoadmapDashboard />} /> },
-      { path: "roadmap/:id", element: <ProtectedRoute element={<RoadmapDetails/>} /> },
-      { path: "roadmapTest", element: <ProtectedRoute element={<RoadmapDetails/>} /> },
+      { path: "roadmap/:id", element: <ProtectedRoute element={<RoadmapDetails />} /> },
+      { path: "roadmapTest", element: <ProtectedRoute element={<RoadmapDetails />} /> },
       { path: "roadmapCreate", element: <ProtectedRoute element={<RoadmapCreate />} /> },
       { path: "roadmapEdit/:id", element: <ProtectedRoute element={<RoadmapEdit />} /> },
       { path: "audit", element: <ProtectedRoute element={<RoadmapAudit />} /> },

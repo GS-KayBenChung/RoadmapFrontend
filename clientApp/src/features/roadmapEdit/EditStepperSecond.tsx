@@ -1,12 +1,38 @@
 import { Box, Card, CardContent, IconButton, TextField } from "@mui/material";
 import { TrashIcon } from "@heroicons/react/16/solid";
-import { runInAction } from "mobx";
+import { runInAction, toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
+import { useStore } from "../../app/stores/store";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
-export default observer(function StepperSecond() {
-  const { milestones, addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask } = roadmapEditStore;
+interface Task{
+  name: string;
+  completed: boolean;
+  dateStart: string;
+  dateEnd: string;
+};
 
+interface Section{
+  name: string;
+  description: string;
+  tasks: Task[];
+};
+
+const EditStepperSecond = observer(() => {
+  const {  addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask, testingLog } = roadmapEditStore;
+  const {roadmapStore} = useStore();
+  const {selectedRoadmap} = roadmapStore;
+
+  console.log("Selected Roadmap:", selectedRoadmap);
+  console.log("Selected Roadmap:", JSON.stringify(toJS(selectedRoadmap), null, 2));
+
+  const milestones = selectedRoadmap?.milestones || [];
+
+  if (!milestones.length) {
+    return <div>No milestones available. Please add a milestone or check the roadmap data.</div>;
+  }
+  if(!selectedRoadmap) return <LoadingComponent/>;
   return (
     <Box className="mb-24">
       <button
@@ -15,11 +41,12 @@ export default observer(function StepperSecond() {
       >
         Add Milestone
       </button>
-      {milestones.map((milestone, milestoneIndex) => (
+      <button onClick={testingLog}>hereTest</button>
+      {selectedRoadmap.milestones?.map((milestone, milestoneIndex) =>  (
         <Card key={milestoneIndex} className="mb-3 p-2 mt-8 border-2 border-black">
           <CardContent>
             <Box className="flex justify-between">
-              <h6 className="font-extrabold text-xl">{milestone.title || `Milestone ${milestoneIndex + 1}`}</h6>
+              <h6 className="font-extrabold text-xl">{milestone.name || `Milestone ${milestoneIndex + 1}`}</h6>
               <IconButton onClick={() => deleteMilestone(milestoneIndex)}>
                 <TrashIcon className="h-5 w-5 text-red-600" />
               </IconButton>
@@ -29,10 +56,10 @@ export default observer(function StepperSecond() {
                 fullWidth
                 margin="normal"
                 label="Milestone Title"
-                value={milestone.title}
+                value={milestone.name}
                 onChange={(e) => {
                   runInAction(() => {
-                    milestone.title = e.target.value;
+                    milestone.name = e.target.value;
                   });
                 }}
                 className="max-w-[500px]"
@@ -58,11 +85,11 @@ export default observer(function StepperSecond() {
                 Add Section
               </button>
 
-              {milestone.sections.map((section, sectionIndex) => (
+              {milestone.sections?.map((section: Section, sectionIndex: number) => (
                 <Card key={sectionIndex} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
                   <CardContent>
                     <Box className="flex justify-between">
-                      <h6 className="font-extrabold text-xl">{section.title || `Section ${sectionIndex + 1}`}</h6>
+                      <h6 className="font-extrabold text-xl">{section.name || `Section ${sectionIndex + 1}`}</h6>
                       <IconButton onClick={() => deleteSection(milestoneIndex, sectionIndex)} aria-label="delete section">
                         <TrashIcon className="h-5 w-5 text-red-600" />
                       </IconButton>
@@ -72,10 +99,10 @@ export default observer(function StepperSecond() {
                         fullWidth
                         margin="normal"
                         label="Section Title"
-                        value={section.title}
+                        value={section.name}
                         onChange={(e) => {
                           runInAction(() => {
-                            section.title = e.target.value;
+                            section.name = e.target.value;
                           });
                         }}
                         className="max-w-[400px]"
@@ -100,11 +127,11 @@ export default observer(function StepperSecond() {
                       >
                         Add Task
                       </button>
-                      {section.tasks.map((task, taskIndex) => (
+                      {section.tasks.map((task: Task, taskIndex: number) => (
                         <Card key={taskIndex} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
                           <CardContent>
                             <Box className="flex justify-between">
-                              <h6 className="font-extrabold text-xl">{task.title || `Task ${taskIndex + 1}`}</h6>
+                              <h6 className="font-extrabold text-xl">{task.name || `Task ${taskIndex + 1}`}</h6>
                               <IconButton
                                 onClick={() => deleteTask(milestoneIndex, sectionIndex, taskIndex)}
                                 aria-label="delete task"
@@ -117,10 +144,10 @@ export default observer(function StepperSecond() {
                                 fullWidth
                                 margin="normal"
                                 label="Task Title"
-                                value={task.title}
+                                value={task.name}
                                 onChange={(e) => {
                                   runInAction(() => {
-                                    task.title = e.target.value;
+                                    task.name = e.target.value;
                                   });
                                 }}
                                 className="max-w-[400px]"
@@ -130,12 +157,12 @@ export default observer(function StepperSecond() {
                                 type="date"
                                 label="Start Date"
                                 InputLabelProps={{ shrink: true }}
-                                value={task.startDate}
-                                onChange={(e) => {
+                                value={task.dateStart ? new Date(task.dateStart).toISOString().split("T")[0] : ""}
+                                onChange={(e) =>
                                   runInAction(() => {
-                                    task.startDate = e.target.value;
-                                  });
-                                }}
+                                    task.dateStart = e.target.value;
+                                  })
+                                }
                                 className="w-[400px]"
                               />
                               <TextField
@@ -143,12 +170,12 @@ export default observer(function StepperSecond() {
                                 type="date"
                                 label="End Date"
                                 InputLabelProps={{ shrink: true }}
-                                value={task.endDate}
-                                onChange={(e) => {
+                                value={task.dateEnd ? new Date(task.dateEnd).toISOString().split("T")[0] : ""}
+                                onChange={(e) =>
                                   runInAction(() => {
-                                    task.endDate = e.target.value;
-                                  });
-                                }}
+                                    task.dateEnd = e.target.value;
+                                  })
+                                }
                                 className="w-[400px]"
                               />
                             </Box>
@@ -166,3 +193,5 @@ export default observer(function StepperSecond() {
     </Box>
   );
 });
+
+export default EditStepperSecond;
