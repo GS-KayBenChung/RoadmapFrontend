@@ -9,9 +9,9 @@ class RoadmapEditStore {
     name: string;
     description: string;
     sections: Array<{
-      title: string;
+      name: string;
       description: string;
-      tasks: Array<{ title: string; startDate: string; endDate: string }>;
+      tasks: Array<{ name: string; dateStart: string; dateEnd: string }>;
     }>;
   }>;
 
@@ -47,12 +47,12 @@ class RoadmapEditStore {
         name: milestone.name || "",
         description: milestone.description || "",
         sections: milestone.sections.map((section) => ({
-          title: section.title || "",
+          name: section.name || "",
           description: section.description || "",
           tasks: section.tasks.map((task) => ({
-            title: task.title || "",
-            startDate: task.startDate || "",
-            endDate: task.endDate || "",
+            name: task.name || "",
+            dateStart: task.dateStart || "",
+            dateEnd: task.dateEnd || "",
           })),
         })),
       }));
@@ -79,7 +79,7 @@ class RoadmapEditStore {
   addSection = (milestoneIndex: number) => {
     runInAction(() => {
       this.milestones[milestoneIndex].sections.push({
-        title: "",
+        name: "",
         description: "",
         tasks: [],
       });
@@ -95,9 +95,9 @@ class RoadmapEditStore {
   addTask = (milestoneIndex: number, sectionIndex: number) => {
     runInAction(() => {
       this.milestones[milestoneIndex].sections[sectionIndex].tasks.push({
-        title: "",
-        startDate: "",
-        endDate: "",
+        name: "",
+        dateStart: "",
+        dateEnd: "",
       });
     });
   };

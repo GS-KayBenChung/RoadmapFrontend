@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, IconButton, TextField } from "@mui/material";
 import { TrashIcon } from "@heroicons/react/16/solid";
-import { runInAction, toJS } from "mobx";
+import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
 import { useStore } from "../../app/stores/store";
@@ -24,8 +24,8 @@ const EditStepperSecond = observer(() => {
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
 
-  console.log("Selected Roadmap:", selectedRoadmap);
-  console.log("Selected Roadmap:", JSON.stringify(toJS(selectedRoadmap), null, 2));
+  // console.log("Selected Roadmap:", selectedRoadmap);
+  // console.log("Selected Roadmap:", JSON.stringify(toJS(selectedRoadmap), null, 2));
 
   const milestones = selectedRoadmap?.milestones || [];
 

@@ -1,38 +1,38 @@
 import axios from "axios";
 
 export interface Task {
-  taskId: string;          
-  title: string;
-  description: string;
-  startDate: string;        
-  endDate: string;        
-  completed: boolean;
+  //taskId: string;          
+  name: string;
+  //description: string;
+  dateStart: string;        
+  dateEnd: string;        
+  //completed: boolean;
 }
 
 export interface Section {
-  sectionId: string;      
-  title: string;
+  //sectionId: string;      
+  name: string;
   description: string;
   tasks: Task[];          
 }
 
 export interface Milestone {
-  milestoneId: string;    
+  //milestoneId: string;    
   name: string;
   description: string;
-  progress: number;        
+  //progress: number;        
   sections: Section[];     
 }
 
 export interface RoadmapDto {
   title: string;
   description: string;
-  createdBy: string;
-  overall_progress: number;
-  overall_duration: number;
-  isCompleted: boolean;
-  isDraft: boolean;
-  isDeleted: boolean;
+  //createdBy: string;
+  //overall_progress: number;
+  //overall_duration: number;
+  //isCompleted: boolean;
+  //isDraft: boolean;
+  //isDeleted: boolean;
   milestones: Milestone[];
 }
 

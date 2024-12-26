@@ -7,20 +7,20 @@ export default function EditRoadmapLevel(){
     name: roadmapTitle,
     description: roadmapDescription,
     children: milestones.map((milestone) => ({
-      name: milestone.title,
+      name: milestone.name,
       attributes: {
         description: milestone.description,
       },
       children: milestone.sections.map((section) => ({
-        name: section.title,
+        name: section.name,
         attributes: {
           description: section.description,
         },
         children: section.tasks.map((task) => ({
-          name: task.title,
+          name: task.name,
           attributes: {
-            startDate: task.startDate,
-            endDate: task.endDate,
+            startDate: task.dateStart,
+            endDate: task.dateEnd,
           },
         })),
       })),

@@ -4,16 +4,61 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ScreenTitleName from "../ScreenTitleName";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
-import EditRoadmapLevel from "./EditRoadmapLevel";
+import { useStore } from "../../app/stores/store";
+import { EditRoadmap, RoadmapDto } from "../../services/roadmapEditServices";
+
+interface Task{
+  name: string;
+  completed: boolean;
+  dateStart: string;
+  dateEnd: string;
+};
+
+interface Section{
+  name: string;
+  description: string;
+  tasks: Task[];
+};
+
+const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
 
 export default observer(function EditStepperThird() {
   const navigate = useNavigate();
   const { roadmapTitle, roadmapDescription, milestones, testingLog } = roadmapEditStore;
   const [openPreview, setOpenPreview] = useState(false);
+  const {roadmapStore} = useStore();
+  const {selectedRoadmap} = roadmapStore;
 
   const handleSubmit = async () => {
-    EditRoadmapLevel()
-    navigate('content')
+    if (!selectedRoadmap) return; 
+  
+    const roadmapData: RoadmapDto = {
+      title: selectedRoadmap.title || roadmapTitle,
+      description: selectedRoadmap.description || roadmapDescription,
+      milestones: selectedRoadmap.milestones.map((milestone) => ({
+        name: milestone.name,
+        description: milestone.description,
+        sections: milestone.sections.map((section: Section) => ({
+          name: section.name,
+          description: section.description,
+          tasks: section.tasks.map((task) => ({
+            name: task.name,
+            dateStart: new Date(task.dateStart).toISOString(),
+            dateEnd: new Date(task.dateEnd).toISOString(),
+          })),
+        })),
+      })),
+    };
+    try 
+    {
+      console.log("Roadmap data being sent:", roadmapData);
+      if(!selectedRoadmap) return 0;
+      const result = await EditRoadmap(selectedRoadmap?.roadmapId,roadmapData);
+      console.log("Roadmap edited successfully:", result);
+      navigate('/content');
+    } catch (error) {
+      console.error("Error editing roadmap:", error);
+    }
   };
   
   const handlePreview = () => {
@@ -23,7 +68,7 @@ export default observer(function EditStepperThird() {
   const handleClosePreview = () => {
     setOpenPreview(false);
   };
-
+  
   return (
     <Box className="p-8 bg-gray-300 rounded-lg shadow-xl">
       <div className="text-center text-4xl font-extrabold text-indigo-900 mb-8">
@@ -47,25 +92,25 @@ export default observer(function EditStepperThird() {
         </div>
       </div>
 
-      {milestones.map((milestone, milestoneIndex) => (
+      {selectedRoadmap?.milestones.map((milestone, milestoneIndex) => (
         <div key={milestoneIndex} className="bg-white p-6 rounded-lg shadow-md mb-6">
           <div className="flex items-center justify-between border-b pb-4 mb-4">
             <h6 className="text-2xl font-semibold text-indigo-800">{`Milestone ${milestoneIndex + 1}: ${milestone.name}`}</h6>
             <p className="text-gray-600 text-sm">{milestone.description}</p>
           </div>
 
-          {milestone.sections.map((section, sectionIndex) => (
+          {milestone.sections.map((section: Section, sectionIndex: number) => (
             <div key={sectionIndex} className="mt-6 space-y-4">
               <div className="flex justify-between items-center">
-                <p className="text-lg font-semibold text-indigo-700">{`Section ${sectionIndex + 1}: ${section.title}`}</p>
+                <p className="text-lg font-semibold text-indigo-700">{`Section ${sectionIndex + 1}: ${section.name}`}</p>
                 <p className="text-gray-600 text-sm">{section.description}</p>
               </div>
 
               {section.tasks.map((task, taskIndex) => (
                 <div key={taskIndex} className="mt-2 ml-6 p-4 bg-indigo-50 rounded-lg shadow-sm">
                   <div className="flex justify-between">
-                    <p className="text-gray-700 font-medium">{`Task ${taskIndex + 1}: ${task.title}`}</p>
-                    <p className="text-gray-500 text-xs">{`Start: ${task.startDate}, End: ${task.endDate}`}</p>
+                    <p className="text-gray-700 font-medium">{`Task ${taskIndex + 1}: ${task.name}`}</p>
+                    <p className="text-gray-500 text-xs">{formatDate(task.dateStart)} - {formatDate(task.dateEnd)}</p>
                   </div>
                 </div>
               ))}
@@ -103,7 +148,7 @@ export default observer(function EditStepperThird() {
           </div>
 
           <div className="max-w-screen-lg mx-auto p-4 mb-12">
-            {milestones.map((milestone, milestoneIndex) => (
+            {selectedRoadmap?.milestones.map((milestone, milestoneIndex) => (
               <div key={milestoneIndex}>
                 <div className="p-4 rounded-lg border-2 border-gray-300">
                   <div className="flex items-center space-x-4">
@@ -116,22 +161,22 @@ export default observer(function EditStepperThird() {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                    {milestone.sections?.map((section, sectionIndex) => (
+                    {milestone.sections?.map((section: Section, sectionIndex: number) => (
                       <div
                         key={sectionIndex}
                         className="p-4 border rounded-lg bg-gray-100"
                       >
                         <div className="flex items-center space-x-3 w-full">
-                          <h3 className="font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.title}</h3>
+                          <h3 className="font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.name}</h3>
                         </div>
                         <hr className="border-t border-gray-300 my-3" />
                         <ul>
                           {section.tasks?.map((task, taskIndex) => (
                             <li key={taskIndex} className="flex items-center space-x-2">
                               <div>
-                                <span className="block text-sm font-medium text-gray-800">{task.title}</span>
+                                <span className="block text-sm font-medium text-gray-800">{task.name}</span>
                                 <span className="block text-xs text-gray-600">
-                                  {`Start: ${task.startDate}, End: ${task.endDate}`}
+                                  {formatDate(task.dateStart)} - {formatDate(task.dateEnd)}
                                 </span>
                               </div>
                             </li>
