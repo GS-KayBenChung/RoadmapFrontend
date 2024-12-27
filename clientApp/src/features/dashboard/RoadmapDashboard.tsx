@@ -3,36 +3,40 @@ import NavBar from "../../app/layout/NavBar";
 import ScreenTitleName from "../ScreenTitleName";
 import CircularProgress from "../CircularProgressBar";
 import Footer from "../../app/layout/Footer";
+import { useStore } from "../../app/stores/store";
+import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
 
-export default function RoadmapDashboard() {
+export default observer( function RoadmapDashboard() {
+  const { roadmapStore } = useStore(); 
 
-    const overallCompletionRate = 60; //TO REMOVE
+  const { loadRoadmaps } = roadmapStore;
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <NavBar />
+  useEffect(() => {
+    loadRoadmaps();
+  }, [loadRoadmaps]);
 
-            <div className="w-full flex-grow bg-white my-24">
-                <ScreenTitleName title="ROADMAP DASHBOARD"/>
+  return (
+    <div className="flex flex-col min-h-screen">
+      <NavBar />
 
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto mt-24">
-                    <DashboardCard title="Current Roadmaps" value="13" />
-                    <DashboardCard title="Completed Roadmap" value="1/3" />
-                    <DashboardCard
-                        title="Overall Completion Rate"
-                        progress={
-                            <div className="relative w-24 h-24 pt-2">
-                                <CircularProgress percentage={overallCompletionRate} />
-                            </div>
-                        }
-                    />
-                    <DashboardCard title="Near Due Roadmap" value="7" />
-                    <DashboardCard title="Overdue Roadmap" value="4" />
-                    <DashboardCard title="Draft Roadmap" value="3" />
-                </div>
-            </div>
+      <div className="w-full flex-grow bg-white my-24">
+        <ScreenTitleName title="ROADMAP DASHBOARD"/>
 
-            <Footer />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto mt-24">
+        <DashboardCard title="Current Roadmaps" value={roadmapStore.dashboardStats.totalRoadmaps} />
+        <DashboardCard title="Completed Roadmap" value={`${roadmapStore.dashboardStats.completedRoadmaps}/${roadmapStore.dashboardStats.totalRoadmaps}`} />
+        <DashboardCard
+          title="Overall Completion Rate"
+          progress={<div className="relative w-24 h-24 pt-2"><CircularProgress percentage={Math.round((roadmapStore.dashboardStats.completedRoadmaps / roadmapStore.dashboardStats.totalRoadmaps) * 100)} /></div>}
+        />
+        <DashboardCard title="Near Due Roadmap" value={88} />
+        <DashboardCard title="Overdue Roadmap" value={88} />
+        <DashboardCard title="Draft Roadmap" value={roadmapStore.dashboardStats.draftRoadmaps} filter="draft" />
         </div>
-    );
-}
+      </div>
+
+      <Footer />
+    </div>
+  );
+})

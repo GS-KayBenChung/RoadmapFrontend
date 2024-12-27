@@ -9,6 +9,11 @@ export default class RoadmapStore {
   editMode = false;
   submitting = false;
   loadingInitial = false;
+  dashboardStats = {
+    totalRoadmaps: 0,
+    draftRoadmaps: 0,
+    completedRoadmaps: 0,
+  };
 
   constructor() {
     makeAutoObservable(this);
@@ -18,20 +23,43 @@ export default class RoadmapStore {
     return Array.from(this.roadmapRegistry.values());
   }
 
-  loadRoadmaps = async () => {
+  loadRoadmaps = async (filter?: string, search?: string) => {
     this.loadingInitial = true;
     try {
-      const roadmaps = await apiClient.Roadmaps.list();
-      roadmaps.forEach((roadmap) => {
-        this.setRoadmap(roadmap);
+      const params = new URLSearchParams();
+      if (filter) params.append("filter", filter);
+      if (search) params.append("search", search);
+  
+      const roadmaps = await apiClient.Roadmaps.list(params.toString());
+  
+      runInAction(() => {
+        this.roadmapRegistry.clear();
+        roadmaps.forEach((roadmap) => {
+          this.setRoadmap(roadmap);
+        });
+  
+        this.calculateDashboardStats();
       });
-      this.loadingInitial = false;
     } catch (error) {
-      console.error("Error loading roadmaps:", error);
+      console.error(error);
+    } finally {
       this.loadingInitial = false;
     }
   };
-
+  
+  calculateDashboardStats() {
+    const totalRoadmaps = this.roadmaps.length;
+    const draftRoadmaps = this.roadmaps.filter(r => r.isDraft).length;
+    const completedRoadmaps = this.roadmaps.filter(r => r.isCompleted).length;
+  
+    this.dashboardStats = {
+      totalRoadmaps,
+      draftRoadmaps,
+      completedRoadmaps,
+    };
+  }
+  
+  
   EditRoadmap = async (roadmap: Roadmap) => {
     this.submitting = true;
     try {
