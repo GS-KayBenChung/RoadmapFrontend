@@ -107,6 +107,13 @@ class RoadmapEditStore {
       this.milestones[milestoneIndex].sections[sectionIndex].tasks.splice(taskIndex, 1);
     });
   };
+  
+  reset() {
+    this.roadmapTitle = "";
+    this.roadmapDescription = "";
+    this.milestones = [];
+    this.activeStep =0;
+  }
 }
 
 export const roadmapEditStore = new RoadmapEditStore();

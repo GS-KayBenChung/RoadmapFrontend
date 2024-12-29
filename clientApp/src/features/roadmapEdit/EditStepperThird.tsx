@@ -8,6 +8,7 @@ import { useStore } from "../../app/stores/store";
 import { EditRoadmap, RoadmapDto } from "../../services/roadmapEditServices";
 
 interface Task{
+  taskId: string; 
   name: string;
   completed: boolean;
   dateStart: string;
@@ -15,6 +16,7 @@ interface Task{
 };
 
 interface Section{
+  sectionId: string; 
   name: string;
   description: string;
   tasks: Task[];
@@ -29,19 +31,30 @@ export default observer(function EditStepperThird() {
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
 
+  // useEffect(() => {
+  //   if (selectedRoadmap) {
+  //     roadmapEditStore.roadmapTitle = selectedRoadmap.title || "";
+  //     roadmapEditStore.roadmapDescription = selectedRoadmap.description || "";
+  //     roadmapEditStore.milestones = selectedRoadmap.milestones || [];
+  //   }
+  // }, [selectedRoadmap]);
+
   const handleSubmit = async () => {
     if (!selectedRoadmap) return; 
   
     const roadmapData: RoadmapDto = {
-      title: selectedRoadmap.title || roadmapTitle,
-      description: selectedRoadmap.description || roadmapDescription,
+      title: roadmapTitle,
+      description: roadmapDescription,
       milestones: selectedRoadmap.milestones.map((milestone) => ({
+        milestoneId: milestone.milestoneId,
         name: milestone.name,
         description: milestone.description,
         sections: milestone.sections.map((section: Section) => ({
+          sectionId: section.sectionId,
           name: section.name,
           description: section.description,
           tasks: section.tasks.map((task) => ({
+            taskId: task.taskId,
             name: task.name,
             dateStart: new Date(task.dateStart).toISOString(),
             dateEnd: new Date(task.dateEnd).toISOString(),
@@ -55,6 +68,7 @@ export default observer(function EditStepperThird() {
       if(!selectedRoadmap) return 0;
       const result = await EditRoadmap(selectedRoadmap?.roadmapId,roadmapData);
       console.log("Roadmap edited successfully:", result);
+      roadmapEditStore.reset();
       navigate('/content');
     } catch (error) {
       console.error("Error editing roadmap:", error);
@@ -92,7 +106,7 @@ export default observer(function EditStepperThird() {
         </div>
       </div>
 
-      {selectedRoadmap?.milestones.map((milestone, milestoneIndex) => (
+      {selectedRoadmap?.milestones?.map((milestone, milestoneIndex) => (
         <div key={milestoneIndex} className="bg-white p-6 rounded-lg shadow-md mb-6">
           <div className="flex items-center justify-between border-b pb-4 mb-4">
             <h6 className="text-2xl font-semibold text-indigo-800">{`Milestone ${milestoneIndex + 1}: ${milestone.name}`}</h6>

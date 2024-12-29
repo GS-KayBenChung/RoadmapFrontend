@@ -1,23 +1,22 @@
 import axios from "axios";
 
 export interface Task {
-  //taskId: string;          
+  taskId: string;          
   name: string;
-  //description: string;
   dateStart: string;        
   dateEnd: string;        
   //completed: boolean;
 }
 
 export interface Section {
-  //sectionId: string;      
+  sectionId: string;      
   name: string;
   description: string;
   tasks: Task[];          
 }
 
 export interface Milestone {
-  //milestoneId: string;    
+  milestoneId: string;    
   name: string;
   description: string;
   //progress: number;        
