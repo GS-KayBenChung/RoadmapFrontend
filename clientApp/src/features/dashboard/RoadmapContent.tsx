@@ -75,10 +75,10 @@ export default observer(function RoadmapsPage() {
   return (
     <>
       <NavBar />
-      <div className="p-16">
+      <div className="py-16">
         <ScreenTitleName title="ROADMAPS" />
-        <div className="mx-80 mt-24">
-          <div className="flex justify-between items-center gap-4 mb-6 flex-wrap mx-10">
+        <div className="mt-24">
+          <div className="flex justify-between gap-4 mb-6 flex-wrap w-full max-w-screen-lg mx-auto px-4">
           <TextField
             margin="normal"
             type="date"
@@ -118,7 +118,7 @@ export default observer(function RoadmapsPage() {
                     </InputAdornment>
                   ),
                 }}
-                className="w-52"
+                className="max-w-[400px]"
               />
             </div>
 
@@ -144,7 +144,7 @@ export default observer(function RoadmapsPage() {
           </div>
 
           {viewType === "card" ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-0">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 md:mx-12 lg:grid-cols-5 gap-12 p-4">
               {roadmaps.map((roadmap) => (
                 <div key={roadmap.roadmapId}>
                   <RoadmapCard
