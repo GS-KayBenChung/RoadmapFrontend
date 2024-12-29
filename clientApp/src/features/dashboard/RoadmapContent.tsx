@@ -156,9 +156,9 @@ export default observer(function RoadmapsPage() {
               ))}
             </div>
           ) : (
-            <div className="pt-4">
-              <TableContainer component="div" className="shadow-md rounded-lg overflow-hidden">
-                <Table className="min-w-full text-sm" aria-label="roadmaps table">
+            <div className="pt-4 mx-16">
+              <TableContainer component="div" className="shadow-md rounded-lg overflow-hidden min-w-full">
+                <Table className="text-sm">
                   <TableHead>
                     <TableRow>
                       <TableCell className="font-semibold text-gray-700">Title</TableCell>
@@ -177,7 +177,7 @@ export default observer(function RoadmapsPage() {
                         <TableCell>{roadmap.overallProgress}%</TableCell>
                         <TableCell>{roadmap.overallDuration}days</TableCell>
                         <TableCell>{formatDate(roadmap.updatedAt)}</TableCell>
-                        <NavLink key={roadmap.roadmapId} to={`/roadmap/${roadmap.roadmapId}`} >
+                        <NavLink key={roadmap.roadmapId} to={`/roadmap/${roadmap.roadmapId}`}>
                           <TableCell><a className="text-blue-500 underline">Roadmap</a></TableCell>
                         </NavLink>
                       </TableRow>

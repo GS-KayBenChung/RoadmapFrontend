@@ -9,10 +9,12 @@ import { useParams } from 'react-router-dom';
 import LoadingComponent from '../../app/layout/LoadingComponent';
 import { useNavigate } from 'react-router-dom';
 import ConfirmDeleteModal from '../../app/layout/ConfirmationModel';
+import { runInAction } from 'mobx';
+import ConfirmUncheck from '../../app/layout/ConfirmationUncheck';
 
 interface Task{
   name: string;
-  completed: boolean;
+  isCompleted: boolean;
   dateStart: string;
   dateEnd: string;
 };
@@ -20,6 +22,7 @@ interface Task{
 interface Section{
   name: string;
   tasks: Task[];
+  isCompleted: boolean;
 };
 
 const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
@@ -30,6 +33,14 @@ export default observer( function RoadmapDetails() {
   const {id} = useParams();
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false); 
+  const [showConfirm, setShowConfirm] = useState(false); 
+  const [confirmationTarget, setConfirmationTarget] = useState<{
+    type: 'roadmap' | 'milestone' | 'section';
+    index?: number; 
+    parentIndex?: number;
+    isChecked: boolean;
+  } | null>(null);
+  
 
   const [roadmapToDelete, setRoadmapToDelete] = useState<string | null>(null); 
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
@@ -74,13 +85,63 @@ export default observer( function RoadmapDetails() {
     setShowModal(false); 
   };
 
+  const handleConfirmationModal = (
+    type: 'roadmap' | 'milestone' | 'section',
+    isChecked: boolean,
+    index?: number,
+    parentIndex?: number
+  ) => {
+    setConfirmationTarget({ type, index, parentIndex, isChecked });
+    setShowConfirm(true);
+  };
+  
+  const confirmAction = () => {
+    if (!confirmationTarget) return;
+  
+    runInAction(() => {
+      const { type, index, parentIndex, isChecked } = confirmationTarget;
+  
+      if (type === 'roadmap') {
+        selectedRoadmap.isCompleted = isChecked;
+        selectedRoadmap.milestones.forEach((milestone) => {
+          milestone.isCompleted = isChecked;
+          milestone.sections.forEach((section: any) => {
+            section.isCompleted = isChecked;
+            section.tasks.forEach((task: any) => (task.isCompleted = isChecked));
+          });
+        });
+      } else if (type === 'milestone' && index !== undefined) {
+        const milestone = selectedRoadmap.milestones[index];
+        milestone.isCompleted = isChecked;
+        milestone.sections.forEach((section: any) => {
+          section.isCompleted = isChecked;
+          section.tasks.forEach((task: any) => (task.isCompleted = isChecked));
+        });
+        selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
+      } else if (type === 'section' && index !== undefined && parentIndex !== undefined) {
+        const section = selectedRoadmap.milestones[parentIndex].sections[index];
+        section.isCompleted = isChecked;
+        section.tasks.forEach((task: any) => (task.isCompleted = isChecked));
+        const milestone = selectedRoadmap.milestones[parentIndex];
+        milestone.isCompleted = milestone.sections.every((s: any) => s.isCompleted);
+        selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
+      }
+    });
+  
+    setShowConfirm(false);
+  };
+  
+  const cancelAction = () => {
+    setConfirmationTarget(null);
+    setShowConfirm(false);
+  };
+  
   const calculateMilestoneDuration = (milestone: any) => {
     if (milestone.sections?.length) {
 
       const firstSection = milestone.sections[0];
       const firstTask = firstSection.tasks?.[0];
       
-
       const lastSection = milestone.sections[milestone.sections.length - 1];
       const lastTask = lastSection.tasks?.[lastSection.tasks.length - 1];
   
@@ -99,12 +160,29 @@ export default observer( function RoadmapDetails() {
     return 'Duration not available';
   };
 
+  const toggleTaskCompletion = (milestoneIndex: number, sectionIndex: number, taskIndex: number, isCompleted: boolean) => {
+    runInAction(() => {
+      const task = selectedRoadmap.milestones[milestoneIndex].sections[sectionIndex].tasks[taskIndex];
+      task.isCompleted = isCompleted;
+      const section = selectedRoadmap.milestones[milestoneIndex].sections[sectionIndex];
+      section.isCompleted = section.tasks.every((t: any) => t.isCompleted);
+      const milestone = selectedRoadmap.milestones[milestoneIndex];
+      milestone.isCompleted = milestone.sections.every((s: any) => s.isCompleted);
+      selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
+    });
+  };
+
   return (
     <>
       <ConfirmDeleteModal
         isOpen={showModal}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
+      />
+      <ConfirmUncheck
+        isOpen={showConfirm}
+        onConfirm={confirmAction}
+        onCancel={cancelAction}
       />
       <NavBar />
       <ScreenTitleName title={selectedRoadmap.title || 'Roadmap Details'} />
@@ -140,7 +218,10 @@ export default observer( function RoadmapDetails() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold leading-none flex-shrink-0">{selectedRoadmap.title}</h1>
-            <Checkbox />
+            <Checkbox
+              checked={selectedRoadmap.isCompleted || false}
+              onChange={(e) => handleConfirmationModal('roadmap', e.target.checked)}
+            />
           </div>
           <div className="flex space-x-4">
             <button
@@ -151,7 +232,7 @@ export default observer( function RoadmapDetails() {
             </button>
             <button
               className="bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 text-sm"
-              onClick={() => handleDelete(roadmapStore.selectedRoadmap?.roadmapId || '')}
+              onClick={() => handleDelete(selectedRoadmap.roadmapId)}
             >
               DELETE
             </button>
@@ -169,14 +250,18 @@ export default observer( function RoadmapDetails() {
                 className="flex items-center space-x-4 cursor-pointer hover:bg-gray-100"
               >
                 <div className="relative w-16 h-16">
-                  <CircularProgressBar percentage={ milestone.milestoneProgress || 0} />
+                  <CircularProgressBar percentage={milestone.milestoneProgress || 0} />
                 </div>
                 <div className="flex-grow">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <h2 className="text-lg font-bold">{milestone.name}</h2>
                       {expandedMilestone === milestoneIndex && (
-                        <Checkbox onClick={(e) => e.stopPropagation()} />
+                        <Checkbox
+                          checked={milestone.isCompleted || false}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => handleConfirmationModal('milestone', e.target.checked, milestoneIndex)}
+                        />
                       )}
                     </div>
                     <span className="text-sm text-gray-500">
@@ -188,32 +273,41 @@ export default observer( function RoadmapDetails() {
                   )}
                 </div>
               </div>
-
               {expandedMilestone === milestoneIndex && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   {milestone.sections?.map((section: Section, sectionIndex: number) => (
                     <div
-                      onClick={() => toggleSection(milestoneIndex, sectionIndex)}
                       key={sectionIndex}
-                      className={`
-                        p-4 border rounded-lg bg-gray-100
-                        ${expandedSections[sectionIndex] ? '' : 'h-14'}
-                        ${expandedSections[sectionIndex] ? 'overflow-visible' : 'overflow-hidden'}
-                      `}
+                      onClick={() => toggleSection(milestoneIndex, sectionIndex)}
+                      className={`p-4 border rounded-lg bg-gray-100 ${
+                        expandedSections[sectionIndex] ? '' : 'h-14'
+                      } ${
+                        expandedSections[sectionIndex] ? 'overflow-visible' : 'overflow-hidden'
+                      }`}
                     >
                       <div className="flex items-center space-x-3 w-full cursor-pointer hover:bg-gray-100">
-                        <h3 className="pl-3 font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.name}</h3>
-                        {expandedSections[sectionIndex] && <Checkbox onClick={(e) => e.stopPropagation()} />}
+                        <h3 className="pl-3 font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">
+                          {section.name}
+                        </h3>
+                        {expandedSections[sectionIndex] && (
+                          <Checkbox
+                            checked={section.isCompleted}
+                            onChange={(e) => handleConfirmationModal('section', e.target.checked, sectionIndex, milestoneIndex)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        )}
                       </div>
                       {expandedSections[sectionIndex] && expandedMilestone === milestoneIndex && (
                         <ul>
                           {section.tasks?.map((task: Task, taskIndex: number) => (
                             <li key={taskIndex} className="flex items-center space-x-2">
-                              
-                              <div className="flex items-center h-full">
-                                <Checkbox checked={task.completed} onClick={(e) => e.stopPropagation()} />
-                              </div>
-
+                              <Checkbox
+                                checked={task.isCompleted}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) =>
+                                  toggleTaskCompletion(milestoneIndex, sectionIndex, taskIndex, e.target.checked)
+                                }
+                              />
                               <div>
                                 <span className="block text-sm font-medium text-gray-800">{task.name}</span>
                                 <span className="block text-xs text-gray-600">
@@ -239,4 +333,4 @@ export default observer( function RoadmapDetails() {
       </div>
     </>
   );
-})
+});

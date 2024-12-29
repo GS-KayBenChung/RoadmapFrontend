@@ -13,6 +13,7 @@ export default observer(function EditStepperFirst() {
                 label="Roadmap Title"
                 value={roadmapTitle}
                 onChange={(e) => setRoadmapTitle(e.target.value)}
+                inputProps={{ maxLength: 50 }}
                 className="max-w-[600px]"
             />
             <TextField
@@ -22,6 +23,7 @@ export default observer(function EditStepperFirst() {
                 multiline
                 rows={4}
                 value={roadmapDescription}
+                inputProps={{ maxLength: 100 }}
                 onChange={(e) => setRoadmapDescription(e.target.value)}
                 className="max-w-[600px]"
             />

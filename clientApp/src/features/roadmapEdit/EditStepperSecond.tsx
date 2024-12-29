@@ -1,6 +1,6 @@
 import { Box, Card, CardContent, IconButton, TextField } from "@mui/material";
 import { TrashIcon } from "@heroicons/react/16/solid";
-import { runInAction } from "mobx";
+import { runInAction, toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
 import { useStore } from "../../app/stores/store";
@@ -19,7 +19,7 @@ interface Section{
   tasks: Task[];
 };
 
-const EditStepperSecond = observer(() => {
+export default observer(function EditStepperSecond(){
   const {  addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask, testingLog } = roadmapEditStore;
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
@@ -57,6 +57,7 @@ const EditStepperSecond = observer(() => {
                 margin="normal"
                 label="Milestone Title"
                 value={milestone.name}
+                inputProps={{ maxLength: 50 }}
                 onChange={(e) => {
                   runInAction(() => {
                     milestone.name = e.target.value;
@@ -71,6 +72,7 @@ const EditStepperSecond = observer(() => {
                 multiline
                 rows={2}
                 value={milestone.description}
+                inputProps={{ maxLength: 100 }}
                 onChange={(e) => {
                   runInAction(() => {
                     milestone.description = e.target.value;
@@ -100,6 +102,7 @@ const EditStepperSecond = observer(() => {
                         margin="normal"
                         label="Section Title"
                         value={section.name}
+                        inputProps={{ maxLength: 50 }}
                         onChange={(e) => {
                           runInAction(() => {
                             section.name = e.target.value;
@@ -114,6 +117,7 @@ const EditStepperSecond = observer(() => {
                         multiline
                         rows={2}
                         value={section.description}
+                        inputProps={{ maxLength: 100 }}
                         onChange={(e) => {
                           runInAction(() => {
                             section.description = e.target.value;
@@ -145,6 +149,7 @@ const EditStepperSecond = observer(() => {
                                 margin="normal"
                                 label="Task Title"
                                 value={task.name}
+                                inputProps={{ maxLength: 50 }}
                                 onChange={(e) => {
                                   runInAction(() => {
                                     task.name = e.target.value;
@@ -193,5 +198,3 @@ const EditStepperSecond = observer(() => {
     </Box>
   );
 });
-
-export default EditStepperSecond;

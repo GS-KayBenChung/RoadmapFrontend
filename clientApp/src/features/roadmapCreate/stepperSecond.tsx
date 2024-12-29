@@ -30,6 +30,7 @@ export default observer(function StepperSecond() {
                 margin="normal"
                 label="Milestone Title"
                 value={milestone.title}
+                inputProps={{ maxLength: 50 }}
                 onChange={(e) => {
                   runInAction(() => {
                     milestone.title = e.target.value;
@@ -44,6 +45,7 @@ export default observer(function StepperSecond() {
                 multiline
                 rows={2}
                 value={milestone.description}
+                inputProps={{ maxLength: 100 }}
                 onChange={(e) => {
                   runInAction(() => {
                     milestone.description = e.target.value;
@@ -73,6 +75,7 @@ export default observer(function StepperSecond() {
                         margin="normal"
                         label="Section Title"
                         value={section.title}
+                        inputProps={{ maxLength: 50 }}
                         onChange={(e) => {
                           runInAction(() => {
                             section.title = e.target.value;
@@ -87,6 +90,7 @@ export default observer(function StepperSecond() {
                         multiline
                         rows={2}
                         value={section.description}
+                        inputProps={{ maxLength: 100 }}
                         onChange={(e) => {
                           runInAction(() => {
                             section.description = e.target.value;
@@ -118,6 +122,7 @@ export default observer(function StepperSecond() {
                                 margin="normal"
                                 label="Task Title"
                                 value={task.title}
+                                inputProps={{ maxLength: 50 }}
                                 onChange={(e) => {
                                   runInAction(() => {
                                     task.title = e.target.value;
