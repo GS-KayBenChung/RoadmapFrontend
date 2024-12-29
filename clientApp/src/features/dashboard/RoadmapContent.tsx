@@ -1,69 +1,74 @@
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { SelectChangeEvent, FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import NavBar from "../../app/layout/NavBar";
 import RoadmapCard from "../../app/layout/RoadmapCard";
-import TableComponent from "../../app/layout/TableComponent";
 import { useStore } from "../../app/stores/store";
 import ScreenTitleName from "../ScreenTitleName";
 import { FaTh, FaListUl } from "react-icons/fa";
 
+const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
+
 export default observer(function RoadmapsPage() {
   const { roadmapStore } = useStore();
   const { loadRoadmaps, roadmaps, loadingInitial } = roadmapStore;
-  const columns = [
-    { header: "Title", accessor: "title" },
-    { header: "Created Date", accessor: "createdAt" },
-    { header: "Description", accessor: "description" },
-    { header: "Link", accessor: "lel" },
-  ];
-
-  const [filter, setFilter] = useState<string>(""); 
-  const handleFilterChange = (event: SelectChangeEvent<string>) => {
-    setFilter(event.target.value);
-  };
-
+  const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
-
   const [viewType, setViewType] = useState<string>("card");
-  const toggleView = (type: string) => setViewType(type);
+  const [selectedDate, setSelectedDate] = useState<string>("");
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleFilterChange = (event: any) => {
+    const selectedFilter = event.target.value;
+    setFilter(selectedFilter);
+    if (selectedFilter === "") {
+      navigate('?');
+    } else {
+      navigate(`?filter=${selectedFilter}`);
+    }
+    loadRoadmaps(selectedFilter, search, selectedDate);
+  };
 
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       event.preventDefault();
       const normalizedSearch = search.trim().replace(/\s+/g, " ").toLowerCase();
-      if (normalizedSearch === "") {
-        return; 
-      }
-      loadRoadmaps(filter, normalizedSearch);
+      loadRoadmaps(filter, normalizedSearch, selectedDate);
     }
   };
-  
+
   const handleClear = () => {
-    setSearch(""); 
-    loadRoadmaps(filter, ""); 
+    setSearch("");
+    loadRoadmaps(filter, "", selectedDate);
   };
 
-  const location = useLocation();
+  const handleDateChange = (event: any) => {
+    const date = event.target.value;
+    setSelectedDate(date);
+    if (date) {
+      loadRoadmaps(filter, search, date);  
+    } else {
+      loadRoadmaps(filter, search, ""); 
+    }
+  };
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const filterParam = queryParams.get("filter");
 
     if (filterParam) {
-      setFilter(filterParam); 
-      loadRoadmaps(filterParam, ""); 
+      setFilter(filterParam);
+      loadRoadmaps(filterParam, "", selectedDate); 
+    } else {
+      loadRoadmaps(filter, search, selectedDate);
     }
   }, [location.search, loadRoadmaps]);
-  
-  
-  // useEffect(() => {
-  //   loadRoadmaps(filter, "").then(() => {
-  //   });
-  // }, [filter, loadRoadmaps]);
 
   if (loadingInitial) return <LoadingComponent />;
 
@@ -74,6 +79,15 @@ export default observer(function RoadmapsPage() {
         <ScreenTitleName title="ROADMAPS" />
         <div className="mx-80 mt-24">
           <div className="flex justify-between items-center gap-4 mb-6 flex-wrap mx-10">
+          <TextField
+            margin="normal"
+            type="date"
+            label="Date"
+            value={selectedDate}
+            onChange={handleDateChange}
+            InputLabelProps={{ shrink: true }}
+            className="w-[200px]"
+          />
             <div className="flex items-center gap-4">
               <FormControl variant="outlined" size="small" className="w-52">
                 <InputLabel>Filter By</InputLabel>
@@ -86,15 +100,15 @@ export default observer(function RoadmapsPage() {
               </FormControl>
               <TextField
                 label="Search"
-                value={search} // Use the search state as the value
-                onChange={(e) => setSearch(e.target.value)} // Update the state as the user types
-                onKeyDown={handleSearchKeyDown} // Trigger search only on Enter key
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={handleSearchKeyDown}
                 variant="outlined"
                 size="small"
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      {search ? ( // Check if the `search` state has a value
+                      {search ? (
                         <IconButton onClick={handleClear} edge="end">
                           <XMarkIcon className="h-5 w-5 text-gray-500" />
                         </IconButton>
@@ -106,7 +120,6 @@ export default observer(function RoadmapsPage() {
                 }}
                 className="w-52"
               />
-
             </div>
 
             <div className="flex items-center gap-4">
@@ -116,18 +129,14 @@ export default observer(function RoadmapsPage() {
                 </button>
               </NavLink>
               <button
-                onClick={() => toggleView("card")}
-                className={`px-3 py-3 rounded ${
-                  viewType === "card" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-                } hover:bg-blue-600`}
+                onClick={() => setViewType("card")}
+                className={`px-3 py-3 rounded ${viewType === "card" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600`}
               >
                 <FaTh className="text-lg" />
               </button>
               <button
-                onClick={() => toggleView("list")}
-                className={`px-3 py-3 rounded ${
-                  viewType === "list" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"
-                } hover:bg-blue-600`}
+                onClick={() => setViewType("list")}
+                className={`px-3 py-3 rounded ${viewType === "list" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600`}
               >
                 <FaListUl className="text-lg" />
               </button>
@@ -148,7 +157,35 @@ export default observer(function RoadmapsPage() {
             </div>
           ) : (
             <div className="pt-4">
-              <TableComponent columns={columns} data={roadmaps} />
+              <TableContainer component="div" className="shadow-md rounded-lg overflow-hidden">
+                <Table className="min-w-full text-sm" aria-label="roadmaps table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell className="font-semibold text-gray-700">Title</TableCell>
+                      <TableCell className="font-semibold text-gray-700 text-right">Description</TableCell>
+                      <TableCell className="font-semibold text-gray-700 text-right">Progress</TableCell>
+                      <TableCell className="font-semibold text-gray-700 text-right">Duration</TableCell>
+                      <TableCell className="font-semibold text-gray-700 text-right">Last Updated</TableCell>
+                      <TableCell className="font-semibold text-gray-700 text-right">To Roadmap</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {roadmaps.map((roadmap) => (
+                      <TableRow key={roadmap.roadmapId} className="hover:bg-gray-100">
+                        <TableCell>{roadmap.title}</TableCell>
+                        <TableCell>{roadmap.description}</TableCell>
+                        <TableCell>{roadmap.overallProgress}%</TableCell>
+                        <TableCell>{roadmap.overallDuration}days</TableCell>
+                        <TableCell>{formatDate(roadmap.updatedAt)}</TableCell>
+                        <NavLink key={roadmap.roadmapId} to={`/roadmap/${roadmap.roadmapId}`} >
+                          <TableCell><a className="text-blue-500 underline">Roadmap</a></TableCell>
+                        </NavLink>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                  
+                </Table>
+              </TableContainer>
             </div>
           )}
         </div>

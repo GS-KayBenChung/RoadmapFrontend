@@ -23,12 +23,13 @@ export default class RoadmapStore {
     return Array.from(this.roadmapRegistry.values());
   }
 
-  loadRoadmaps = async (filter?: string, search?: string) => {
+  loadRoadmaps = async (filter?: string, search?: string, date?: string) => {
     this.loadingInitial = true;
     try {
       const params = new URLSearchParams();
       if (filter) params.append("filter", filter);
       if (search) params.append("search", search);
+      if (date) params.append("date", date);
   
       const roadmaps = await apiClient.Roadmaps.list(params.toString());
   

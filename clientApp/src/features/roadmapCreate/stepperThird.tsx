@@ -68,12 +68,12 @@ export default observer(function StepperThird() {
     };
         
     try {
-      console.log("Roadmap data being sent:", roadmapData);
-      const result = await createRoadmap(roadmapData);
-      console.log("Roadmap created successfully:", result);
+      await createRoadmap(roadmapData);
+      console.log(roadmapData);
+      roadmapCreateStore.reset();
       navigate('/content');
     } catch (error) {
-      console.error("Error creating roadmap:", error);
+
     }
   };
 

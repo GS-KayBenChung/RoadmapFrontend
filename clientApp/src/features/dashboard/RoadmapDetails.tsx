@@ -8,6 +8,7 @@ import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import LoadingComponent from '../../app/layout/LoadingComponent';
 import { useNavigate } from 'react-router-dom';
+import ConfirmDeleteModal from '../../app/layout/ConfirmationModel';
 
 interface Task{
   name: string;
@@ -28,7 +29,9 @@ export default observer( function RoadmapDetails() {
   const {selectedRoadmap, loadRoadmap, loadingInitial} = roadmapStore;
   const {id} = useParams();
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false); 
 
+  const [roadmapToDelete, setRoadmapToDelete] = useState<string | null>(null); 
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
   const [expandedSections, setExpandedSections] = useState<boolean[]>([]); 
 
@@ -55,26 +58,38 @@ export default observer( function RoadmapDetails() {
     });
   };
 
-  const handleDelete = async (id: string) => {
-    await roadmapStore.deleteRoadmap(id, navigate);
+  const handleDelete = (id: string) => {
+    setRoadmapToDelete(id);
+    setShowModal(true); 
+  };
+
+  const confirmDelete = async () => {
+    if (roadmapToDelete) {
+      await roadmapStore.deleteRoadmap(roadmapToDelete, navigate);
+    }
+    setShowModal(false); 
+  };
+
+  const cancelDelete = () => {
+    setShowModal(false); 
   };
 
   const calculateMilestoneDuration = (milestone: any) => {
     if (milestone.sections?.length) {
-      // Get the first section and its first task
+
       const firstSection = milestone.sections[0];
       const firstTask = firstSection.tasks?.[0];
       
-      // Get the last section and its last task
+
       const lastSection = milestone.sections[milestone.sections.length - 1];
       const lastTask = lastSection.tasks?.[lastSection.tasks.length - 1];
   
       if (firstTask && lastTask) {
-        // Parse the dates of the first and last tasks
+
         const firstTaskDate = new Date(firstTask.dateStart);
         const lastTaskDate = new Date(lastTask.dateEnd);
   
-        // Calculate the duration in days
+
         const durationInDays = Math.ceil((lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24));
         
         return `${durationInDays} ${durationInDays === 1 ? 'day' : 'days'}`;
@@ -86,6 +101,11 @@ export default observer( function RoadmapDetails() {
 
   return (
     <>
+      <ConfirmDeleteModal
+        isOpen={showModal}
+        onConfirm={confirmDelete}
+        onCancel={cancelDelete}
+      />
       <NavBar />
       <ScreenTitleName title={selectedRoadmap.title || 'Roadmap Details'} />
       <div className="max-w-screen-lg mx-auto p-4">

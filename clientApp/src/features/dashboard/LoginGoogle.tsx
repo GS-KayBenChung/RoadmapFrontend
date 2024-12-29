@@ -13,12 +13,11 @@ const LoginGoogle = () => {
         token: credentialResponse.credential,
       });
 
-      // Set the user in the context after successful login
-      const userData = response.data; // Assuming response contains user data
+      const userData = response.data; 
 
-      console.log('Logged-in user data:', userData.email); // Log the complete user data
-      console.log('Logged-in user data:', userData.name); // Log the complete user data
-      console.log('Loggedaceata:', response.data); // Log the complete user data
+      console.log('Logged-in user data:', userData.email); 
+      console.log('Logged-in user data:', userData.name);
+      console.log('Loggedaceata:', response.data);
 
       setUser({
         email: userData.email,
@@ -26,13 +25,13 @@ const LoginGoogle = () => {
         token: userData.token,
       });
 
-      localStorage.setItem('user', JSON.stringify(userData));  // Save user to localStorage
-      localStorage.setItem('token', userData.token);  // Save token to localStorage
+      localStorage.setItem('user', JSON.stringify(userData)); 
+      localStorage.setItem('token', userData.token);  
 
       console.log('Logged-in user data:', userData);
       console.log('Stored user in localStorage:', localStorage.getItem('user'));
 
-      navigate('/dashboard'); // Redirect to the protected page
+      navigate('/dashboard');
     } catch (error) {
       console.error('Error during server login:', error);
     }

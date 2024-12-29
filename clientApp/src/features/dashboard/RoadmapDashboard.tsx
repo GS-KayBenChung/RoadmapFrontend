@@ -25,7 +25,7 @@ export default observer( function RoadmapDashboard() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto mt-24">
         <DashboardCard title="Current Roadmaps" value={roadmapStore.dashboardStats.totalRoadmaps} />
-        <DashboardCard title="Completed Roadmap" value={`${roadmapStore.dashboardStats.completedRoadmaps}/${roadmapStore.dashboardStats.totalRoadmaps}`} />
+        <DashboardCard title="Completed Roadmap" value={`${roadmapStore.dashboardStats.completedRoadmaps}/${roadmapStore.dashboardStats.totalRoadmaps}`} filter="completed" />
         <DashboardCard
           title="Overall Completion Rate"
           progress={<div className="relative w-24 h-24 pt-2"><CircularProgress percentage={Math.round((roadmapStore.dashboardStats.completedRoadmaps / roadmapStore.dashboardStats.totalRoadmaps) * 100)} /></div>}

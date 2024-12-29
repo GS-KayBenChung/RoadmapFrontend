@@ -1,4 +1,3 @@
-// stepperFirst.tsx
 import { Box, TextField } from "@mui/material";
 import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
 import { observer } from "mobx-react-lite";
@@ -13,6 +12,7 @@ export default observer (function stepperFirst() {
         margin="normal"
         label="Roadmap Title"
         value={roadmapTitle}
+        inputProps={{ maxLength: 50 }}
         onChange={(e) => setRoadmapTitle(e.target.value)}
         className="max-w-[600px]"
       />
@@ -23,6 +23,7 @@ export default observer (function stepperFirst() {
         multiline
         rows={4}
         value={roadmapDescription} 
+        inputProps={{ maxLength: 100 }}
         onChange={(e) => setRoadmapDescription(e.target.value)}
         className="max-w-[600px]"
       />
