@@ -20,14 +20,19 @@ interface Section{
 };
 
 export default observer(function EditStepperSecond(){
-  const {  addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask, testingLog } = roadmapEditStore;
+  const {addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask, testingLog } = roadmapEditStore;
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
 
   // console.log("Selected Roadmap:", selectedRoadmap);
   // console.log("Selected Roadmap:", JSON.stringify(toJS(selectedRoadmap), null, 2));
 
+  //IMPORTANT
   const milestones = selectedRoadmap?.milestones || [];
+
+  const testingData = () => {
+    console.log(milestones);
+  };
 
   if (!milestones.length) {
     return <div>No milestones available. Please add a milestone or check the roadmap data.</div>;
@@ -35,8 +40,13 @@ export default observer(function EditStepperSecond(){
   if(!selectedRoadmap) return <LoadingComponent/>;
   return (
     <Box className="mb-24">
+      <button onClick={testingData}>testsfsg</button>
       <button
-        onClick={addMilestone}
+         onClick={() => {
+          addMilestone();
+          console.log("Milestones after addition:", toJS(roadmapEditStore.milestones));
+          
+        }}
         className="mb-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         Add Milestone
@@ -162,26 +172,28 @@ export default observer(function EditStepperSecond(){
                                 type="date"
                                 label="Start Date"
                                 InputLabelProps={{ shrink: true }}
+                                onKeyDown={(e) => e.preventDefault()}
                                 value={task.dateStart ? new Date(task.dateStart).toISOString().split("T")[0] : ""}
                                 onChange={(e) =>
                                   runInAction(() => {
                                     task.dateStart = e.target.value;
                                   })
                                 }
-                                className="w-[400px]"
+                                className="max-w-[400px]"
                               />
                               <TextField
                                 margin="normal"
                                 type="date"
                                 label="End Date"
                                 InputLabelProps={{ shrink: true }}
+                                onKeyDown={(e) => e.preventDefault()}
                                 value={task.dateEnd ? new Date(task.dateEnd).toISOString().split("T")[0] : ""}
                                 onChange={(e) =>
                                   runInAction(() => {
                                     task.dateEnd = e.target.value;
                                   })
                                 }
-                                className="w-[400px]"
+                                className="max-w-[400px]"
                               />
                             </Box>
                           </CardContent>

@@ -31,14 +31,6 @@ export default observer(function EditStepperThird() {
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
 
-  // useEffect(() => {
-  //   if (selectedRoadmap) {
-  //     roadmapEditStore.roadmapTitle = selectedRoadmap.title || "";
-  //     roadmapEditStore.roadmapDescription = selectedRoadmap.description || "";
-  //     roadmapEditStore.milestones = selectedRoadmap.milestones || [];
-  //   }
-  // }, [selectedRoadmap]);
-
   const handleSubmit = async () => {
     if (!selectedRoadmap) return; 
   
@@ -162,7 +154,7 @@ export default observer(function EditStepperThird() {
           </div>
 
           <div className="max-w-screen-lg mx-auto p-4 mb-12">
-            {selectedRoadmap?.milestones.map((milestone, milestoneIndex) => (
+            {milestones.map((milestone, milestoneIndex) => (
               <div key={milestoneIndex}>
                 <div className="p-4 rounded-lg border-2 border-gray-300">
                   <div className="flex items-center space-x-4">

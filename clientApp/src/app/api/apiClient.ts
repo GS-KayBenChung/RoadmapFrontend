@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from 'axios';
 import { Roadmap } from '../models/roadmap';
+import { AuditLogs } from '../models/roadmap';
 import API_URL from '../../config/apiConfig';
 
 const sleep = (delay: number) => {
@@ -29,12 +30,13 @@ const requests = {
 }
 
 const Roadmaps = {
-  // list: () => requests.get<Roadmap[]>('/roadmaps'),
   list: (params: string) => requests.get<Roadmap[]>(`/roadmaps?${params}`), 
   details: (id: string) => requests.get<Roadmap>(`/roadmaps/details/${id}`),
   create: (roadmap: Roadmap) => requests.post<void>('/roadmaps', roadmap),
   update: (roadmap: Roadmap) => requests.put<void>(`/roadmaps/${roadmap.roadmapId}`, roadmap),
-  delete: (id: string) => requests.delete<void>(`/roadmaps/${id}`)
+  delete: (id: string) => requests.delete<void>(`/roadmaps/${id}`),
+  getLogs: (params: string) => requests.get<AuditLog[]>(`/roadmaps/logs?${params}`)
+
 }
 
 const apiClient = {

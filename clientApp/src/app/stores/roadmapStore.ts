@@ -1,9 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { Roadmap } from "../models/roadmap";
+import { AuditLog } from "../models/roadmap";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
 
 export default class RoadmapStore {
+  logs: AuditLog[] = [];
   roadmapRegistry = new Map<string, Roadmap>();
   selectedRoadmap: Roadmap | undefined = undefined;
   editMode = false;
@@ -22,6 +24,31 @@ export default class RoadmapStore {
   get roadmaps() {
     return Array.from(this.roadmapRegistry.values());
   }
+
+  loadLogs = async (filter?: string, search?: string) => {
+    try {
+      const params = new URLSearchParams();
+  
+      if (filter) params.append("filter", filter);
+      if (search) params.append("search", search);
+  
+      const logs = await apiClient.Roadmaps.getLogs(params.toString());
+  
+      console.log("LoadLogs: " + filter + " " + search);
+  
+      runInAction(() => {
+        if (logs) {
+          this.logs = logs;
+        } else {
+          this.logs = [];
+        }
+      });
+    } catch (error) {
+      console.error("Failed to fetch logs", error);
+    }
+  };
+  
+  
 
   loadRoadmaps = async (filter?: string, search?: string, date?: string) => {
     this.loadingInitial = true;

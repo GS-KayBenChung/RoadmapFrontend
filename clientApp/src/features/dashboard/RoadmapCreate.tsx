@@ -8,12 +8,9 @@ import StepperFirst from "../roadmapCreate/stepperFirst";
 import StepperSecond from "../roadmapCreate/stepperSecond";
 import StepperThird from "../roadmapCreate/stepperThird";
 import { ToastContainer } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-
 
 export default observer(function RoadmapCreate() {
-  const {
-    activeStep  } = roadmapCreateStore;
+  const { activeStep } = roadmapCreateStore;
 
   const steps = ["Roadmap Details", "Milestones & Sections", "Overview & Submit"];
 

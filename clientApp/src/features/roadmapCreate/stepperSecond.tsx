@@ -135,26 +135,28 @@ export default observer(function StepperSecond() {
                                 type="date"
                                 label="Start Date"
                                 InputLabelProps={{ shrink: true }}
+                                onKeyDown={(e) => e.preventDefault()}
                                 value={task.startDate}
                                 onChange={(e) => {
                                   runInAction(() => {
                                     task.startDate = e.target.value;
                                   });
                                 }}
-                                className="w-[400px]"
+                                className="max-w-[400px]"
                               />
                               <TextField
                                 margin="normal"
                                 type="date"
                                 label="End Date"
                                 InputLabelProps={{ shrink: true }}
+                                onKeyDown={(e) => e.preventDefault()}
                                 value={task.endDate}
                                 onChange={(e) => {
                                   runInAction(() => {
                                     task.endDate = e.target.value;
                                   });
                                 }}
-                                className="w-[400px]"
+                                className="max-w-[400px]"
                               />
                             </Box>
                           </CardContent>
