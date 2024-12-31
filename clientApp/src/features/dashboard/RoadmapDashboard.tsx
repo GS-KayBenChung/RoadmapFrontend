@@ -30,8 +30,8 @@ export default observer( function RoadmapDashboard() {
           title="Overall Completion Rate"
           progress={<div className="relative w-24 h-24 pt-2"><CircularProgress percentage={Math.round((roadmapStore.dashboardStats.completedRoadmaps / roadmapStore.dashboardStats.totalRoadmaps) * 100)} /></div>}
         />
-        <DashboardCard title="Near Due Roadmap" value={88} />
-        <DashboardCard title="Overdue Roadmap" value={88} />
+        <DashboardCard title="Near Due Roadmap" value={roadmapStore.dashboardStats.draftRoadmaps} />
+        <DashboardCard title="Overdue Roadmap" value={roadmapStore.dashboardStats.draftRoadmaps} />
         <DashboardCard title="Draft Roadmap" value={roadmapStore.dashboardStats.draftRoadmaps} filter="draft" />
         </div>
       </div>

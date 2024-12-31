@@ -5,7 +5,6 @@ export interface Task {
   name: string;
   dateStart: string;        
   dateEnd: string;        
-  //completed: boolean;
 }
 
 export interface Section {
@@ -18,20 +17,13 @@ export interface Section {
 export interface Milestone {
   milestoneId: string;    
   name: string;
-  description: string;
-  //progress: number;        
+  description: string;      
   sections: Section[];     
 }
 
 export interface RoadmapDto {
   title: string;
   description: string;
-  //createdBy: string;
-  //overall_progress: number;
-  //overall_duration: number;
-  //isCompleted: boolean;
-  //isDraft: boolean;
-  //isDeleted: boolean;
   milestones: Milestone[];
 }
 

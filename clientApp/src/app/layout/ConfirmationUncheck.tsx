@@ -30,4 +30,3 @@ export default function ConfirmUncheck({ isOpen, onConfirm, onCancel }: ConfirmU
     </div>
   );
 };
-

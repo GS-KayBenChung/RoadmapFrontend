@@ -1,11 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { Roadmap } from "../models/roadmap";
-import { AuditLog } from "../models/roadmap";
+import { AuditLogs } from "../models/auditLogs";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
 
 export default class RoadmapStore {
-  logs: AuditLog[] = [];
+  logs: AuditLogs[] = [];
   roadmapRegistry = new Map<string, Roadmap>();
   selectedRoadmap: Roadmap | undefined = undefined;
   editMode = false;
@@ -25,6 +25,36 @@ export default class RoadmapStore {
     return Array.from(this.roadmapRegistry.values());
   }
 
+  updateTaskCompletionStatus = async (id: string, type: 'roadmap' | 'milestone' | 'section' | 'task', isChecked: boolean, index?: number, parentIndex?: number) => {
+    try {
+      const body = {
+        id,
+        type,
+        isChecked,
+        index,
+        parentIndex,
+      };
+      await apiClient.Roadmaps.updateCheck(body);
+      runInAction(() => {
+        if (type === 'roadmap') {
+          this.selectedRoadmap!.isCompleted = isChecked;
+        } else if (type === 'milestone' && index !== undefined) {
+          const milestone = this.selectedRoadmap!.milestones[index];
+          milestone.isCompleted = isChecked;
+        } else if (type === 'section' && index !== undefined && parentIndex !== undefined) {
+          const section = this.selectedRoadmap!.milestones[parentIndex].sections[index];
+          section.isCompleted = isChecked;
+        } else if (type === 'task' && index !== undefined && parentIndex !== undefined) {
+          const task = this.selectedRoadmap!.milestones[parentIndex].sections[index].tasks[index];
+          task.isCompleted = isChecked;
+          console.log("Roadmapstore: task updated" + task.isCompleted);
+        }
+      });
+    } catch (error) {
+      console.error("Error updating task completion status", error);
+    }
+  };
+  
   loadLogs = async (filter?: string, search?: string) => {
     try {
       const params = new URLSearchParams();
@@ -33,8 +63,6 @@ export default class RoadmapStore {
       if (search) params.append("search", search);
   
       const logs = await apiClient.Roadmaps.getLogs(params.toString());
-  
-      console.log("LoadLogs: " + filter + " " + search);
   
       runInAction(() => {
         if (logs) {
@@ -48,8 +76,6 @@ export default class RoadmapStore {
     }
   };
   
-  
-
   loadRoadmaps = async (filter?: string, search?: string, date?: string) => {
     this.loadingInitial = true;
     try {
@@ -67,12 +93,13 @@ export default class RoadmapStore {
         });
   
         this.calculateDashboardStats();
+        this.loadingInitial = false;
       });
+      
     } catch (error) {
       console.error(error);
-    } finally {
       this.loadingInitial = false;
-    }
+    } 
   };
   
   calculateDashboardStats() {
@@ -86,7 +113,6 @@ export default class RoadmapStore {
       completedRoadmaps,
     };
   }
-  
   
   EditRoadmap = async (roadmap: Roadmap) => {
     this.submitting = true;
@@ -134,8 +160,6 @@ export default class RoadmapStore {
       
     } catch (error) {
       runInAction(() => {
-        console.log(error);
-        // ADD ERROR MSG 
         this.loadingInitial = false;
       });
     }

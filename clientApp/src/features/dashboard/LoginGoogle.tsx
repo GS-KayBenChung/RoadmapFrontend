@@ -15,10 +15,6 @@ const LoginGoogle = () => {
 
       const userData = response.data; 
 
-      console.log('Logged-in user data:', userData.email); 
-      console.log('Logged-in user data:', userData.name);
-      console.log('Loggedaceata:', response.data);
-
       setUser({
         email: userData.email,
         name: userData.name,
@@ -28,12 +24,8 @@ const LoginGoogle = () => {
       localStorage.setItem('user', JSON.stringify(userData)); 
       localStorage.setItem('token', userData.token);  
 
-      console.log('Logged-in user data:', userData);
-      console.log('Stored user in localStorage:', localStorage.getItem('user'));
-
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error during server login:', error);
     }
   };
 

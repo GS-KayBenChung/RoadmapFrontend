@@ -26,6 +26,4 @@ export default function createRoadmapLevel(){
       })),
     })),
   };
-
-  console.log(JSON.stringify(roadmap, null, 2));
 };

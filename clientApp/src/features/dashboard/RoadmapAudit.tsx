@@ -10,20 +10,20 @@ import { useNavigate, useLocation } from "react-router-dom";
 export default observer(function RoadmapAudit() {
   const { roadmapStore } = useStore();
   const { logs, loadLogs } = roadmapStore;
-  const [filter, setFilter] = useState<string>(""); // Default filter is empty (all)
-  const [search, setSearch] = useState<string>(""); // Initial search is empty
+  const [filter, setFilter] = useState<string>("");
+  const [search, setSearch] = useState<string>("");
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const urlFilter = params.get("filter") || "";  // Default to "" if no filter is present
-    const urlSearch = params.get("search") || ""; // Default to "" if no search term is present
+    const urlFilter = params.get("filter") || "";
+    const urlSearch = params.get("search") || "";
 
-    setFilter(urlFilter);  // Set the filter state
-    setSearch(urlSearch);  // Set the search state
+    setFilter(urlFilter);
+    setSearch(urlSearch);
 
-    loadLogs(urlFilter, urlSearch);  // Load logs based on the current filter and search
+    loadLogs(urlFilter, urlSearch);
   }, [location.search, loadLogs]);
 
   const handleFilterChange = (event: any) => {
@@ -31,11 +31,11 @@ export default observer(function RoadmapAudit() {
     setFilter(selectedFilter);
 
     const queryParams = new URLSearchParams(location.search);
-    queryParams.set("filter", selectedFilter); // Update the URL with the selected filter
+    queryParams.set("filter", selectedFilter);
 
     const newUrl = `?${queryParams.toString()}`;
-    navigate(newUrl); // Navigate to the updated URL
-    loadLogs(selectedFilter, search); // Reload the logs with the new filter and current search
+    navigate(newUrl);
+    loadLogs(selectedFilter, search);
   };
 
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -44,20 +44,20 @@ export default observer(function RoadmapAudit() {
       const normalizedSearch = search.trim().replace(/\s+/g, " ").toLowerCase();
 
       const queryParams = new URLSearchParams(location.search);
-      queryParams.set("search", normalizedSearch); // Update the URL with the search term
+      queryParams.set("search", normalizedSearch);
 
       const newUrl = `?${queryParams.toString()}`;
-      navigate(newUrl); // Navigate to the updated URL
-      loadLogs(filter, normalizedSearch); // Reload logs with the current filter and new search
+      navigate(newUrl);
+      loadLogs(filter, normalizedSearch);
     }
   };
 
   const handleClearSearch = () => {
     setSearch("");
     const queryParams = new URLSearchParams(location.search);
-    queryParams.delete("search"); // Remove search parameter from URL
-    navigate(`?${queryParams.toString()}`); // Update the URL
-    loadLogs(filter, ""); // Reload logs with the current filter and no search
+    queryParams.delete("search");
+    navigate(`?${queryParams.toString()}`);
+    loadLogs(filter, "");
   };
 
   return (
@@ -69,7 +69,7 @@ export default observer(function RoadmapAudit() {
           <FormControl variant="outlined" size="small" className="w-52">
             <InputLabel>Filter By Action</InputLabel>
             <Select value={filter} onChange={handleFilterChange} label="Filter By Action">
-              <MenuItem value="">All</MenuItem>  {/* "All" filter */}
+              <MenuItem value="">All</MenuItem>
               <MenuItem value="created">Created</MenuItem>
               <MenuItem value="updated">Updated</MenuItem>
               <MenuItem value="deleted">Deleted</MenuItem>

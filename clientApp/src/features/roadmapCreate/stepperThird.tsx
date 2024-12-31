@@ -69,11 +69,9 @@ export default observer(function StepperThird() {
         
     try {
       await createRoadmap(roadmapData);
-      console.log(roadmapData);
       roadmapCreateStore.reset();
       navigate('/content');
     } catch (error) {
-
     }
   };
 

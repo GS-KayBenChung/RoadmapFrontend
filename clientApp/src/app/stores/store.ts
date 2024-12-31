@@ -5,7 +5,6 @@ import RoadmapStore from "./roadmapStore";
 interface Store {
   userStore: UserStore;
   roadmapStore: RoadmapStore;
-
 }
 
 export const store: Store = {
