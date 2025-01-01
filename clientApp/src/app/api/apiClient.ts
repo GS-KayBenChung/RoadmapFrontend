@@ -3,6 +3,7 @@ import { Roadmap } from '../models/roadmap';
 import { AuditLogs } from '../models/auditLogs';
 import API_URL from '../../config/apiConfig';
 import { PaginatedAudit } from '../models/paginatedAudit';
+import { PaginatedRoadmap } from '../models/paginatedRoadmap';
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
@@ -32,7 +33,8 @@ const requests = {
 
 const Roadmaps = {
   googleGet: (token: any) => requests.post<void>('/googlelogin', { token }),
-  list: (params: string) => requests.get<Roadmap[]>(`/roadmaps?${params}`), 
+  // list: (params: string) => requests.get<Roadmap[]>(`/roadmaps?${params}`), 
+  list: async (queryString: string) => requests.get<PaginatedRoadmap<Roadmap>>(`/roadmaps?${queryString}`),  
   details: (id: string) => requests.get<Roadmap>(`/roadmaps/details/${id}`),
   create: (roadmap: Roadmap) => requests.post<void>('/roadmaps', roadmap),
   update: (roadmap: Roadmap) => requests.put<void>(`/roadmaps/${roadmap.roadmapId}`, roadmap),

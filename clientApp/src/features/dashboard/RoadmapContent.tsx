@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { useState, useEffect } from "react";
 import { NavLink, useLocation } from "react-router-dom";
@@ -27,21 +27,27 @@ export default observer(function RoadmapsPage() {
   const handleFilterChange = (event: any) => {
     const selectedFilter = event.target.value;
     setFilter(selectedFilter);
-    if (selectedFilter === "") {
-      navigate('?');
-    } else {
-      navigate(`?filter=${selectedFilter}`);
-    }
-    loadRoadmaps(selectedFilter, search, selectedDate);
+    const query = new URLSearchParams({
+      filter: selectedFilter || "",
+      search: search || "",
+      page: "1",
+    }).toString();
+    navigate(`?${query}`);
+    loadRoadmaps(selectedFilter, search, selectedDate, 1);
   };
-
+  
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
-      event.preventDefault();
-      const normalizedSearch = search.trim().replace(/\s+/g, " ").toLowerCase();
-      loadRoadmaps(filter, normalizedSearch, selectedDate);
+      const normalizedSearch = search.trim().toLowerCase();
+      const query = new URLSearchParams({
+        filter: filter || "",
+        search: normalizedSearch,
+        page: "1", 
+      }).toString();
+      navigate(`?${query}`);
+      loadRoadmaps(filter, normalizedSearch, selectedDate, 1); 
     }
-  };
+  };  
 
   const handleClear = () => {
     setSearch("");
@@ -58,16 +64,27 @@ export default observer(function RoadmapsPage() {
     }
   };
 
+  const handlePageChange = (_: any, newPage: number) => {
+    const query = new URLSearchParams({
+      filter: filter || "",
+      search: search || "",
+      page: newPage.toString(),
+    }).toString();
+    navigate(`?${query}`);
+    loadRoadmaps(filter, search, selectedDate, newPage);
+  };
+
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
     const filterParam = queryParams.get("filter");
-
-    if (filterParam) {
-      setFilter(filterParam);
-      loadRoadmaps(filterParam, "", selectedDate); 
-    } else {
-      loadRoadmaps(filter, search, selectedDate);
-    }
+    const searchParam = queryParams.get("search");
+    const pageParam = queryParams.get("page");
+  
+    setFilter(filterParam || "");
+    setSearch(searchParam || "");
+    const pageNumber = pageParam ? parseInt(pageParam, 10) : 1;
+  
+    roadmapStore.loadRoadmaps(filterParam || undefined, searchParam || undefined, selectedDate || undefined, pageNumber);
   }, [location.search, loadRoadmaps]);
 
   if (loadingInitial) return <LoadingComponent />;
@@ -188,6 +205,14 @@ export default observer(function RoadmapsPage() {
               </TableContainer>
             </div>
           )}
+          <div className="flex justify-center mt-6">
+            <Pagination
+              count={roadmapStore.totalPages} 
+              page={roadmapStore.currentPage}
+              onChange={handlePageChange}
+              color="primary"
+            />
+          </div>
         </div>
       </div>
     </>

@@ -76,30 +76,37 @@ export default class RoadmapStore {
     }
   };
 
-  loadRoadmaps = async (filter?: string, search?: string, date?: string) => {
+  loadRoadmaps = async (
+    filter?: string,
+    search?: string,
+    date?: string,
+    pageNumber: number = 1
+  ) => {
     this.loadingInitial = true;
     try {
       const params = new URLSearchParams();
       if (filter) params.append("filter", filter);
       if (search) params.append("search", search);
       if (date) params.append("date", date);
+      params.append("pageNumber", pageNumber.toString());
   
-      const roadmaps = await apiClient.Roadmaps.list(params.toString());
+      const result = await apiClient.Roadmaps.list(params.toString());
   
       runInAction(() => {
         this.roadmapRegistry.clear();
-        roadmaps.forEach((roadmap) => {
+        result.items.forEach((roadmap) => {
           this.setRoadmap(roadmap);
         });
   
+        this.currentPage = pageNumber;
+        this.totalPages = result.totalPages; 
         this.calculateDashboardStats();
         this.loadingInitial = false;
       });
-      
     } catch (error) {
       console.error(error);
       this.loadingInitial = false;
-    } 
+    }
   };
   
   calculateDashboardStats() {
