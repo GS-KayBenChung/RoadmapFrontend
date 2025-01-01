@@ -15,16 +15,23 @@ export default observer(function RoadmapAudit() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [_,setTotalPages] = useState<number>(1);
+
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const urlFilter = params.get("filter") || "";
     const urlSearch = params.get("search") || "";
+    const urlPageNumber = parseInt(params.get("pageNumber") || "1");
 
     setFilter(urlFilter);
     setSearch(urlSearch);
-
-    loadLogs(urlFilter, urlSearch);
-  }, [location.search, loadLogs]);
+    setCurrentPage(urlPageNumber);
+    setTotalPages(roadmapStore.totalPages);
+ 
+    loadLogs(urlFilter, urlSearch, urlPageNumber);
+  }, [location.search, loadLogs, roadmapStore.totalPages]);
 
   const handleFilterChange = (event: any) => {
     const selectedFilter = event.target.value;
@@ -58,6 +65,12 @@ export default observer(function RoadmapAudit() {
     queryParams.delete("search");
     navigate(`?${queryParams.toString()}`);
     loadLogs(filter, "");
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const queryParams = new URLSearchParams(location.search);
+    queryParams.set("pageNumber", newPage.toString());
+    navigate(`?${queryParams.toString()}`);
   };
 
   return (
@@ -122,6 +135,33 @@ export default observer(function RoadmapAudit() {
             </TableBody>
           </Table>
         </TableContainer>
+        <div className="flex justify-center mt-4">
+          <button
+            className="px-4 py-2 mx-2 border rounded"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          {[...Array(roadmapStore.totalPages)].map((_, index) => (
+            <button
+              key={index}
+              className={`px-4 py-2 mx-1 border rounded ${
+                currentPage === index + 1 ? "bg-blue-500 text-white" : ""
+              }`}
+              onClick={() => handlePageChange(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+          <button
+            className="px-4 py-2 mx-2 border rounded"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === roadmapStore.totalPages}
+          >
+            Next
+          </button>
+        </div>
       </div>
     </>
   );

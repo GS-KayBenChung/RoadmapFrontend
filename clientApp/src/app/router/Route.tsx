@@ -27,6 +27,7 @@ export const router = createBrowserRouter([
       { path: "roadmapCreate", element: <ProtectedRoute element={<RoadmapCreate />} /> },
       { path: "roadmapEdit/:id", element: <ProtectedRoute element={<RoadmapEdit />} /> },
       { path: "audit", element: <ProtectedRoute element={<RoadmapAudit />} /> },
+      // { path: "testGoogle", element: <LoginGoogle/>},
     ],
   },
-]);
+]); 

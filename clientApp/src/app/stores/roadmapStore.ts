@@ -6,6 +6,8 @@ import {v4 as uuid} from 'uuid'
 
 export default class RoadmapStore {
   logs: AuditLogs[] = [];
+  currentPage = 1;
+  totalPages = 1;
   roadmapRegistry = new Map<string, Roadmap>();
   selectedRoadmap: Roadmap | undefined = undefined;
   editMode = false;
@@ -55,27 +57,25 @@ export default class RoadmapStore {
     }
   };
   
-  loadLogs = async (filter?: string, search?: string) => {
+  loadLogs = async (filter?: string, search?: string, pageNumber: number = 1) => {
     try {
       const params = new URLSearchParams();
   
       if (filter) params.append("filter", filter);
       if (search) params.append("search", search);
+      params.append("pageNumber", pageNumber.toString());
   
-      const logs = await apiClient.Roadmaps.getLogs(params.toString());
-  
+      const result = await apiClient.Roadmaps.getLogs(params.toString());
+
       runInAction(() => {
-        if (logs) {
-          this.logs = logs;
-        } else {
-          this.logs = [];
-        }
+        this.logs = result.items; 
+        this.totalPages = result.totalPages; 
       });
     } catch (error) {
       console.error("Failed to fetch logs", error);
     }
   };
-  
+
   loadRoadmaps = async (filter?: string, search?: string, date?: string) => {
     this.loadingInitial = true;
     try {
