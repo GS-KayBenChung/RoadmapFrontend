@@ -112,6 +112,7 @@ export default observer(function RoadmapsPage() {
                   <MenuItem value="">All</MenuItem>
                   <MenuItem value="draft">Draft</MenuItem>
                   <MenuItem value="completed">Completed</MenuItem>
+                  <MenuItem value="neardue">Near Due</MenuItem>
                   <MenuItem value="overdue">Overdue</MenuItem>
                 </Select>
               </FormControl>

@@ -17,6 +17,8 @@ export default class RoadmapStore {
     totalRoadmaps: 0,
     draftRoadmaps: 0,
     completedRoadmaps: 0,
+    nearDueRoadmaps: 0,
+    overdueRoadmaps: 0,
   };
 
   constructor() {
@@ -100,7 +102,7 @@ export default class RoadmapStore {
   
         this.currentPage = pageNumber;
         this.totalPages = result.totalPages; 
-        this.calculateDashboardStats();
+        //this.calculateDashboardStats();
         this.loadingInitial = false;
       });
     } catch (error) {
@@ -108,19 +110,19 @@ export default class RoadmapStore {
       this.loadingInitial = false;
     }
   };
-  
-  calculateDashboardStats() {
-    const totalRoadmaps = this.roadmaps.length;
-    const draftRoadmaps = this.roadmaps.filter(r => r.isDraft).length;
-    const completedRoadmaps = this.roadmaps.filter(r => r.isCompleted).length;
-  
-    this.dashboardStats = {
-      totalRoadmaps,
-      draftRoadmaps,
-      completedRoadmaps,
-    };
-  }
-  
+
+  loadDashboardStats = async () => {
+    try {
+      const result = await apiClient.Roadmaps.getDashboard();
+      runInAction(() => {
+        this.dashboardStats = result;  
+      });
+    } catch (error) {
+      console.error("Failed to load dashboard stats:", error);
+    }
+  };
+
+   
   EditRoadmap = async (roadmap: Roadmap) => {
     this.submitting = true;
     try {

@@ -4,6 +4,7 @@ import { AuditLogs } from '../models/auditLogs';
 import API_URL from '../../config/apiConfig';
 import { PaginatedAudit } from '../models/paginatedAudit';
 import { PaginatedRoadmap } from '../models/paginatedRoadmap';
+import { DashboardStats } from '../models/dashboardStats';
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
@@ -33,13 +34,12 @@ const requests = {
 
 const Roadmaps = {
   googleGet: (token: any) => requests.post<void>('/googlelogin', { token }),
-  // list: (params: string) => requests.get<Roadmap[]>(`/roadmaps?${params}`), 
+  getDashboard: () => requests.get<DashboardStats>(`/roadmaps/dashboard`),  
   list: async (queryString: string) => requests.get<PaginatedRoadmap<Roadmap>>(`/roadmaps?${queryString}`),  
   details: (id: string) => requests.get<Roadmap>(`/roadmaps/details/${id}`),
   create: (roadmap: Roadmap) => requests.post<void>('/roadmaps', roadmap),
   update: (roadmap: Roadmap) => requests.put<void>(`/roadmaps/${roadmap.roadmapId}`, roadmap),
   delete: (id: string) => requests.delete<void>(`/roadmaps/${id}`),
-  // getLogs: (params: string) => requests.get<AuditLogs[]>(`/roadmaps/logs?${params}`),
   updateCheck: (body: { id: string, type: 'roadmap' | 'milestone' | 'section' | 'task', isChecked: boolean, index?: number, parentIndex?: number }) => 
     requests.put<void>(`/roadmaps/checkboxes/${body.id}`, body),
   getLogs: async (query: string) => requests.get<PaginatedAudit<AuditLogs>>(`/roadmaps/logs?${query}`),
