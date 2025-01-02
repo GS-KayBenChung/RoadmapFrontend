@@ -59,7 +59,11 @@ export default class RoadmapStore {
     }
   };
   
-  loadLogs = async (filter?: string, search?: string, pageNumber: number = 1) => {
+  loadLogs = async (
+    filter?: string, 
+    search?: string, 
+    pageNumber: number = 1
+  ) => {
     try {
       const params = new URLSearchParams();
   
@@ -71,6 +75,7 @@ export default class RoadmapStore {
 
       runInAction(() => {
         this.logs = result.items; 
+        this.currentPage = pageNumber;
         this.totalPages = result.totalPages; 
       });
     } catch (error) {

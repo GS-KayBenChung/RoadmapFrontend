@@ -4,7 +4,7 @@ import ScreenTitleName from "../ScreenTitleName";
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "../../app/stores/store";
-import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 
 export default observer(function RoadmapAudit() {
@@ -15,23 +15,18 @@ export default observer(function RoadmapAudit() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [_,setTotalPages] = useState<number>(1);
-
-
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const urlFilter = params.get("filter") || "";
-    const urlSearch = params.get("search") || "";
-    const urlPageNumber = parseInt(params.get("pageNumber") || "1");
+    const queryParams = new URLSearchParams(location.search);
+    const urlFilter = queryParams.get("filter");
+    const searchParam = queryParams.get("search");
+    const pageParam = queryParams.get("page") || "1";
+  
+    setFilter(urlFilter || "");
+    setSearch(searchParam || "");
+    const pageNumber = parseInt(pageParam, 10);
 
-    setFilter(urlFilter);
-    setSearch(urlSearch);
-    setCurrentPage(urlPageNumber);
-    setTotalPages(roadmapStore.totalPages);
- 
-    loadLogs(urlFilter, urlSearch, urlPageNumber);
-  }, [location.search, loadLogs, roadmapStore.totalPages]);
+    roadmapStore.loadLogs(urlFilter || undefined, searchParam || undefined, pageNumber);
+  }, [location.search, loadLogs]);
 
   const handleFilterChange = (event: any) => {
     const selectedFilter = event.target.value;
@@ -67,10 +62,14 @@ export default observer(function RoadmapAudit() {
     loadLogs(filter, "");
   };
 
-  const handlePageChange = (newPage: number) => {
-    const queryParams = new URLSearchParams(location.search);
-    queryParams.set("pageNumber", newPage.toString());
-    navigate(`?${queryParams.toString()}`);
+  const handlePageChange = (_:any, newPage: number) => {
+    const query = new URLSearchParams({
+      filter: filter || "",
+      search: search || "",
+      page: newPage.toString(),
+    }).toString();
+    navigate(`?${query}`);
+    loadLogs(filter, search, newPage);
   };
 
   return (
@@ -135,7 +134,7 @@ export default observer(function RoadmapAudit() {
             </TableBody>
           </Table>
         </TableContainer>
-        <div className="flex justify-center mt-4">
+        {/* <div className="flex justify-center mt-4">
           <button
             className="px-4 py-2 mx-2 border rounded"
             onClick={() => handlePageChange(currentPage - 1)}
@@ -161,6 +160,14 @@ export default observer(function RoadmapAudit() {
           >
             Next
           </button>
+        </div> */}
+        <div className="flex justify-center mt-6">
+          <Pagination
+            count={roadmapStore.totalPages} 
+            page={roadmapStore.currentPage}
+            onChange={handlePageChange}
+            color="primary"
+          />
         </div>
       </div>
     </>
