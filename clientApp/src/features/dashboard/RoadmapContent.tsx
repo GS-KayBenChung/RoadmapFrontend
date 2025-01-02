@@ -163,15 +163,19 @@ export default observer(function RoadmapsPage() {
 
           {viewType === "card" ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 md:mx-12 lg:grid-cols-5 gap-12 p-4">
-              {roadmaps.map((roadmap) => (
-                <div key={roadmap.roadmapId}>
-                  <RoadmapCard
-                    name={roadmap.title}
-                    progress={roadmap.overallProgress}
-                    roadmapId={roadmap.roadmapId}
-                  />
-                </div>
-              ))}
+              {roadmaps.length > 0 ? (
+                roadmaps.map((roadmap) => (
+                  <div key={roadmap.roadmapId}>
+                    <RoadmapCard
+                      name={roadmap.title}
+                      progress={roadmap.overallProgress}
+                      roadmapId={roadmap.roadmapId}
+                    />
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-full text-center text-gray-500">No Roadmap found</div>
+              )}
             </div>
           ) : (
             <div className="pt-4 mx-16">
@@ -188,20 +192,27 @@ export default observer(function RoadmapsPage() {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {roadmaps.map((roadmap) => (
-                      <TableRow key={roadmap.roadmapId} className="hover:bg-gray-100">
-                        <TableCell>{roadmap.title}</TableCell>
-                        <TableCell>{roadmap.description}</TableCell>
-                        <TableCell>{roadmap.overallProgress}%</TableCell>
-                        <TableCell>{roadmap.overallDuration}days</TableCell>
-                        <TableCell>{formatDate(roadmap.updatedAt)}</TableCell>
-                        <NavLink key={roadmap.roadmapId} to={`/roadmap/${roadmap.roadmapId}`}>
-                          <TableCell><a className="text-blue-500 underline">Roadmap</a></TableCell>
-                        </NavLink>
+                    {roadmaps.length > 0 ? (
+                      roadmaps.map((roadmap) => (
+                        <TableRow key={roadmap.roadmapId} className="hover:bg-gray-100">
+                          <TableCell>{roadmap.title}</TableCell>
+                          <TableCell>{roadmap.description}</TableCell>
+                          <TableCell>{roadmap.overallProgress}%</TableCell>
+                          <TableCell>{roadmap.overallDuration}days</TableCell>
+                          <TableCell>{formatDate(roadmap.updatedAt)}</TableCell>
+                          <NavLink key={roadmap.roadmapId} to={`/roadmap/${roadmap.roadmapId}`}>
+                            <TableCell><a className="text-blue-500 underline">Roadmap</a></TableCell>
+                          </NavLink>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={6} className="text-center text-gray-500">
+                          No Roadmap found
+                        </TableCell>
                       </TableRow>
-                    ))}
+                    )}
                   </TableBody>
-                  
                 </Table>
               </TableContainer>
             </div>

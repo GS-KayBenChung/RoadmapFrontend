@@ -37,8 +37,8 @@ export default observer( function RoadmapDashboard() {
               </div>
             }
           />
-          <DashboardCard title="Near Due Roadmap" value={dashboardStats.nearDueRoadmaps} />
-          <DashboardCard title="Overdue Roadmap" value={dashboardStats.overdueRoadmaps} />
+          <DashboardCard title="Near Due Roadmap" value={dashboardStats.nearDueRoadmaps} filter="neardue" />
+          <DashboardCard title="Overdue Roadmap" value={dashboardStats.overdueRoadmaps} filter="overdue" />
           <DashboardCard title="Draft Roadmap" value={dashboardStats.draftRoadmaps} filter="draft"/>
         </div>
       </div>
