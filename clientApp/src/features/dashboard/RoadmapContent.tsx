@@ -17,76 +17,184 @@ export default observer(function RoadmapsPage() {
   const { roadmapStore } = useStore();
   const { loadRoadmaps, roadmaps, loadingInitial } = roadmapStore;
   const [filter, setFilter] = useState<string>("");
+  const [pageSize, setPageSize] =useState<number>(10)
   const [search, setSearch] = useState<string>("");
   const [viewType, setViewType] = useState<string>("card");
   const [selectedDate, setSelectedDate] = useState<string>("");
+  const [sortBy, setSortBy] = useState('UpdatedAt');
+  const [asc, setAsc] = useState(1);
 
   const navigate = useNavigate();
   const location = useLocation();
 
+  const handleClear = () => {
+    setSearch("");
+  };
+
+  const updateQueryAndLoadRoadmaps = ({
+    filter,
+    search,
+    date,
+    page,
+    pageSize,
+    sortBy,
+    asc,
+  }: {
+    filter?: string;
+    search?: string;
+    date?: string;
+    page?: number;
+    pageSize?: number;
+    sortBy?: string;
+    asc?: number;
+  }) => {
+    const queryParams = new URLSearchParams({
+      ...(filter && { filter }),
+      ...(search && { search }),
+      ...(date && { date }),
+      page: (page || 1).toString(),
+      pageSize: (pageSize || 10).toString(),
+      sortBy: sortBy || "UpdatedAt",
+      asc: (asc || 0).toString()
+    }).toString();
+    console.log("updateQueryAndLoadRoadmaps asc: " + asc);
+    console.log("updateQueryAndLoadRoadmaps sortby: " +  sortBy);
+    console.log("queryParams : " +  queryParams);
+    
+    navigate(`?${queryParams}`);
+    loadRoadmaps(
+      filter || undefined,
+      search || undefined,
+      date || undefined,
+      page || 1,
+      pageSize || 10,
+      sortBy || "UpdatedAt",
+      asc || 1
+    );
+  };
+  
   const handleFilterChange = (event: any) => {
     const selectedFilter = event.target.value;
     setFilter(selectedFilter);
-    const query = new URLSearchParams({
-      filter: selectedFilter || "",
-      search: search || "",
-      page: "1",
-    }).toString();
-    navigate(`?${query}`);
-    loadRoadmaps(selectedFilter, search, selectedDate, 1);
+    updateQueryAndLoadRoadmaps({
+      filter: selectedFilter,
+      search,
+      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+      page: 1,
+      pageSize,
+      sortBy,
+      asc,
+    });
   };
   
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       const normalizedSearch = search.trim().toLowerCase();
-      const query = new URLSearchParams({
-        filter: filter || "",
+      setSearch(normalizedSearch);
+      updateQueryAndLoadRoadmaps({
+        filter,
         search: normalizedSearch,
-        page: "1", 
-      }).toString();
-      navigate(`?${query}`);
-      loadRoadmaps(filter, normalizedSearch, selectedDate, 1); 
+        date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+        page: 1,
+        pageSize,
+        sortBy,
+        asc,
+      });
     }
-  };  
-
-  const handleClear = () => {
-    setSearch("");
-    loadRoadmaps(filter, "", selectedDate);
   };
-
+  
   const handleDateChange = (event: any) => {
     const date = event.target.value;
     setSelectedDate(date);
-    if (date) {
-      loadRoadmaps(filter, search, date);  
-    } else {
-      loadRoadmaps(filter, search, ""); 
-    }
-  };
 
+    updateQueryAndLoadRoadmaps({
+      filter,
+      search,
+      date: date ? new Date(date).toISOString() : undefined,
+      page: 1,
+      pageSize,
+      sortBy,
+      asc,
+    });
+  };
+  
   const handlePageChange = (_: any, newPage: number) => {
-    const query = new URLSearchParams({
-      filter: filter || "",
-      search: search || "",
-      page: newPage.toString(),
-    }).toString();
-    navigate(`?${query}`);
-    loadRoadmaps(filter, search, selectedDate, newPage);
+    updateQueryAndLoadRoadmaps({
+      filter,
+      search,
+      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+      page: newPage,
+      pageSize,
+      sortBy,
+      asc,
+    });
   };
-
+  
+  const handlePageSize = (event: any) => {
+    const updatedPageSize = parseInt(event.target.value, 10);
+    setPageSize(updatedPageSize);
+    updateQueryAndLoadRoadmaps({
+      filter,
+      search,
+      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+      page: 1,
+      pageSize: updatedPageSize,
+      sortBy,
+      asc,
+    });
+  };
+  
+  const handleSortByChange = (event: any) => {
+    const newSortBy = event.target.value;
+    setSortBy(newSortBy);
+    updateQueryAndLoadRoadmaps({
+      filter,
+      search,
+      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+      page: 1,
+      pageSize,
+      sortBy: newSortBy,
+      asc,
+    });
+  };
+  
+  const handleAscDescChange = (event: any) => {
+    const newAsc = parseInt(event.target.value);
+    console.log(newAsc);
+    setAsc(newAsc);
+    updateQueryAndLoadRoadmaps({
+      filter,
+      search,
+      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+      page: 1,
+      pageSize,
+      sortBy,
+      asc: newAsc,
+    });
+  };
+  
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
-    const filterParam = queryParams.get("filter");
-    const searchParam = queryParams.get("search");
-    const pageParam = queryParams.get("page");
-  
-    setFilter(filterParam || "");
-    setSearch(searchParam || "");
-    const pageNumber = pageParam ? parseInt(pageParam, 10) : 1;
-  
-    roadmapStore.loadRoadmaps(filterParam || undefined, searchParam || undefined, selectedDate || undefined, pageNumber);
-  }, [location.search, loadRoadmaps]);
+    const filterParam = queryParams.get("filter") || "";
+    const searchParam = queryParams.get("search") || "";
+    const dateParam = queryParams.get("date") || "";
+    const pageParam = parseInt(queryParams.get("page") || "1", 10);
+    const pageSizeParam = parseInt(queryParams.get("pageSize") || "10", 10);
+    const sortByParam = queryParams.get("sortBy") || "UpdatedAt";
+    const ascParam = parseInt(queryParams.get("asc") || "1", 10);
+    setFilter(filterParam);
+    setSearch(searchParam);
+    setSelectedDate(dateParam);
+    setPageSize(pageSizeParam);
+    setSortBy(sortByParam);
+    setAsc(ascParam);
 
+    console.log("ascParam:  " + ascParam);
+    
+
+    loadRoadmaps(filterParam, searchParam, dateParam, pageParam, pageSizeParam, sortByParam, ascParam);
+  }, [location.search, loadRoadmaps]);
+  
   if (loadingInitial) return <LoadingComponent />;
 
   return (
@@ -94,19 +202,21 @@ export default observer(function RoadmapsPage() {
       <NavBar />
       <div className="py-16">
         <ScreenTitleName title="ROADMAPS" />
-        <div className="mt-24">
-          <div className="flex justify-between gap-4 mb-6 flex-wrap w-full max-w-screen-lg mx-auto px-4">
-          <TextField
-            margin="normal"
-            type="date"
-            label="Date"
-            value={selectedDate}
-            onChange={handleDateChange}
-            InputLabelProps={{ shrink: true }}
-            className="w-[200px]"
-          />
-            <div className="flex items-center gap-4">
-              <FormControl variant="outlined" size="small" className="w-52">
+        <div className="space-y-4">
+          <div className="w-full sm:w-auto mx-16">
+            <TextField
+              margin="normal"
+              type="date"
+              label="Date"
+              value={selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : ''}
+              onChange={handleDateChange}
+              InputLabelProps={{ shrink: true }}
+              className="w-full sm:w-[200px]"
+            />
+          </div>
+          <div className="mx-16">
+            <div className="flex items-center justify-between w-full">
+              <FormControl variant="outlined" size="small" className="w-full sm:w-52">
                 <InputLabel>Filter By</InputLabel>
                 <Select value={filter} onChange={handleFilterChange} label="Filter By">
                   <MenuItem value="">All</MenuItem>
@@ -116,10 +226,14 @@ export default observer(function RoadmapsPage() {
                   <MenuItem value="overdue">Overdue</MenuItem>
                 </Select>
               </FormControl>
+
               <TextField
                 label="Search"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  if (e.target.value === '') return;
+                  setSearch(e.target.value.trim());
+                }}
                 onKeyDown={handleSearchKeyDown}
                 variant="outlined"
                 size="small"
@@ -136,28 +250,64 @@ export default observer(function RoadmapsPage() {
                     </InputAdornment>
                   ),
                 }}
-                className="max-w-[400px]"
+                className="sm:max-w-[400px]"
               />
-            </div>
 
-            <div className="flex items-center gap-4">
-              <NavLink to="/roadmapCreate">
-                <button className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-sm">
-                  Create Roadmap
+              <div className="flex gap-4 ml-auto">
+                <NavLink to="/roadmapCreate">
+                  <button className="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 text-sm">
+                    Create Roadmap
+                  </button>
+                </NavLink>
+                
+                <button
+                  onClick={() => setViewType('card')}
+                  className={`px-3 py-3 rounded ${
+                    viewType === 'card' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                  } hover:bg-blue-600`}
+                >
+                  <FaTh className="text-lg" />
                 </button>
-              </NavLink>
-              <button
-                onClick={() => setViewType("card")}
-                className={`px-3 py-3 rounded ${viewType === "card" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600`}
+
+                <button
+                  onClick={() => setViewType('list')}
+                  className={`px-3 py-3 rounded ${
+                    viewType === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
+                  } hover:bg-blue-600`}
+                >
+                  <FaListUl className="text-lg" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap justify-between gap-4 mt-4 mx-16">
+    
+            <div className="w-full sm:w-auto">
+              <Select value={sortBy} onChange={handleSortByChange}>
+                <MenuItem value="Title">Title</MenuItem>
+                <MenuItem value="CreatedAt">Created At</MenuItem>
+                <MenuItem value="UpdatedAt">Updated At</MenuItem>
+              </Select>
+              <Select value={asc} onChange={handleAscDescChange}>
+                <MenuItem value={1}>Ascending</MenuItem>
+                <MenuItem value={0}>Descending</MenuItem>
+              </Select>
+            </div>
+        
+            <div className="flex flex-wrap items-center gap-4 justify-end w-full sm:w-auto">
+              <span>Items per page:</span>
+              <Select
+                value={pageSize}
+                onChange={handlePageSize}
+                className="ml-2 w-full sm:w-auto"
               >
-                <FaTh className="text-lg" />
-              </button>
-              <button
-                onClick={() => setViewType("list")}
-                className={`px-3 py-3 rounded ${viewType === "list" ? "bg-blue-500 text-white" : "bg-gray-200 text-gray-700"} hover:bg-blue-600`}
-              >
-                <FaListUl className="text-lg" />
-              </button>
+                <MenuItem value="5">5</MenuItem>
+                <MenuItem value="10">10</MenuItem>
+                <MenuItem value="15">15</MenuItem>
+                <MenuItem value="20">20</MenuItem>
+              </Select>
+              
             </div>
           </div>
 

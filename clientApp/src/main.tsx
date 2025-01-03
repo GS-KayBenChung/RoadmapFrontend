@@ -8,7 +8,7 @@ import { UserProvider } from './userContext.tsx';
 import { store, StoreContext } from './app/stores/store.ts';
 
 createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <GoogleOAuthProvider clientId="36494825135-hb6snjuupfv7r5pqdupedv1u1oklvj44.apps.googleusercontent.com">
       <StoreContext.Provider value={store}>
         <UserProvider>
@@ -16,5 +16,5 @@ createRoot(document.getElementById('root')!).render(
         </UserProvider>
       </StoreContext.Provider>
     </GoogleOAuthProvider>
-  </React.StrictMode>
+  // </React.StrictMode>
 ); 
