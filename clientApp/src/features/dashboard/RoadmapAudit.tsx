@@ -6,10 +6,11 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "../../app/stores/store";
 import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default observer(function RoadmapAudit() {
   const { roadmapStore } = useStore();
-  const { logs, loadLogs } = roadmapStore;
+  const { logs, loadLogs, loadingInitial } = roadmapStore;
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
@@ -184,6 +185,8 @@ export default observer(function RoadmapAudit() {
     );
   };
 
+  if (loadingInitial) return <LoadingComponent />;
+
   return (
     <>
       <NavBar />
@@ -198,6 +201,7 @@ export default observer(function RoadmapAudit() {
               label="Date"
               value={selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : ''}
               onChange={handleDateChange}
+              onKeyDown={(e) => e.preventDefault()}
               InputLabelProps={{ shrink: true }}
               className="w-full sm:w-[200px]"
             />
@@ -283,7 +287,17 @@ export default observer(function RoadmapAudit() {
                 <TableRow key={log.logId} className="hover:bg-gray-100">
                   <TableCell>{log.userName}</TableCell>
                   <TableCell>{log.activityAction}</TableCell>
-                  <TableCell>{new Date(log.createdAt).toLocaleString()}</TableCell>
+                  <TableCell>
+                    {new Date(log.createdAt).toLocaleString('en-GB', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false,
+                    })}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

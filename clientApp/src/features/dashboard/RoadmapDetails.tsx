@@ -41,7 +41,6 @@ export default observer( function RoadmapDetails() {
     isChecked: boolean;
   } | null>(null);
   
-
   const [roadmapToDelete, setRoadmapToDelete] = useState<string | null>(null); 
   const [expandedMilestone, setExpandedMilestone] = useState<number | null>(null);
   const [expandedSections, setExpandedSections] = useState<boolean[]>([]); 
@@ -84,7 +83,7 @@ export default observer( function RoadmapDetails() {
   const cancelDelete = () => {
     setShowModal(false); 
   };
-
+  
   const handleConfirmationModal = (
     type: 'roadmap' | 'milestone' | 'section',
     isChecked: boolean,
@@ -94,13 +93,13 @@ export default observer( function RoadmapDetails() {
     setConfirmationTarget({ type, index, parentIndex, isChecked });
     setShowConfirm(true);
   };
-  
-  const confirmAction = () => {
+
+  const confirmAction = async () => {
     if (!confirmationTarget) return;
   
-    runInAction(() => {
-      const { type, index, parentIndex, isChecked } = confirmationTarget;
+    const { type, index, parentIndex, isChecked } = confirmationTarget;
   
+    runInAction(() => {
       if (type === 'roadmap') {
         selectedRoadmap.isCompleted = isChecked;
         selectedRoadmap.milestones.forEach((milestone) => {
@@ -109,7 +108,9 @@ export default observer( function RoadmapDetails() {
             section.isCompleted = isChecked;
             section.tasks.forEach((task: any) => (task.isCompleted = isChecked));
           });
+          milestone.milestoneProgress = isChecked ? 100 : 0;
         });
+        selectedRoadmap.overallProgress = isChecked ? 100 : 0;
       } else if (type === 'milestone' && index !== undefined) {
         const milestone = selectedRoadmap.milestones[index];
         milestone.isCompleted = isChecked;
@@ -117,17 +118,32 @@ export default observer( function RoadmapDetails() {
           section.isCompleted = isChecked;
           section.tasks.forEach((task: any) => (task.isCompleted = isChecked));
         });
+        milestone.milestoneProgress = isChecked ? 100 : 0;
         selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
+        selectedRoadmap.overallProgress = calculateRoadmapProgress(selectedRoadmap);
       } else if (type === 'section' && index !== undefined && parentIndex !== undefined) {
         const section = selectedRoadmap.milestones[parentIndex].sections[index];
         section.isCompleted = isChecked;
         section.tasks.forEach((task: any) => (task.isCompleted = isChecked));
         const milestone = selectedRoadmap.milestones[parentIndex];
         milestone.isCompleted = milestone.sections.every((s: any) => s.isCompleted);
+        milestone.milestoneProgress = calculateMilestoneProgress(milestone);
         selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
+        selectedRoadmap.overallProgress = calculateRoadmapProgress(selectedRoadmap);
       }
     });
+
+    console.log("roadmapID: " + id + "Type: " + type + "isCHecked: " + isChecked + "Index: " + index + "parentIndex: " + parentIndex);
+    
+    roadmapStore.updateTaskCompletionStatus(
+      id!, 
+      type,
+      isChecked,
+      index,
+      parentIndex
+    );
   
+    setConfirmationTarget(null);
     setShowConfirm(false);
   };
   
@@ -168,10 +184,51 @@ export default observer( function RoadmapDetails() {
       section.isCompleted = section.tasks.every((t: any) => t.isCompleted);
       const milestone = selectedRoadmap.milestones[milestoneIndex];
       milestone.isCompleted = milestone.sections.every((s: any) => s.isCompleted);
-      selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
-    });
-  };
 
+      milestone.milestoneProgress = calculateMilestoneProgress(milestone);
+
+      selectedRoadmap.isCompleted = selectedRoadmap.milestones.every((m) => m.isCompleted);
+
+      selectedRoadmap.overallProgress = calculateRoadmapProgress(selectedRoadmap);
+    });
+
+    console.log("roadmapID: " + id + " isCHecked: " + isCompleted + " Index: " + taskIndex + " parentIndex: " + sectionIndex + " GrandParentIndex: " + milestoneIndex);
+
+    roadmapStore.updateTaskCompletionStatus(
+      id!, 
+      'task',
+      isCompleted,
+      taskIndex,
+      sectionIndex,
+      milestoneIndex 
+    );
+  };
+  
+  const calculateMilestoneProgress = (milestone: any) => {
+    const totalTasks = milestone.sections.reduce(
+      (count: number, section: any) => count + section.tasks.length,
+      0
+    );
+    const completedTasks = milestone.sections.reduce(
+      (count: number, section: any) =>
+        count + section.tasks.filter((task: Task) => task.isCompleted).length,
+      0
+    );
+  
+    return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  };
+  
+  const calculateRoadmapProgress = (roadmap: any) => {
+    const allTasks = roadmap.milestones.flatMap((milestone: any) =>
+      milestone.sections.flatMap((section: any) => section.tasks)
+    );
+  
+    const completedTasks = allTasks.filter((task: any) => task.isCompleted).length;
+    const totalTasks = allTasks.length;
+  
+    return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+  };
+  
   return (
     <>
       <ConfirmDeleteModal

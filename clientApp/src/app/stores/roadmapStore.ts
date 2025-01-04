@@ -29,7 +29,14 @@ export default class RoadmapStore {
     return Array.from(this.roadmapRegistry.values());
   }
 
-  updateTaskCompletionStatus = async (id: string, type: 'roadmap' | 'milestone' | 'section' | 'task', isChecked: boolean, index?: number, parentIndex?: number) => {
+  updateTaskCompletionStatus = async (
+    id: string, 
+    type: 'roadmap' | 'milestone' | 'section' | 'task', 
+    isChecked: boolean, 
+    index?: number, 
+    parentIndex?: number, 
+    grandParentIndex?: number,
+  ) => {
     try {
       const body = {
         id,
@@ -37,7 +44,9 @@ export default class RoadmapStore {
         isChecked,
         index,
         parentIndex,
+        grandParentIndex
       };
+      console.log({ id, type, isChecked, index, parentIndex, grandParentIndex }); 
       await apiClient.Roadmaps.updateCheck(body);
       runInAction(() => {
         if (type === 'roadmap') {
@@ -51,37 +60,12 @@ export default class RoadmapStore {
         } else if (type === 'task' && index !== undefined && parentIndex !== undefined) {
           const task = this.selectedRoadmap!.milestones[parentIndex].sections[index].tasks[index];
           task.isCompleted = isChecked;
-          console.log("Roadmapstore: task updated" + task.isCompleted);
         }
       });
     } catch (error) {
       console.error("Error updating task completion status", error);
     }
   };
-  
-  // loadLogs = async (
-  //   filter?: string, 
-  //   search?: string, 
-  //   pageNumber: number = 1
-  // ) => {
-  //   try {
-  //     const params = new URLSearchParams();
-  
-  //     if (filter) params.append("filter", filter);
-  //     if (search) params.append("search", search);
-  //     params.append("pageNumber", pageNumber.toString());
-  
-  //     const result = await apiClient.Roadmaps.getLogs(params.toString());
-
-  //     runInAction(() => {
-  //       this.logs = result.items; 
-  //       this.currentPage = pageNumber;
-  //       this.totalPages = result.totalPages; 
-  //     });
-  //   } catch (error) {
-  //     console.error("Failed to fetch logs", error);
-  //   }
-  // };
 
   loadLogs = async (
     filter?: string,
@@ -92,7 +76,6 @@ export default class RoadmapStore {
     sortBy: string = "Date",
     asc: number = 1
   ) => {
-    
     this.loadingInitial = true;
     try {
       const params = new URLSearchParams();
@@ -157,17 +140,18 @@ export default class RoadmapStore {
   };
 
   loadDashboardStats = async () => {
+    this.loadingInitial = true;
     try {
       const result = await apiClient.Roadmaps.getDashboard();
       runInAction(() => {
         this.dashboardStats = result;  
+        this.loadingInitial = false;
       });
     } catch (error) {
       console.error("Failed to load dashboard stats:", error);
     }
   };
-
-   
+ 
   EditRoadmap = async (roadmap: Roadmap) => {
     this.submitting = true;
     try {

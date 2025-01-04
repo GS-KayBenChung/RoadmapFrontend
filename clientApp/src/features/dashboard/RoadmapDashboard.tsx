@@ -6,14 +6,17 @@ import Footer from "../../app/layout/Footer";
 import { useStore } from "../../app/stores/store";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
+import LoadingComponent from "../../app/layout/LoadingComponent";
 
 export default observer( function RoadmapDashboard() {
   const { roadmapStore } = useStore(); 
-  const { dashboardStats } = roadmapStore;
+  const { dashboardStats, loadingInitial } = roadmapStore;
 
   useEffect(() => {
     roadmapStore.loadDashboardStats();
   }, [roadmapStore]);
+
+  if (loadingInitial) return <LoadingComponent />;
 
   return (
     <div className="flex flex-col min-h-screen">
