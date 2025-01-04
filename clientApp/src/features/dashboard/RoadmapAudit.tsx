@@ -283,7 +283,8 @@ export default observer(function RoadmapAudit() {
               </TableRow>
             </TableHead>
             <TableBody className="border-2 border-black">
-              {logs.map((log) => (
+            {logs.length > 0 ? (
+              logs.map((log) => (
                 <TableRow key={log.logId} className="hover:bg-gray-100">
                   <TableCell>{log.userName}</TableCell>
                   <TableCell>{log.activityAction}</TableCell>
@@ -299,7 +300,14 @@ export default observer(function RoadmapAudit() {
                     })}
                   </TableCell>
                 </TableRow>
-              ))}
+              ))
+            ): (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center text-gray-500">
+                    No Audit Logs found
+                  </TableCell>
+                </TableRow>
+              )}
             </TableBody>
           </Table>
         </TableContainer>

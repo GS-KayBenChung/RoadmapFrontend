@@ -133,8 +133,6 @@ export default observer( function RoadmapDetails() {
       }
     });
 
-    console.log("roadmapID: " + id + "Type: " + type + "isCHecked: " + isChecked + "Index: " + index + "parentIndex: " + parentIndex);
-    
     roadmapStore.updateTaskCompletionStatus(
       id!, 
       type,
@@ -192,8 +190,6 @@ export default observer( function RoadmapDetails() {
       selectedRoadmap.overallProgress = calculateRoadmapProgress(selectedRoadmap);
     });
 
-    console.log("roadmapID: " + id + " isCHecked: " + isCompleted + " Index: " + taskIndex + " parentIndex: " + sectionIndex + " GrandParentIndex: " + milestoneIndex);
-
     roadmapStore.updateTaskCompletionStatus(
       id!, 
       'task',
@@ -228,7 +224,49 @@ export default observer( function RoadmapDetails() {
   
     return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
   };
+
+  const calculateDurationDate = (): string => {
+    let firstTaskDate: Date | null = null;
+    let lastTaskDate: Date | null = null;
   
+    const totalDuration = selectedRoadmap.milestones?.reduce((acc, milestone) => {
+      const allTasks = milestone.sections.flatMap((section: Section) => section.tasks || []);
+      if (allTasks.length) {
+        const sortedTasks = allTasks.sort((a: { dateStart: string }, b: { dateStart: string }) =>
+          new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
+        );
+  
+        const currentFirstTaskDate = new Date(sortedTasks[0].dateStart);
+        const currentLastTaskDate = new Date(sortedTasks[sortedTasks.length - 1].dateEnd);
+  
+        if (!firstTaskDate || currentFirstTaskDate < firstTaskDate) {
+          firstTaskDate = currentFirstTaskDate;
+        }
+        if (!lastTaskDate || currentLastTaskDate > lastTaskDate) {
+          lastTaskDate = currentLastTaskDate;
+        }
+  
+        const durationInDays = Math.ceil(
+          (lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24)
+        );
+  
+        return durationInDays;
+      }
+      return acc;
+    }, 0);
+  
+    const formatDate = (date: Date | null): string => {
+      if (!date) return '';
+      return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()}`;
+    };
+  
+    const formattedFirstTaskDate = formatDate(firstTaskDate);
+    const formattedLastTaskDate = formatDate(lastTaskDate);
+  
+    return `${formattedFirstTaskDate} To ${formattedLastTaskDate} ( ${totalDuration} ${totalDuration === 1 ? 'day' : 'days'} )`;
+  };
+  
+ 
   return (
     <>
       <ConfirmDeleteModal
@@ -248,28 +286,7 @@ export default observer( function RoadmapDetails() {
           <CircularProgressBar percentage={selectedRoadmap.overallProgress} />
         </div>
         <div className="text-gray-600 text-sm mt-8">
-          Duration: {(() => {
-            if (selectedRoadmap) {
-              const totalDuration = selectedRoadmap.milestones?.reduce((acc, milestone) => {
-                const allTasks = milestone.sections.flatMap((section: Section) => section.tasks || []);
-                if (allTasks.length) {
-                  const sortedTasks = allTasks.sort((a: { dateStart: string }, b: { dateStart: string }) =>
-                    new Date(a.dateStart).getTime() - new Date(b.dateStart).getTime()
-                  );
-
-                  const firstTaskDate = new Date(sortedTasks[0].dateStart);
-                  const lastTaskDate = new Date(sortedTasks[sortedTasks.length - 1].dateEnd);
-                  const durationInDays = Math.ceil((lastTaskDate.getTime() - firstTaskDate.getTime()) / (1000 * 60 * 60 * 24));
-
-                  return acc + durationInDays;
-                }
-                return acc; 
-              }, 0); 
-
-              return `${totalDuration} ${totalDuration === 1 ? 'day' : 'days'}`;
-            }
-            return 'Duration';
-          })()}
+          Date: {calculateDurationDate()}
         </div>
 
         <div className="flex items-center justify-between mb-6">

@@ -46,7 +46,6 @@ export default class RoadmapStore {
         parentIndex,
         grandParentIndex
       };
-      console.log({ id, type, isChecked, index, parentIndex, grandParentIndex }); 
       await apiClient.Roadmaps.updateCheck(body);
       runInAction(() => {
         if (type === 'roadmap') {

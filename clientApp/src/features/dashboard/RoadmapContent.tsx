@@ -178,7 +178,7 @@ export default observer(function RoadmapsPage() {
     const pageParam = parseInt(queryParams.get("page") || "1", 10);
     const pageSizeParam = parseInt(queryParams.get("pageSize") || "10", 10);
     const sortByParam = queryParams.get("sortBy") || "UpdatedAt";
-    const ascParam = parseInt(queryParams.get("asc") || "1", 10);
+    const ascParam = parseInt(queryParams.get("asc") || "0", 10);
     setFilter(filterParam);
     setSearch(searchParam);
     setSelectedDate(dateParam);
@@ -343,9 +343,11 @@ export default observer(function RoadmapsPage() {
                           <TableCell>{roadmap.overallProgress}%</TableCell>
                           <TableCell>{roadmap.overallDuration}days</TableCell>
                           <TableCell>{formatDate(roadmap.updatedAt)}</TableCell>
-                          <NavLink key={roadmap.roadmapId} to={`/roadmap/${roadmap.roadmapId}`}>
-                            <TableCell><a className="text-blue-500 underline">Roadmap</a></TableCell>
-                          </NavLink>
+                          <TableCell>
+                            <NavLink to={`/roadmap/${roadmap.roadmapId}`} className="text-blue-500 underline">
+                              Roadmap
+                            </NavLink>
+                          </TableCell>
                         </TableRow>
                       ))
                     ) : (
