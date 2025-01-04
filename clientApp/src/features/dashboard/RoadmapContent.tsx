@@ -57,9 +57,6 @@ export default observer(function RoadmapsPage() {
       sortBy: sortBy || "UpdatedAt",
       asc: (asc || 0).toString()
     }).toString();
-    console.log("updateQueryAndLoadRoadmaps asc: " + asc);
-    console.log("updateQueryAndLoadRoadmaps sortby: " +  sortBy);
-    console.log("queryParams : " +  queryParams);
     
     navigate(`?${queryParams}`);
     loadRoadmaps(
@@ -90,6 +87,7 @@ export default observer(function RoadmapsPage() {
   const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Enter") {
       const normalizedSearch = search.trim().toLowerCase();
+      if (normalizedSearch === "") {return}
       setSearch(normalizedSearch);
       updateQueryAndLoadRoadmaps({
         filter,
@@ -160,7 +158,6 @@ export default observer(function RoadmapsPage() {
   
   const handleAscDescChange = (event: any) => {
     const newAsc = parseInt(event.target.value);
-    console.log(newAsc);
     setAsc(newAsc);
     updateQueryAndLoadRoadmaps({
       filter,
@@ -188,10 +185,6 @@ export default observer(function RoadmapsPage() {
     setPageSize(pageSizeParam);
     setSortBy(sortByParam);
     setAsc(ascParam);
-
-    console.log("ascParam:  " + ascParam);
-    
-
     loadRoadmaps(filterParam, searchParam, dateParam, pageParam, pageSizeParam, sortByParam, ascParam);
   }, [location.search, loadRoadmaps]);
   

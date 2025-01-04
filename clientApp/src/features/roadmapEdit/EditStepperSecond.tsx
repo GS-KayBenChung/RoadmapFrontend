@@ -24,8 +24,6 @@ export default observer(function EditStepperSecond(){
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
 
-  // console.log("Selected Roadmap:", selectedRoadmap);
-  // console.log("Selected Roadmap:", JSON.stringify(toJS(selectedRoadmap), null, 2));
 
   //IMPORTANT
   const milestones = selectedRoadmap?.milestones || [];

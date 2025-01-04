@@ -59,27 +59,62 @@ export default class RoadmapStore {
     }
   };
   
+  // loadLogs = async (
+  //   filter?: string, 
+  //   search?: string, 
+  //   pageNumber: number = 1
+  // ) => {
+  //   try {
+  //     const params = new URLSearchParams();
+  
+  //     if (filter) params.append("filter", filter);
+  //     if (search) params.append("search", search);
+  //     params.append("pageNumber", pageNumber.toString());
+  
+  //     const result = await apiClient.Roadmaps.getLogs(params.toString());
+
+  //     runInAction(() => {
+  //       this.logs = result.items; 
+  //       this.currentPage = pageNumber;
+  //       this.totalPages = result.totalPages; 
+  //     });
+  //   } catch (error) {
+  //     console.error("Failed to fetch logs", error);
+  //   }
+  // };
+
   loadLogs = async (
-    filter?: string, 
-    search?: string, 
-    pageNumber: number = 1
+    filter?: string,
+    search?: string,
+    date?: string,
+    pageNumber: number = 1,
+    pageSize: number = 10,
+    sortBy: string = "Date",
+    asc: number = 1
   ) => {
+    
+    this.loadingInitial = true;
     try {
       const params = new URLSearchParams();
-  
       if (filter) params.append("filter", filter);
       if (search) params.append("search", search);
+      if (date) params.append("date", date);
       params.append("pageNumber", pageNumber.toString());
-  
+      params.append("pageSize", pageSize.toString());
+      params.append("sortBy", sortBy.toLowerCase());
+      params.append("asc", asc.toString());
       const result = await apiClient.Roadmaps.getLogs(params.toString());
-
       runInAction(() => {
         this.logs = result.items; 
         this.currentPage = pageNumber;
         this.totalPages = result.totalPages; 
+        pageSize = result.pageSize;
+        
+        this.loadingInitial = false;
       });
     } catch (error) {
-      console.error("Failed to fetch logs", error);
+      console.error(error);
+      this.loadingInitial = false;
     }
   };
 
@@ -94,14 +129,6 @@ export default class RoadmapStore {
   ) => {
     this.loadingInitial = true;
     try {
-      // console.log("Filter:", filter);
-      // console.log("Search:", search);
-      // console.log("Date:", date);
-      // console.log("Page Number:", pageNumber);
-      // console.log("Page Size:", pageSize);
-      // console.log("Sort By:", sortBy);
-      // console.log("Ascending:", asc);
-
       const params = new URLSearchParams();
       if (filter) params.append("filter", filter);
       if (search) params.append("search", search);
@@ -110,7 +137,6 @@ export default class RoadmapStore {
       params.append("pageSize", pageSize.toString());
       params.append("sortBy", sortBy.toLowerCase());
       params.append("asc", asc.toString());
-  
       const result = await apiClient.Roadmaps.list(params.toString());
       runInAction(() => {
         this.roadmapRegistry.clear();
@@ -123,7 +149,6 @@ export default class RoadmapStore {
         pageSize = result.pageSize;
         
         this.loadingInitial = false;
-        //console.log('Inside loadRoadmaps:', asc); 
       });
     } catch (error) {
       console.error(error);
