@@ -1,13 +1,13 @@
+import { observer } from 'mobx-react-lite';
 import { Outlet } from 'react-router-dom';
+import { useStore } from '../stores/store';
 
-function App() {
-  return (
-    <>
-      <div>
-        <Outlet />
-      </div>
-    </>
-  )
-}
+export default observer (function App() {
+  const { userStore } = useStore();
 
-export default App;
+  if (!userStore.isLoggedIn && userStore.token) {
+    userStore.loadUserFromLocalStorage();
+  }
+
+  return <Outlet />;
+})

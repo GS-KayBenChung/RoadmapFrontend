@@ -33,7 +33,6 @@ const requests = {
 }
 
 const Roadmaps = {
-  googleGet: (token: any) => requests.post<void>('/googlelogin', { token }),
   getDashboard: () => requests.get<DashboardStats>(`/roadmaps/dashboard`),  
   list: async (queryString: string) => requests.get<PaginatedRoadmap<Roadmap>>(`/roadmaps?${queryString}`),  
   details: (id: string) => requests.get<Roadmap>(`/roadmaps/details/${id}`),
@@ -43,7 +42,10 @@ const Roadmaps = {
   updateCheck: (body: { id: string, type: 'roadmap' | 'milestone' | 'section' | 'task', isChecked: boolean, index?: number, parentIndex?: number }) => 
     requests.put<void>(`/roadmaps/checkboxes/${body.id}`, body),
   getLogs: async (query: string) => requests.get<PaginatedAudit<AuditLogs>>(`/roadmaps/logs?${query}`),
-
+  googleLogin: (token: string) => requests.post<{ id: string; username: string; email: string; token: string; createdAt: string }>(
+    `/authentication/googleresponse`,
+    { credential: token }
+  ),
 }
 
 const apiClient = {

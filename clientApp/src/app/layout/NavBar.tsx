@@ -16,7 +16,7 @@ export default function NavBar() {
           <NavLink to={"/dashboard"}>
             <img src="/logoGoSaas.png" alt="GoSaas" className="h-12 w-24"/>
           </NavLink>
-          <h1 className="text-2xl font-bold pl-24"> {userStore.user?.name || "User"}</h1>
+          <h1 className="text-2xl font-bold pl-24"> {userStore.user?.username || "User"}</h1>
         </div>
 
         <div className="hidden md:flex items-center space-x-6">

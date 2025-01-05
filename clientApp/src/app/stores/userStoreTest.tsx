@@ -1,25 +1,38 @@
-import { makeAutoObservable } from "mobx";
+// import { makeAutoObservable } from "mobx";
+// import { User } from "../models/user";
 
-class UserStoreTest {
-  constructor() {
-    makeAutoObservable(this);
-  }
+// export default class UserStoreTest {
+//   user: User | null = null;  
+//   token: string | null = localStorage.getItem('appToken') || null;
 
-  async loginWithGoogle(decodedToken: any) {
-    // Send token to backend for validation
-    const response = await fetch("/api/auth/google-login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ token: decodedToken }),
-    });
+//   constructor() {
+//     makeAutoObservable(this);
+//   }
 
-    if (!response.ok) {
-      throw new Error("Failed to authenticate");
-    }
-    // Handle successful login (e.g., set user data)
-  }
-}
+//   get isLoggedIn() {
+//     return !!this.user;
+//   }
 
-export const userStoreTest = new UserStoreTest();
+//   setUser = (user: User) => {
+//     this.user = user;
+//     this.token = user.token;
+//     localStorage.setItem("user", JSON.stringify(user));
+//     localStorage.setItem("appToken", user.token); 
+//   };
+
+//   logout = () => {
+//     this.user = null;
+//     this.token = null;
+//     localStorage.removeItem("user");
+//     localStorage.removeItem("appToken");
+//     localStorage.removeItem("view");
+//   };
+  
+//   loadUserFromLocalStorage = () => {
+//     const storedUser = localStorage.getItem("user");
+//     if (storedUser) {
+//       this.user = JSON.parse(storedUser);
+//       this.token = localStorage.getItem('appToken');
+//     }
+//   };
+// }
