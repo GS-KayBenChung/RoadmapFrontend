@@ -12,9 +12,8 @@ export default observer(function EditStepperComponent({ steps, activeStep }: Pro
   const { setActiveStep, roadmapTitle, roadmapDescription } = roadmapEditStore;
 
   const handleNext = () => {
-    if (!roadmapTitle || !roadmapDescription) {
-      toast.warning("Please fill out both the Roadmap Title and Roadmap Description before proceeding.");
-      return;
+    if (!roadmapEditStore.validateRoadmap()) {
+      return; 
     }
     setActiveStep(activeStep + 1);
   };

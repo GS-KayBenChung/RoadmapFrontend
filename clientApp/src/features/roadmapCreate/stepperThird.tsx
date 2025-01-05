@@ -83,6 +83,10 @@ export default observer(function StepperThird() {
     setOpenPreview(false);
   };
 
+  const hasTasks = milestones.some(milestone => 
+    milestone.sections.some(section => section.tasks.length > 0)
+  );
+
   return (
     <Box className="p-8 bg-gray-300 rounded-lg shadow-xl">
       <div className="text-center text-4xl font-extrabold text-indigo-900 mb-8">
@@ -143,12 +147,14 @@ export default observer(function StepperThird() {
         >
           Save As Draft
         </button>
-        <button
-          onClick={() => handleSubmit(false)} 
-          className="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          Publish Roadmap
-        </button>
+        {hasTasks && (
+          <button
+            onClick={() => handleSubmit(false)} 
+            className="bg-blue-500 text-white p-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Publish Roadmap
+          </button>
+        )}
       </div>
       <Modal
         open={openPreview}

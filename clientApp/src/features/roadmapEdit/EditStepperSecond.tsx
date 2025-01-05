@@ -28,9 +28,9 @@ export default observer(function EditStepperSecond(){
   //IMPORTANT
   const milestones = selectedRoadmap?.milestones || [];
 
-  const testingData = () => {
-    console.log(milestones);
-  };
+  // const testingData = () => {
+  //   console.log(milestones);
+  // };
 
   if (!milestones.length) {
     return <div>No milestones available. Please add a milestone or check the roadmap data.</div>;
@@ -38,7 +38,7 @@ export default observer(function EditStepperSecond(){
   if(!selectedRoadmap) return <LoadingComponent/>;
   return (
     <Box className="mb-24">
-      <button onClick={testingData}>testsfsg</button>
+      {/* <button onClick={testingData}>testsfsg</button> */}
       <button
          onClick={() => {
           addMilestone();
@@ -49,7 +49,7 @@ export default observer(function EditStepperSecond(){
       >
         Add Milestone
       </button>
-      <button onClick={testingLog}>hereTest</button>
+      {/* <button onClick={testingLog}>hereTest</button> */}
       {selectedRoadmap.milestones?.map((milestone, milestoneIndex) =>  (
         <Card key={milestoneIndex} className="mb-3 p-2 mt-8 border-2 border-black">
           <CardContent>
