@@ -29,6 +29,15 @@ export default observer(function RoadmapsPage() {
 
   const handleClear = () => {
     setSearch("");
+    updateQueryAndLoadRoadmaps({
+      filter,
+      search: "",
+      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+      page: 1,
+      pageSize,
+      sortBy,
+      asc,
+    });
   };
 
   const updateQueryAndLoadRoadmaps = ({

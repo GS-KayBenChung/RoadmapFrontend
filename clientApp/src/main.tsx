@@ -1,19 +1,17 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './app/layout/styles.css';
 import { RouterProvider } from 'react-router-dom';
 import { router } from './app/router/Route.tsx';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { UserProvider } from './userContext.tsx';
 import { store, StoreContext } from './app/stores/store.ts';
+
+const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 createRoot(document.getElementById('root')!).render(
   // <React.StrictMode>
-    <GoogleOAuthProvider clientId="36494825135-k0do7cn18k184m3skpkimm90bgp373qe.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId={clientId || ''}>
       <StoreContext.Provider value={store}>
-        <UserProvider>
-          <RouterProvider router={router} />
-        </UserProvider>
+        <RouterProvider router={router} />
       </StoreContext.Provider>
     </GoogleOAuthProvider>
   // </React.StrictMode>

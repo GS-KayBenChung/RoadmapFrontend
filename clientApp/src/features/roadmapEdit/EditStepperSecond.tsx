@@ -20,17 +20,12 @@ interface Section{
 };
 
 export default observer(function EditStepperSecond(){
-  const {addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask, testingLog } = roadmapEditStore;
+  const {addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask } = roadmapEditStore;
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
 
-
-  //IMPORTANT
   const milestones = selectedRoadmap?.milestones || [];
-
-  // const testingData = () => {
-  //   console.log(milestones);
-  // };
+  const isDraft = selectedRoadmap?.isDraft; 
 
   if (!milestones.length) {
     return <div>No milestones available. Please add a milestone or check the roadmap data.</div>;
@@ -38,7 +33,6 @@ export default observer(function EditStepperSecond(){
   if(!selectedRoadmap) return <LoadingComponent/>;
   return (
     <Box className="mb-24">
-      {/* <button onClick={testingData}>testsfsg</button> */}
       <button
          onClick={() => {
           addMilestone();
@@ -49,7 +43,6 @@ export default observer(function EditStepperSecond(){
       >
         Add Milestone
       </button>
-      {/* <button onClick={testingLog}>hereTest</button> */}
       {selectedRoadmap.milestones?.map((milestone, milestoneIndex) =>  (
         <Card key={milestoneIndex} className="mb-3 p-2 mt-8 border-2 border-black">
           <CardContent>
@@ -71,6 +64,7 @@ export default observer(function EditStepperSecond(){
                     milestone.name = e.target.value;
                   });
                 }}
+                disabled={!isDraft}
                 className="max-w-[500px]"
               />
               <TextField
@@ -86,6 +80,7 @@ export default observer(function EditStepperSecond(){
                     milestone.description = e.target.value;
                   });
                 }}
+                disabled={!isDraft}
                 className="max-w-[500px]"
               />
               <button
@@ -117,6 +112,7 @@ export default observer(function EditStepperSecond(){
                           });
                         }}
                         className="max-w-[400px]"
+                        disabled={!isDraft}
                       />
                       <TextField
                         fullWidth
@@ -132,6 +128,7 @@ export default observer(function EditStepperSecond(){
                           });
                         }}
                         className="max-w-[400px]"
+                        disabled={!isDraft}
                       />
                       <button
                         onClick={() => addTask(milestoneIndex, sectionIndex)}
@@ -164,6 +161,7 @@ export default observer(function EditStepperSecond(){
                                   });
                                 }}
                                 className="max-w-[400px]"
+                                disabled={!isDraft}
                               />
                               <TextField
                                 margin="normal"

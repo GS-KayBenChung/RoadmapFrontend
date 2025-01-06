@@ -56,10 +56,8 @@ export default observer(function EditStepperThird() {
     };
     try 
     {
-      console.log("Roadmap data being sent:", roadmapData);
       if(!selectedRoadmap) return 0;
       const result = await EditRoadmap(selectedRoadmap?.roadmapId,roadmapData);
-      console.log("Roadmap edited successfully:", result);
       roadmapEditStore.reset();
       navigate('/content');
     } catch (error) {
