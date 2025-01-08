@@ -1,5 +1,6 @@
 import axios from "axios";
-import API_URL from "../config/apiConfig";
+import { toast } from "react-toastify";
+//import API_URL from "../config/apiConfig";
 
 export interface Task {
   name: string;
@@ -46,10 +47,10 @@ export interface RoadmapDto {
 
 export const createRoadmap = async (roadmapData: RoadmapDto) => {
   try {
-    const response = await axios.post(API_URL.roadmap, roadmapData);
+    const response = await axios.post(import.meta.env.VITE_API_URL_ROADMAP, roadmapData);
     return response.data;
   } catch (error) {
-    console.error("Error creating roadmap:", error);
+    toast.error(`Error creating roadmap: ${error}`);
     throw error;
   }
 };

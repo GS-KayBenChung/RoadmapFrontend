@@ -1,5 +1,5 @@
 import NavItem from "./NavItem";
-import LogoutButton from "../../Logout";
+import LogoutButton from "../../features/Logout";
 
 export default function NavLinks() {
   return (

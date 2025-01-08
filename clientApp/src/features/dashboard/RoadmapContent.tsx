@@ -13,16 +13,24 @@ import { FaTh, FaListUl } from "react-icons/fa";
 
 const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
 
+const PaginationConfig = {
+  defaultPage: parseInt(import.meta.env.VITE_DEFAULT_PAGE || "1", 10),
+  defaultPageSize: parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE || "10", 10),
+  defaultRoadmapSortBy: import.meta.env.VITE_DEFAULT_ROADMAP_SORT_BY || "UpdatedAt",
+  defaultAsc: parseInt(import.meta.env.VITE_DEFAULT_ASC || "0", 10),
+  pageSizeOptions: (import.meta.env.VITE_PAGE_SIZE_OPTIONS || "10")
+};
+
 export default observer(function RoadmapsPage() {
   const { roadmapStore } = useStore();
   const { loadRoadmaps, roadmaps, loadingInitial } = roadmapStore;
   const [filter, setFilter] = useState<string>("");
-  const [pageSize, setPageSize] =useState<number>(10)
   const [search, setSearch] = useState<string>("");
   const [viewType, setViewType] = useState<string>("card");
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [sortBy, setSortBy] = useState('UpdatedAt');
-  const [asc, setAsc] = useState(1);
+  const [pageSize, setPageSize] =useState<number>(PaginationConfig.defaultPageSize)
+  const [sortBy, setSortBy] = useState(PaginationConfig.defaultRoadmapSortBy);
+  const [asc, setAsc] = useState(PaginationConfig.defaultAsc);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -33,7 +41,7 @@ export default observer(function RoadmapsPage() {
       filter,
       search: "",
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc,
@@ -61,10 +69,10 @@ export default observer(function RoadmapsPage() {
       ...(filter && { filter }),
       ...(search && { search }),
       ...(date && { date }),
-      page: (page || 1).toString(),
-      pageSize: (pageSize || 10).toString(),
-      sortBy: sortBy || "UpdatedAt",
-      asc: (asc || 0).toString()
+      page: (page || PaginationConfig.defaultPage).toString(),
+      pageSize: (pageSize || PaginationConfig.defaultPageSize).toString(),
+      sortBy: sortBy || PaginationConfig.defaultRoadmapSortBy,
+      asc: (asc || PaginationConfig.defaultAsc).toString()
     }).toString();
     
     navigate(`?${queryParams}`);
@@ -72,10 +80,10 @@ export default observer(function RoadmapsPage() {
       filter || undefined,
       search || undefined,
       date || undefined,
-      page || 1,
-      pageSize || 10,
-      sortBy || "UpdatedAt",
-      asc || 1
+      page || PaginationConfig.defaultPage,
+      pageSize || PaginationConfig.defaultPageSize,
+      sortBy || PaginationConfig.defaultRoadmapSortBy,
+      asc || PaginationConfig.defaultAsc
     );
   };
   
@@ -86,7 +94,7 @@ export default observer(function RoadmapsPage() {
       filter: selectedFilter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc,
@@ -102,7 +110,7 @@ export default observer(function RoadmapsPage() {
         filter,
         search: normalizedSearch,
         date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-        page: 1,
+        page: PaginationConfig.defaultPage,
         pageSize,
         sortBy,
         asc,
@@ -118,7 +126,7 @@ export default observer(function RoadmapsPage() {
       filter,
       search,
       date: date ? new Date(date).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc,
@@ -144,7 +152,7 @@ export default observer(function RoadmapsPage() {
       filter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize: updatedPageSize,
       sortBy,
       asc,
@@ -158,7 +166,7 @@ export default observer(function RoadmapsPage() {
       filter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy: newSortBy,
       asc,
@@ -172,7 +180,7 @@ export default observer(function RoadmapsPage() {
       filter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc: newAsc,
@@ -184,10 +192,10 @@ export default observer(function RoadmapsPage() {
     const filterParam = queryParams.get("filter") || "";
     const searchParam = queryParams.get("search") || "";
     const dateParam = queryParams.get("date") || "";
-    const pageParam = parseInt(queryParams.get("page") || "1", 10);
-    const pageSizeParam = parseInt(queryParams.get("pageSize") || "10", 10);
-    const sortByParam = queryParams.get("sortBy") || "UpdatedAt";
-    const ascParam = parseInt(queryParams.get("asc") || "0", 10);
+    const pageParam = parseInt(queryParams.get("page") || PaginationConfig.defaultPage.toString(), 10);
+    const pageSizeParam = parseInt(queryParams.get("pageSize") || PaginationConfig.defaultPageSize.toString(), 10);
+    const sortByParam = queryParams.get("sortBy") || PaginationConfig.defaultRoadmapSortBy;
+    const ascParam = parseInt(queryParams.get("asc") || PaginationConfig.defaultAsc.toString(), 10);
     setFilter(filterParam);
     setSearch(searchParam);
     setSelectedDate(dateParam);

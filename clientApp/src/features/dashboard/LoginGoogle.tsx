@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useGoogleAuth } from "../../hooks/useGoogleAuth"; 
 import { useStore } from "../../app/stores/store";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { toast } from "react-toastify";
 
 export default observer(function Login() {
   const { handleGoogleLogin } = useGoogleAuth();
@@ -14,7 +15,7 @@ export default observer(function Login() {
   };
 
   const handleError = () => {
-    console.error("Google Login Failed");
+    toast.error("Google Login Failed");
   };
 
   if (loadingInitial) return <LoadingComponent/>

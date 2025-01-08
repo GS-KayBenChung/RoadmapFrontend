@@ -3,6 +3,7 @@ import { Roadmap } from "../models/roadmap";
 import { AuditLogs } from "../models/auditLogs";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
+import { toast } from "react-toastify";
 
 export default class RoadmapStore {
   logs: AuditLogs[] = [];
@@ -62,7 +63,7 @@ export default class RoadmapStore {
         }
       });
     } catch (error) {
-      console.error("Error updating task completion status", error);
+      toast.error("Error updating task completion status");
     }
   };
 
@@ -95,7 +96,7 @@ export default class RoadmapStore {
         this.loadingInitial = false;
       });
     } catch (error) {
-      console.error(error);
+      toast.error("Failed to load logs:");
       this.loadingInitial = false;
     }
   };
@@ -133,7 +134,7 @@ export default class RoadmapStore {
         this.loadingInitial = false;
       });
     } catch (error) {
-      console.error(error);
+      toast.error("Failed to load roadmaps:");
       this.loadingInitial = false;
     }
   };
@@ -147,7 +148,7 @@ export default class RoadmapStore {
         this.loadingInitial = false;
       });
     } catch (error) {
-      console.error("Failed to load dashboard stats:", error);
+      toast.error("Failed to load dashboard stats:");
     }
   };
  
@@ -165,7 +166,7 @@ export default class RoadmapStore {
       //this.selectedRoadmap = roadmap;
       this.editMode = false;
     } catch (error) {
-      console.error("Error creating or editing roadmap:", error);
+      toast.error("Error editing roadmap:");
     } finally {
       this.submitting = false;
     }
@@ -178,7 +179,7 @@ export default class RoadmapStore {
       this.roadmapRegistry.delete(id);
       navigate('/content');
     } catch (error) {
-      console.error("Error deleting roadmap:", error);
+      toast.error("Error deleting roadmap:");
       this.submitting = false;
     } 
   }

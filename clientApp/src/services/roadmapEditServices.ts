@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 export interface Task {
   taskId: string;          
@@ -32,7 +33,7 @@ export const EditRoadmap = async (roadmapId: string, roadmapData: RoadmapDto) =>
     const response = await axios.put(`/roadmaps/${roadmapId}`, roadmapData);
     return response.data;
   } catch (error) {
-    console.error("Error editing roadmap:", error);
+    toast.error("Error editing roadmap:");
     throw error;
   }
 };

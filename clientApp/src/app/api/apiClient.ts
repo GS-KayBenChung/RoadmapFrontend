@@ -1,7 +1,7 @@
 import axios, { AxiosResponse } from 'axios';
 import { Roadmap } from '../models/roadmap';
 import { AuditLogs } from '../models/auditLogs';
-import API_URL from '../../config/apiConfig';
+// import API_URL from '../../config/apiConfig';
 import { PaginatedAudit } from '../models/paginatedAudit';
 import { PaginatedRoadmap } from '../models/paginatedRoadmap';
 import { DashboardStats } from '../models/dashboardStats';
@@ -12,7 +12,7 @@ const sleep = (delay: number) => {
   })
 }
 
-axios.defaults.baseURL = API_URL.base;
+axios.defaults.baseURL = import.meta.env.VITE_BASE_API_URL;
 
 axios.interceptors.response.use(async response => {
   try {

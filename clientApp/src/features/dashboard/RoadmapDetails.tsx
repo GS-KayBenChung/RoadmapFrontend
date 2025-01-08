@@ -13,6 +13,7 @@ import { runInAction } from 'mobx';
 import ConfirmUncheck from '../../app/layout/ConfirmationUncheck';
 
 interface Task{
+  taskId: string;
   name: string;
   isCompleted: boolean;
   dateStart: string;
@@ -20,6 +21,7 @@ interface Task{
 };
 
 interface Section{
+  sectionId: string;
   name: string;
   tasks: Task[];
   isCompleted: boolean;
@@ -48,9 +50,6 @@ export default observer( function RoadmapDetails() {
   useEffect(() => {      
     if(id) {
       loadRoadmap(id);
-    }
-    else {
-      console.log("Failed");    
     }
   }, [id, loadRoadmap])
 
@@ -317,7 +316,8 @@ export default observer( function RoadmapDetails() {
 
       <div className="max-w-screen-lg mx-auto p-4 mb-12">
         {selectedRoadmap.milestones?.map((milestone, milestoneIndex) => (
-          <div key={milestoneIndex}>
+          <div key={milestone.milestoneId}>
+          {/* <div key={milestoneIndex}> */}
             <div className="p-4 rounded-lg border-2 border-gray-300">
               <div
                 onClick={() => toggleMilestone(milestoneIndex)}
@@ -351,7 +351,7 @@ export default observer( function RoadmapDetails() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                   {milestone.sections?.map((section: Section, sectionIndex: number) => (
                     <div
-                      key={sectionIndex}
+                      key={section.sectionId}
                       onClick={() => toggleSection(milestoneIndex, sectionIndex)}
                       className={`p-4 border rounded-lg bg-gray-100 ${
                         expandedSections[sectionIndex] ? '' : 'h-14'
@@ -374,7 +374,7 @@ export default observer( function RoadmapDetails() {
                       {expandedSections[sectionIndex] && expandedMilestone === milestoneIndex && (
                         <ul>
                           {section.tasks?.map((task: Task, taskIndex: number) => (
-                            <li key={taskIndex} className="flex items-center space-x-2">
+                            <li key={task.taskId} className="flex items-center space-x-2">
                               <Checkbox
                                 checked={task.isCompleted}
                                 onClick={(e) => e.stopPropagation()}

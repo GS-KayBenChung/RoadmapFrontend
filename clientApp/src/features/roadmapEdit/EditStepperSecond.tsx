@@ -27,17 +27,13 @@ export default observer(function EditStepperSecond(){
   const milestones = selectedRoadmap?.milestones || [];
   const isDraft = selectedRoadmap?.isDraft; 
 
-  if (!milestones.length) {
-    return <div>No milestones available. Please add a milestone or check the roadmap data.</div>;
-  }
   if(!selectedRoadmap) return <LoadingComponent/>;
   return (
     <Box className="mb-24">
       <button
          onClick={() => {
           addMilestone();
-          console.log("Milestones after addition:", toJS(roadmapEditStore.milestones));
-          
+          // console.log("Milestones after addition:", toJS(roadmapEditStore.milestones));
         }}
         className="mb-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >

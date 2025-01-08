@@ -7,6 +7,7 @@ import { formatDate, formatDateOnly } from "../DateTimeFormat";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ScreenTitleName from "../ScreenTitleName";
+import { toast } from "react-toastify";
 
 // interface Task{
 //   name: string;
@@ -68,7 +69,14 @@ export default observer(function StepperThird() {
     };
         
     try {
-      await createRoadmap(roadmapData);
+      const result = await createRoadmap(roadmapData);
+      console.log(result);
+      console.log(result.status);
+      console.log(result.err);
+      if(result.status === "401"){
+        toast.error(result.status + " Error Occured: " + result.err);
+        return;
+      }
       roadmapCreateStore.reset();
       navigate('/content');
     } catch (error) {

@@ -8,15 +8,23 @@ import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, I
 import { useNavigate, useLocation } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 
+const PaginationConfig = {
+  defaultPage: parseInt(import.meta.env.VITE_DEFAULT_PAGE || "1", 10),
+  defaultPageSize: parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE || "10", 10),
+  defaultAuditSortBy: import.meta.env.VITE_DEFAULT_AUDIT_SORT_BY || "CreatedAt",
+  defaultAsc: parseInt(import.meta.env.VITE_DEFAULT_ASC || "0", 10),
+  pageSizeOptions: (import.meta.env.VITE_PAGE_SIZE_OPTIONS || "10")
+};
+
 export default observer(function RoadmapAudit() {
   const { roadmapStore } = useStore();
   const { logs, loadLogs, loadingInitial } = roadmapStore;
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
-  const [pageSize, setPageSize] = useState<number>(10);
-  const [sortBy, setSortBy] = useState<string>("CreatedAt");
-  const [asc, setAsc] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(PaginationConfig.defaultPageSize);
+  const [sortBy, setSortBy] = useState<string>(PaginationConfig.defaultAuditSortBy);
+  const [asc, setAsc] = useState<number>(PaginationConfig.defaultAsc);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -25,10 +33,10 @@ export default observer(function RoadmapAudit() {
     const filterParam = queryParams.get("filter") || "";
     const searchParam = queryParams.get("search") || "";
     const dateParam = queryParams.get("date") || "";
-    const pageParam = parseInt(queryParams.get("page") || "1", 10);
-    const pageSizeParam = parseInt(queryParams.get("pageSize") || "10", 10);
-    const sortByParam = queryParams.get("sortBy") || "CreatedAt";
-    const ascParam = parseInt(queryParams.get("asc") || "1", 10);
+    const pageParam = parseInt(queryParams.get("page") || PaginationConfig.defaultPage.toString(), 10);
+    const pageSizeParam = parseInt(queryParams.get("pageSize") || PaginationConfig.defaultPageSize.toString(), 10);
+    const sortByParam = queryParams.get("sortBy") || PaginationConfig.defaultAuditSortBy;
+    const ascParam = parseInt(queryParams.get("asc") || PaginationConfig.defaultAsc.toString(), 10);
 
     setFilter(filterParam);
     setSearch(searchParam);
@@ -47,7 +55,7 @@ export default observer(function RoadmapAudit() {
       filter: selectedFilter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc,
@@ -62,7 +70,7 @@ export default observer(function RoadmapAudit() {
         filter,
         search: normalizedSearch,
         date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-        page: 1,
+        page: PaginationConfig.defaultPage,
         pageSize,
         sortBy,
         asc,
@@ -97,7 +105,7 @@ export default observer(function RoadmapAudit() {
       filter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy: newSortBy,
       asc,
@@ -111,7 +119,7 @@ export default observer(function RoadmapAudit() {
       filter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc: newAsc,
@@ -126,7 +134,7 @@ export default observer(function RoadmapAudit() {
       filter,
       search,
       date: date ? new Date(date).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize,
       sortBy,
       asc,
@@ -140,7 +148,7 @@ export default observer(function RoadmapAudit() {
       filter,
       search,
       date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: 1,
+      page: PaginationConfig.defaultPage,
       pageSize: updatedPageSize,
       sortBy,
       asc,
@@ -168,20 +176,20 @@ export default observer(function RoadmapAudit() {
       ...(filter && { filter }),
       ...(search && { search }),
       ...(date && { date }),
-      page: (page || 1).toString(),
-      pageSize: (pageSize || 10).toString(),
-      sortBy: sortBy || "Date",
-      asc: (asc || 0).toString()
+      page: (page || PaginationConfig.defaultPage).toString(),
+      pageSize: (pageSize || PaginationConfig.defaultPageSize).toString(),
+      sortBy: sortBy || PaginationConfig.defaultAuditSortBy,
+      asc: (asc || PaginationConfig.defaultAsc).toString()
     }).toString();
     navigate(`?${queryParams}`);
     loadLogs(
       filter || undefined,
       search || undefined,
       date || undefined,
-      page || 1,
-      pageSize || 10,
-      sortBy || "Date",
-      asc || 1
+      page || PaginationConfig.defaultPage,
+      pageSize || PaginationConfig.defaultPageSize,
+      sortBy || PaginationConfig.defaultAuditSortBy,
+      asc || PaginationConfig.defaultAsc
     );
   };
 

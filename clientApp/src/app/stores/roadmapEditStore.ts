@@ -61,10 +61,6 @@ class RoadmapEditStore {
     return true;
   };
 
-  testingLog = () => {
-    console.log("Milestones:", toJS(roadmapEditStore.milestones));
-  }
-
   setActiveStep = (step: number) => {
     runInAction(() => {
       this.activeStep = step;
@@ -103,7 +99,6 @@ class RoadmapEditStore {
   
   addMilestone = () => {
     runInAction(() => {
-      console.log("addMilestoneEditStore called");
       this.milestones.push({
           name: "",
           description: "",
@@ -120,7 +115,6 @@ class RoadmapEditStore {
 
   addSection = (milestoneIndex: number) => {
     runInAction(() => {
-      console.log("addSectionEditStore called");
       this.milestones[milestoneIndex].sections.push({
         name: "",
         description: "",
@@ -137,7 +131,6 @@ class RoadmapEditStore {
 
   addTask = (milestoneIndex: number, sectionIndex: number) => {
     runInAction(() => {
-      console.log("addTaskEditStore called");
       this.milestones[milestoneIndex].sections[sectionIndex].tasks.push({
         name: "",
         dateStart: "",

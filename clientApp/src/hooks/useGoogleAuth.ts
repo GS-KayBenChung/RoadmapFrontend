@@ -1,4 +1,5 @@
 
+import { toast } from "react-toastify";
 import apiClient from "../app/api/apiClient";
 import { useStore } from "../app/stores/store";
 import { useAuth } from "./useAuth";
@@ -12,6 +13,7 @@ export const useGoogleAuth = () => {
   const handleGoogleLogin = async (credentialResponse: any) => {
     try {
       const token = credentialResponse.credential;
+      //sending crediential
 
       const data = await apiClient.Roadmaps.googleLogin(token);
 
@@ -23,7 +25,11 @@ export const useGoogleAuth = () => {
         id: data.id,
         username: data.username,
         email: data.email,
-        token: data.token,
+        token: data.token,//not token is credientals
+
+        //NOTES : WRONG WAY TO DO IT should serialized it (id, username, email)
+        //serializedToken: data.serializedToken,
+
         createdAt: data.createdAt,
       };
 
@@ -35,7 +41,7 @@ export const useGoogleAuth = () => {
         navigate("/");
       }
     } catch (error) {
-      console.error("Error during Google login:", error);
+      toast.error("Error during Google login:");
     }
   };
 

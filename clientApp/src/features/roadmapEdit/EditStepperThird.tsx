@@ -6,6 +6,7 @@ import ScreenTitleName from "../ScreenTitleName";
 import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
 import { useStore } from "../../app/stores/store";
 import { EditRoadmap, RoadmapDto } from "../../services/roadmapEditServices";
+import { toast } from "react-toastify";
 
 interface Task{
   taskId: string; 
@@ -26,7 +27,7 @@ const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
 
 export default observer(function EditStepperThird() {
   const navigate = useNavigate();
-  const { roadmapTitle, roadmapDescription, milestones, testingLog } = roadmapEditStore;
+  const { roadmapTitle, roadmapDescription, milestones } = roadmapEditStore;
   const [openPreview, setOpenPreview] = useState(false);
   const {roadmapStore} = useStore();
   const {selectedRoadmap} = roadmapStore;
@@ -61,7 +62,7 @@ export default observer(function EditStepperThird() {
       roadmapEditStore.reset();
       navigate('/content');
     } catch (error) {
-      console.error("Error editing roadmap:", error);
+      toast.error("Error editing roadmap:");
     }
   };
   
@@ -84,7 +85,6 @@ export default observer(function EditStepperThird() {
       >
         Preview Roadmap Structure
       </button>
-      <button onClick={testingLog}>hereTest</button>
       <div className="space-y-4 mb-8">
         <div>
           <p className="text-xl font-semibold text-gray-800">Roadmap Title:</p>
