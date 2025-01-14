@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import ConfirmDeleteModal from '../../app/layout/ConfirmationModel';
 import { runInAction } from 'mobx';
 import ConfirmUncheck from '../../app/layout/ConfirmationUncheck';
+import ConfirmModal from '../../app/layout/ConfirmationModel';
+import { toast, ToastContainer } from 'react-toastify';
 
 interface Task{
   taskId: string;
@@ -36,6 +38,7 @@ export default observer( function RoadmapDetails() {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false); 
   const [showConfirm, setShowConfirm] = useState(false); 
+  const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [confirmationTarget, setConfirmationTarget] = useState<{
     type: 'roadmap' | 'milestone' | 'section';
     index?: number; 
@@ -264,10 +267,53 @@ export default observer( function RoadmapDetails() {
   
     return `${formattedFirstTaskDate} To ${formattedLastTaskDate} ( ${totalDuration} ${totalDuration === 1 ? 'day' : 'days'} )`;
   };
+
+  const handlePublishConfirmation = () => {
+    if (validateRoadmapBeforePublish()) {
+      setShowPublishConfirm(true);
+    }
+  };
+  
+  const confirmPublish = async () => {
+    try {
+      await roadmapStore.publishRoadmap(id!);
+      setShowPublishConfirm(false);
+      navigate(`/roadmap/${id}`);
+    } catch (error) {
+      toast.error('Failed to publish the roadmap.');
+    }
+  };
+  
+
+  const validateRoadmapBeforePublish = () => {
+    const hasTasks = selectedRoadmap.milestones.some((milestone: any) =>
+      milestone.sections.some((section: any) => section.tasks.length > 0)
+    );
+    if (!hasTasks) {
+      toast.error('You cannot publish a roadmap without any tasks.');
+      return false;
+    }
+    return true;
+  };
   
   return (
     <>
-      <ConfirmDeleteModal
+      <ToastContainer
+        autoClose={2000}
+        hideProgressBar={true}
+        closeOnClick={true}
+        pauseOnHover={true}
+        draggable={true}
+        position="top-center"
+      />
+      <ConfirmModal
+        actionType="publish"
+        isOpen={showPublishConfirm}
+        onConfirm={confirmPublish}
+        onCancel={() => setShowPublishConfirm(false)}
+      />
+      <ConfirmModal
+        actionType="delete"
         isOpen={showModal}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
@@ -290,12 +336,22 @@ export default observer( function RoadmapDetails() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center space-x-4">
             <h1 className="text-xl font-bold leading-none flex-shrink-0">{selectedRoadmap.title}</h1>
-            <Checkbox
-              checked={selectedRoadmap.isCompleted || false}
-              onChange={(e) => handleConfirmationModal('roadmap', e.target.checked)}
-            />
+            {!selectedRoadmap.isDraft && (
+              <Checkbox
+                checked={selectedRoadmap.isCompleted || false}
+                onChange={(e) => handleConfirmationModal('roadmap', e.target.checked)}
+              />
+            )}
           </div>
           <div className="flex space-x-4">
+            {selectedRoadmap.isDraft && (
+              <button
+                className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 text-sm"
+                onClick={handlePublishConfirmation}
+              >
+                PUBLISH
+              </button>
+            )}
             <button
               className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 text-sm"
               onClick={() => navigate(`/roadmapEdit/${selectedRoadmap.roadmapId}`)}
@@ -329,13 +385,15 @@ export default observer( function RoadmapDetails() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <h2 className="text-lg font-bold">{milestone.name}</h2>
-                      {expandedMilestone === milestoneIndex && (
-                        <Checkbox
-                          checked={milestone.isCompleted || false}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => handleConfirmationModal('milestone', e.target.checked, milestoneIndex)}
-                        />
-                      )}
+                      {expandedMilestone === milestoneIndex ? (
+                        !selectedRoadmap.isDraft ? (
+                          <Checkbox
+                            checked={milestone.isCompleted || false}
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => handleConfirmationModal('milestone', e.target.checked, milestoneIndex)}
+                          />
+                        ) : null
+                      ) : null}
                     </div>
                     <span className="text-sm text-gray-500">
                       Duration: {calculateMilestoneDuration(milestone)}
@@ -359,10 +417,11 @@ export default observer( function RoadmapDetails() {
                       }`}
                     >
                       <div className="flex items-center space-x-3 w-full cursor-pointer hover:bg-gray-100">
-                        <h3 className="pl-3 font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">
+                        <h3  className={`font-semibold break-words w-full md:max-w-[calc(100%-2rem)] ${!selectedRoadmap.isDraft ? 'pl-3' : ''}`}>
                           {section.name}
                         </h3>
-                        {expandedSections[sectionIndex] && (
+                        {expandedSections[sectionIndex] && !selectedRoadmap.isDraft && (
+                          
                           <Checkbox
                             checked={section.isCompleted}
                             onChange={(e) => handleConfirmationModal('section', e.target.checked, sectionIndex, milestoneIndex)}
@@ -374,13 +433,15 @@ export default observer( function RoadmapDetails() {
                         <ul>
                           {section.tasks?.map((task: Task, taskIndex: number) => (
                             <li key={task.taskId} className="flex items-center space-x-2">
-                              <Checkbox
-                                checked={task.isCompleted}
-                                onClick={(e) => e.stopPropagation()}
-                                onChange={(e) =>
-                                  toggleTaskCompletion(milestoneIndex, sectionIndex, taskIndex, e.target.checked)
-                                }
-                              />
+                              {!selectedRoadmap.isDraft && (
+                                <Checkbox
+                                  checked={task.isCompleted}
+                                  onClick={(e) => e.stopPropagation()}
+                                  onChange={(e) =>
+                                    toggleTaskCompletion(milestoneIndex, sectionIndex, taskIndex, e.target.checked)
+                                  }
+                                />
+                              )}
                               <div>
                                 <span className="block text-sm font-medium text-gray-800">{task.name}</span>
                                 <span className="block text-xs text-gray-600">

@@ -206,6 +206,19 @@ export default class RoadmapStore {
       });
     }
   }
+
+  publishRoadmap = async(id: string) => {
+    try {
+      await apiClient.Roadmaps.publishRoadmap(id);
+      runInAction(() => {
+        this.selectedRoadmap!.isDraft = false;
+      });
+      toast.success("Roadmap published successfully!");
+    } catch (error) {
+      toast.error("Failed to publish the roadmap.");
+    }
+  }
+  
   
   private getRoadmap = (id: string) => {
     return this.roadmapRegistry.get(id)

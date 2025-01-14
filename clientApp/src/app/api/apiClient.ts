@@ -60,6 +60,7 @@ const Roadmaps = {
     `/authentication/googleresponse`,
     { credential: token }
   ),
+  publishRoadmap: async (roadmapId: string) => requests.patch<void>(`/roadmaps/${roadmapId}/publish`, {}),
 }
 
 const apiClient = {
