@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 
 export default class RoadmapStore {
   logs: AuditLogs[] = [];
+  totalCount = 0;
   currentPage = 1;
   totalPages = 1;
   roadmapRegistry = new Map<string, Roadmap>();
@@ -17,6 +18,7 @@ export default class RoadmapStore {
   dashboardStats = {
     totalRoadmaps: 0,
     draftRoadmaps: 0,
+    publishedRoadmaps: 0,
     completedRoadmaps: 0,
     nearDueRoadmaps: 0,
     overdueRoadmaps: 0,
@@ -92,7 +94,7 @@ export default class RoadmapStore {
         this.currentPage = pageNumber;
         this.totalPages = result.totalPages; 
         pageSize = result.pageSize;
-        
+
         this.loadingInitial = false;
       });
     } catch (error) {
@@ -130,6 +132,7 @@ export default class RoadmapStore {
         this.currentPage = pageNumber;
         this.totalPages = result.totalPages; 
         pageSize = result.pageSize;
+        this.totalCount = result.totalCount;
         
         this.loadingInitial = false;
       });
@@ -195,6 +198,7 @@ export default class RoadmapStore {
         this.loadingInitial = false;
       });
       return roadmap;
+      
       
     } catch (error) {
       runInAction(() => {

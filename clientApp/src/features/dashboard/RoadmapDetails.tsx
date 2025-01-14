@@ -265,7 +265,6 @@ export default observer( function RoadmapDetails() {
     return `${formattedFirstTaskDate} To ${formattedLastTaskDate} ( ${totalDuration} ${totalDuration === 1 ? 'day' : 'days'} )`;
   };
   
- 
   return (
     <>
       <ConfirmDeleteModal

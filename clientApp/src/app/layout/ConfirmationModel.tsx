@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ConfirmDeleteModalProps {
   isOpen: boolean;
   onConfirm: () => void;

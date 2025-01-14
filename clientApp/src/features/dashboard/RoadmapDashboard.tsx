@@ -24,8 +24,8 @@ export default observer( function RoadmapDashboard() {
       <div className="w-full flex-grow bg-white my-24">
         <ScreenTitleName title="ROADMAP DASHBOARD" />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-4xl mx-auto mt-24">
-          <DashboardCard title="Current Roadmaps" value={dashboardStats.totalRoadmaps} />
-          <DashboardCard title="Completed Roadmap" value={`${dashboardStats.completedRoadmaps}/${dashboardStats.totalRoadmaps}`} filter="completed" />
+          <DashboardCard title="Current Roadmaps" value={dashboardStats.totalRoadmaps || 0}  />
+          <DashboardCard title="Completed Roadmap" value={`${dashboardStats.completedRoadmaps || 0}/${dashboardStats.totalRoadmaps || 0}`} filter="completed" />
           <DashboardCard
             title="Overall Completion Rate"
             progress={
@@ -33,16 +33,16 @@ export default observer( function RoadmapDashboard() {
                 <CircularProgress
                   percentage={
                     dashboardStats.totalRoadmaps > 0
-                    ? Math.round((dashboardStats.completedRoadmaps / dashboardStats.totalRoadmaps) * 100)
+                    ? Math.round((dashboardStats.completedRoadmaps  / dashboardStats.totalRoadmaps) * 100)
                     : 0
                   }
                 />
               </div>
             }
           />
-          <DashboardCard title="Near Due Roadmap" value={dashboardStats.nearDueRoadmaps} filter="neardue" />
-          <DashboardCard title="Overdue Roadmap" value={dashboardStats.overdueRoadmaps} filter="overdue" />
-          <DashboardCard title="Draft Roadmap" value={dashboardStats.draftRoadmaps} filter="draft"/>
+          <DashboardCard title="Near Due Roadmap" value={dashboardStats.nearDueRoadmaps || 0} filter="neardue" />
+          <DashboardCard title="Overdue Roadmap" value={dashboardStats.overdueRoadmaps || 0} filter="overdue" />
+          <DashboardCard title="Draft Roadmap" value={dashboardStats.draftRoadmaps || 0} filter="draft"/>
         </div>
       </div>
       <Footer />

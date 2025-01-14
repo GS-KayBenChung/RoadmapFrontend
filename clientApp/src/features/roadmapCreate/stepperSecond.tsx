@@ -135,6 +135,9 @@ export default observer(function StepperSecond() {
                                 type="date"
                                 label="Start Date"
                                 InputLabelProps={{ shrink: true }}
+                                inputProps={{
+                                  min: new Date().toISOString().split('T')[0], 
+                                }}
                                 onKeyDown={(e) => e.preventDefault()}
                                 value={task.startDate}
                                 onChange={(e) => {
@@ -149,6 +152,9 @@ export default observer(function StepperSecond() {
                                 type="date"
                                 label="End Date"
                                 InputLabelProps={{ shrink: true }}
+                                inputProps={{
+                                  min: new Date().toISOString().split('T')[0], 
+                                }}
                                 onKeyDown={(e) => e.preventDefault()}
                                 value={task.endDate}
                                 onChange={(e) => {

@@ -1,44 +1,36 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { observer } from "mobx-react-lite";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useStore } from "../../app/stores/store";
 import NavBar from "../../app/layout/NavBar";
 import ScreenTitleName from "../ScreenTitleName";;
-import LoadingComponent from "../../app/layout/LoadingComponent";
+// import LoadingComponent from "../../app/layout/LoadingComponent";
 import EditStepperFirst from "../roadmapEdit/EditStepperFirst";
 import EditStepperSecond from "../roadmapEdit/EditStepperSecond";
 import EditStepperComponent from "../roadmapEdit/EditStepperComponent";
-import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
 import { ToastContainer } from "react-toastify";
 import EditStepperThird from "../roadmapEdit/EditStepperThird";
+import {roadmapEditTestStore} from "../../app/stores/roadmapEditTestStore";
 
 const steps = ["Roadmap Details", "Milestones & Sections", "Overview & Submit"];
 
-const RoadmapEdit = observer(() => {
+export default observer(function RoadmapEdit() {
+  const { activeStep } = roadmapEditTestStore;
   const { roadmapStore } = useStore();
-  const { selectedRoadmap, loadRoadmap, loadingInitial } = roadmapStore;
+  const { loadRoadmap } = roadmapStore;
   const { id } = useParams();
-  const navigate = useNavigate();
+  const [roadmapToEdit, setRoadmapToEdit] = useState<any>(null);
 
-  const { activeStep, setActiveStep } = roadmapEditStore;
-
-  useEffect(() => {
-    if (selectedRoadmap) {
-      roadmapEditStore.setRoadmapTitle(selectedRoadmap.title);
-      roadmapEditStore.setRoadmapDescription(selectedRoadmap.description);
-      roadmapEditStore.setMilestones(selectedRoadmap.milestones || []); 
-    }
-  }, [selectedRoadmap]);
 
   useEffect(() => {
     if (id) {
-      loadRoadmap(id);
+      loadRoadmap(id).then((roadmap) => {
+        if (roadmap) {
+          setRoadmapToEdit({ ...roadmap });
+        }
+      });
     }
   }, [id, loadRoadmap]);
-
-  const handleSave = () => {
-    navigate(`/roadmapDetails/${id}`);
-  };
 
   const renderStepContent = (step: number) => {
     switch (step) {
@@ -53,13 +45,13 @@ const RoadmapEdit = observer(() => {
     }
   };
 
-  if (loadingInitial) {
-    return <LoadingComponent />;
-  }
+  // if (loadingInitial) {
+  //   return <LoadingComponent />;
+  // }
 
-  if (!selectedRoadmap) {
-    return <div>Failed to load roadmap. Please try again.</div>;
-  }
+  // if (!roadmapToEdit) {
+  //   return <div>Failed to load roadmap. Please try again.</div>;
+  // }
 
   return (
     <>
@@ -80,7 +72,6 @@ const RoadmapEdit = observer(() => {
         </div>
       </div>
     </>
-  );
-});
+  ); 
 
-export default RoadmapEdit;
+});

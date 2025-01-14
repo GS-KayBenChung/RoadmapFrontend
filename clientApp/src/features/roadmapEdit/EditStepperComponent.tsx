@@ -1,7 +1,6 @@
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { toast } from "react-toastify";
-import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
+import { roadmapEditTestStore } from "../../app/stores/roadmapEditTestStore";
 
 interface Props {
   steps: string[];
@@ -9,12 +8,12 @@ interface Props {
 }
 
 export default observer(function EditStepperComponent({ steps, activeStep }: Props) {
-  const { setActiveStep, roadmapTitle, roadmapDescription } = roadmapEditStore;
+  const { setActiveStep } = roadmapEditTestStore;
 
   const handleNext = () => {
-    if (!roadmapEditStore.validateRoadmap()) {
-      return; 
-    }
+    // if (!roadmapEditStore.validateRoadmap()) {
+    //   return; 
+    // }
     setActiveStep(activeStep + 1);
   };
 

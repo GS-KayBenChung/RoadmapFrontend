@@ -23,7 +23,7 @@ const PaginationConfig = {
 
 export default observer(function RoadmapsPage() {
   const { roadmapStore } = useStore();
-  const { loadRoadmaps, roadmaps, loadingInitial } = roadmapStore;
+  const { loadRoadmaps, roadmaps, loadingInitial, dashboardStats } = roadmapStore;
   const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
   const [viewType, setViewType] = useState<string>("card");
@@ -31,6 +31,7 @@ export default observer(function RoadmapsPage() {
   const [pageSize, setPageSize] =useState<number>(PaginationConfig.defaultPageSize)
   const [sortBy, setSortBy] = useState(PaginationConfig.defaultRoadmapSortBy);
   const [asc, setAsc] = useState(PaginationConfig.defaultAsc);
+  const pageSizeOptions = [5, 10, 20, 50];
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -203,7 +204,7 @@ export default observer(function RoadmapsPage() {
     setSortBy(sortByParam);
     setAsc(ascParam);
     loadRoadmaps(filterParam, searchParam, dateParam, pageParam, pageSizeParam, sortByParam, ascParam);
-  }, [location.search, loadRoadmaps]);
+  }, [location.search, loadRoadmaps, dashboardStats]);
   
   if (loadingInitial) return <LoadingComponent />;
 
@@ -214,26 +215,33 @@ export default observer(function RoadmapsPage() {
         <ScreenTitleName title="ROADMAPS" />
         <div className="space-y-4">
           <div className="w-full sm:w-auto mx-16">
-            <TextField
-              margin="normal"
-              type="date"
-              label="Date"
-              value={selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : ''}
-              onChange={handleDateChange}
-              InputLabelProps={{ shrink: true }}
-              className="w-full sm:w-[200px]"
-            />
+            <div className="flex items-center justify-between w-full">
+              <TextField
+                margin="normal"
+                type="date"
+                label="Date"
+                value={selectedDate ? new Date(selectedDate).toISOString().split('T')[0] : ''}
+                onChange={handleDateChange}
+                InputLabelProps={{ shrink: true }}
+                className="w-full sm:w-[200px]"
+              />
+              <div className="text-gray-600">
+                {roadmapStore.totalCount} results found
+              </div>
+              </div>
           </div>
+          
           <div className="mx-16">
             <div className="flex items-center justify-between w-full">
               <FormControl variant="outlined" size="small" className="w-full sm:w-52">
                 <InputLabel>Filter By</InputLabel>
                 <Select value={filter} onChange={handleFilterChange} label="Filter By">
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="draft">Draft</MenuItem>
-                  <MenuItem value="completed">Completed</MenuItem>
-                  <MenuItem value="neardue">Near Due</MenuItem>
-                  <MenuItem value="overdue">Overdue</MenuItem>
+                  <MenuItem value="">All  ({roadmapStore.dashboardStats.totalRoadmaps})</MenuItem>
+                  <MenuItem value="draft">Draft ({roadmapStore.dashboardStats.draftRoadmaps}) </MenuItem>
+                  <MenuItem value="published">Published ({roadmapStore.dashboardStats.publishedRoadmaps})</MenuItem>
+                  <MenuItem value="completed">Completed ({roadmapStore.dashboardStats.completedRoadmaps})</MenuItem>
+                  <MenuItem value="neardue">Near Due ({roadmapStore.dashboardStats.nearDueRoadmaps})</MenuItem>
+                  <MenuItem value="overdue">Overdue ({roadmapStore.dashboardStats.overdueRoadmaps})</MenuItem>
                 </Select>
               </FormControl>
 
@@ -312,12 +320,16 @@ export default observer(function RoadmapsPage() {
                 onChange={handlePageSize}
                 className="ml-2 w-full sm:w-auto"
               >
-                <MenuItem value="5">5</MenuItem>
-                <MenuItem value="10">10</MenuItem>
-                <MenuItem value="15">15</MenuItem>
-                <MenuItem value="20">20</MenuItem>
+                {pageSizeOptions.map((size) => (
+                  <MenuItem
+                    key={size}
+                    value={size}
+                    disabled={size > roadmapStore.totalCount && roadmapStore.totalCount !== 0}
+                  >
+                    {size}
+                  </MenuItem>
+                ))}
               </Select>
-              
             </div>
           </div>
 

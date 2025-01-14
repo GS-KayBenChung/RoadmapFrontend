@@ -1,25 +1,13 @@
 import { Box, Modal } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
-import createRoadmapHierarchy from "./createRoadmapLevel";
-import { createRoadmap, RoadmapDto } from "../../services/roadmapServices"; 
 import { formatDate, formatDateOnly } from "../DateTimeFormat";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ScreenTitleName from "../ScreenTitleName";
 import { toast } from "react-toastify";
-
-// interface Task{
-//   name: string;
-//   completed: boolean;
-//   dateStart: string;
-//   dateEnd: string;
-// };
-
-// interface Section{
-//   name: string;
-//   tasks: Task[];
-// };
+import apiClient from "../../app/api/apiClient";
+import axios from "axios";
 
 export default observer(function StepperThird() {
 
@@ -29,9 +17,8 @@ export default observer(function StepperThird() {
   const [openPreview, setOpenPreview] = useState(false);
 
   const handleSubmit = async (isDraft: boolean) => {
-    createRoadmapHierarchy();
 
-    const roadmapData: RoadmapDto = {
+    const roadmapData: any = {
       title: roadmapTitle,
       description: roadmapDescription,
       createdBy: "0e7d3f8c-845c-4c69-b50d-9f07c0c7b98f",  
@@ -69,17 +56,19 @@ export default observer(function StepperThird() {
     };
         
     try {
-      const result = await createRoadmap(roadmapData);
-      console.log(result);
-      console.log(result.status);
-      console.log(result.err);
-      if(result.status === "401"){
-        toast.error(result.status + " Error Occured: " + result.err);
-        return;
-      }
+      await apiClient.Roadmaps.create(roadmapData);
+  
+      toast.success("Roadmap created successfully!");
       roadmapCreateStore.reset();
       navigate('/content');
-    } catch (error) {
+    } catch (error: any) {
+      if (axios.isAxiosError(error) && error.response) {
+        const status = error.response.status;
+        const message = error.response.data?.message || "An error occurred.";
+        toast.error(`Error ${status}: ${message}`);
+      } else {
+        toast.error("An unexpected error occurred.");
+      }
     }
   };
 
@@ -173,7 +162,7 @@ export default observer(function StepperThird() {
           <div className="max-w-screen-lg mx-auto p-4">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <h1 className="text-xl font-bold leading-none flex-shrink-0">{roadmapTitle}</h1>
+                <h1 className="text-xl font-bold leading-none flex-shrink-0">Roadmap : {roadmapTitle}</h1>
               </div>
             </div>
             <div>{roadmapDescription}</div>
@@ -186,7 +175,7 @@ export default observer(function StepperThird() {
                   <div className="flex items-center space-x-4">
                     <div className="flex-grow">
                       <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold">{milestone.title}</h2>
+                        <h2 className="text-lg font-bold">Milestone: {milestone.title}</h2>
                       </div>
                       <p className="text-sm text-gray-600 mt-2">{milestone.description}</p>
                     </div>
@@ -199,14 +188,14 @@ export default observer(function StepperThird() {
                         className="p-4 border rounded-lg bg-gray-100"
                       >
                         <div className="flex items-center space-x-3 w-full">
-                          <h3 className="font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">{section.title}</h3>
+                          <h3 className="font-semibold break-words w-full md:max-w-[calc(100%-2rem)]">Section: {section.title}</h3>
                         </div>
                         <hr className="border-t border-gray-300 my-3" />
                         <ul>
                           {section.tasks?.map((task, taskIndex) => (
                             <li key={taskIndex} className="flex items-center space-x-2">
                               <div>
-                                <span className="block text-sm font-medium text-gray-800">{task.title}</span>
+                                <span className="block text-sm font-medium text-gray-800">Task: {task.title}</span>
                                 <span className="block text-xs text-gray-600">
                                   {formatDateOnly(new Date(task.startDate))} to {formatDateOnly(new Date(task.endDate))}
                                 </span>

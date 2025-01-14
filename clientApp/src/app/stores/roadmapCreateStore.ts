@@ -31,8 +31,16 @@ class RoadmapCreateStore {
       return false;
     }
   
-    for (let i = 0; i < this.milestones.length; i++) {
-      const milestone = this.milestones[i];
+    const sortedMilestones = [...this.milestones].sort((a, b) => {
+      const aStartDates = a.sections.flatMap(section => section.tasks.map(task => new Date(task.startDate)));
+      const bStartDates = b.sections.flatMap(section => section.tasks.map(task => new Date(task.startDate)));
+      return Math.min(...aStartDates.map(date => date.getTime())) - Math.min(...bStartDates.map(date => date.getTime()));
+    });
+  
+    let lastTaskEndDate: Date | null = null;
+  
+    for (let i = 0; i < sortedMilestones.length; i++) {
+      const milestone = sortedMilestones[i];
       if (!milestone.title.trim() || !milestone.description.trim()) {
         toast.warning(`Milestone ${i + 1} Title and Description are required.`);
         return false;
@@ -45,8 +53,11 @@ class RoadmapCreateStore {
           return false;
         }
   
-        for (let k = 0; k < section.tasks.length; k++) {
-          const task = section.tasks[k];
+        const sortedTasks = [...section.tasks].sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+  
+        for (let k = 0; k < sortedTasks.length; k++) {
+          const task = sortedTasks[k];
+  
           if (!task.title.trim()) {
             toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} Title is required.`);
             return false;
@@ -55,10 +66,38 @@ class RoadmapCreateStore {
             toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} Start Date and End Date are required.`);
             return false;
           }
-          if (new Date(task.startDate) > new Date(task.endDate)) {
+  
+          const startDate = new Date(task.startDate);
+          const endDate = new Date(task.endDate);
+  
+          if (startDate.getTime() === endDate.getTime()) {
+            toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} Start Date and End Date cannot be the same.`);
+            return false;
+          }
+          if (startDate > endDate) {
             toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} End Date cannot be before Start Date.`);
             return false;
           }
+  
+          if (k > 0) {
+            const prevTaskEndDate = new Date(sortedTasks[k - 1].endDate);
+            if (startDate < prevTaskEndDate) {
+              toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} cannot start before the previous task ends.`);
+              return false;
+            }
+          }
+  
+          if (lastTaskEndDate && startDate < lastTaskEndDate) {
+            toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} cannot start before the previous task in another section ends.`);
+            return false;
+          }
+  
+          if (lastTaskEndDate && startDate < lastTaskEndDate) {
+            toast.warning(`Task ${k + 1} in Section ${j + 1} of Milestone ${i + 1} cannot start before the last task in Milestone ${i} ends.`);
+            return false;
+          }
+  
+          lastTaskEndDate = endDate;
         }
       }
     }

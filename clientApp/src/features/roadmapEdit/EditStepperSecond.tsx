@@ -1,50 +1,130 @@
-import { Box, Card, CardContent, IconButton, TextField } from "@mui/material";
 import { TrashIcon } from "@heroicons/react/16/solid";
-import { runInAction, toJS } from "mobx";
+import { Box, Card, CardContent, IconButton, TextField, Button } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { roadmapEditStore } from "../../app/stores/roadmapEditStore";
-import { useStore } from "../../app/stores/store";
+import { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { roadmapEditTestStore } from "../../app/stores/roadmapEditTestStore";
+import { toast } from "react-toastify";
 
-interface Task{
-  name: string;
-  completed: boolean;
-  dateStart: string;
-  dateEnd: string;
-};
 
-interface Section{
-  name: string;
-  description: string;
-  tasks: Task[];
-};
+export default observer(function EditStepperSecond() {
+  const { loadRoadmap, roadmapToEdit, updateRoadmap, addMilestone, addSection, addTask } = roadmapEditTestStore;
+  const { id } = useParams();
+  
+  const visibleMilestones = roadmapToEdit?.milestones?.filter((m: any) => !m.isDeleted) || [];
+  const visibleSections = (sections: any[]) => sections?.filter((s) => !s.isDeleted) || [];
+  const visibleTasks = (tasks: any[]) => tasks?.filter((t) => !t.isDeleted) || [];
+  
+  useEffect(() => {
+    if (id) {
+      loadRoadmap(id);
+    }
+  }, [id, loadRoadmap]);
 
-export default observer(function EditStepperSecond(){
-  const {addMilestone, deleteMilestone, addSection, deleteSection, addTask, deleteTask } = roadmapEditStore;
-  const {roadmapStore} = useStore();
-  const {selectedRoadmap} = roadmapStore;
+  const handleMilestoneChange = (milestoneId: string, field: string, value: string) => {
+    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+    if (milestone) {
+      milestone[field] = value;
+      updateRoadmap({ milestones: roadmapToEdit.milestones });
+    }
+  };
 
-  const milestones = selectedRoadmap?.milestones || [];
-  const isDraft = selectedRoadmap?.isDraft; 
+  const handleSectionChange = (milestoneId: string, sectionId: string, field: string, value: string) => {
+    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+    if (section) {
+      section[field] = value;
+      updateRoadmap({ milestones: roadmapToEdit.milestones });
+    }
+  };
 
-  if(!selectedRoadmap) return <LoadingComponent/>;
+  const handleTaskChange = (milestoneId: string, sectionId: string, taskId: string, field: string, value: string) => {
+    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+    const task = section?.tasks.find((t: any) => t.taskId === taskId);
+    if (task) {
+      task[field] = value;
+      updateRoadmap({ milestones: roadmapToEdit.milestones });
+    }
+  };
+
+  const removeMilestone = (milestoneId: string) => {
+    roadmapToEdit((prev: any) => {
+      const updatedMilestones = prev.milestones.map((milestone: any) =>
+        milestone.milestoneId === milestoneId
+          ? { ...milestone, isDeleted: true }
+          : milestone
+      );
+      return { ...prev, milestones: updatedMilestones };
+    });
+  };
+  
+  const removeSection = (milestoneId: string, sectionId: string) => {
+    roadmapToEdit((prev: any) => {
+      const updatedMilestones = prev.milestones.map((milestone: any) => {
+        if (milestone.milestoneId === milestoneId) {
+          const updatedSections = milestone.sections.map((section: any) =>
+            section.sectionId === sectionId
+              ? { ...section, isDeleted: true }
+              : section
+          );
+          return { ...milestone, sections: updatedSections };
+        }
+        return milestone;
+      });
+      return { ...prev, milestones: updatedMilestones };
+    });
+  };
+  
+  const removeTask = (milestoneId: string, sectionId: string, taskId: string) => {
+    roadmapToEdit((prev: any) => {
+      const updatedMilestones = prev.milestones.map((milestone: any) => {
+        if (milestone.milestoneId === milestoneId) {
+          const updatedSections = milestone.sections.map((section: any) => {
+            if (section.sectionId === sectionId) {
+              const updatedTasks = section.tasks.map((task: any) =>
+                task.taskId === taskId
+                  ? { ...task, isDeleted: true }
+                  : task
+              );
+              return { ...section, tasks: updatedTasks };
+            }
+            return section;
+          });
+          return { ...milestone, sections: updatedSections };
+        }
+        return milestone;
+      });
+      return { ...prev, milestones: updatedMilestones };
+    });
+  };
+
+  const saveChanges = async () => {
+    try {
+      // await roadmapEditTestStore.saveRoadmap();
+    } catch (error) {
+      toast.error("Failed to save roadmap:");
+    }
+  };
+
+  if (!roadmapToEdit) return <LoadingComponent />;
+
   return (
-    <Box className="mb-24">
-      <button
-         onClick={() => {
-          addMilestone();
-          // console.log("Milestones after addition:", toJS(roadmapEditStore.milestones));
-        }}
-        className="mb-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        Add Milestone
-      </button>
-      {selectedRoadmap.milestones?.map((milestone, milestoneIndex) =>  (
-        <Card key={milestoneIndex} className="mb-3 p-2 mt-8 border-2 border-black">
+    <>
+      <Box className="mb-24">
+        <button
+          onClick={addMilestone}
+          className="mb-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Add Milestone
+        </button>
+        {visibleMilestones.map((milestone: any) => (
+        <Card key={milestone.milestoneId} className="mb-3 p-2 mt-8 border-2 border-black">
           <CardContent>
             <Box className="flex justify-between">
-              <h6 className="font-extrabold text-xl">{milestone.name || `Milestone ${milestoneIndex + 1}`}</h6>
-              <IconButton onClick={() => deleteMilestone(milestoneIndex)}>
+              <h6 className="font-extrabold text-xl">{milestone.name || `Milestone ${milestone.milestoneId}`}</h6>
+              <IconButton onClick={() => removeMilestone(milestone.milestoneId)}>
                 <TrashIcon className="h-5 w-5 text-red-600" />
               </IconButton>
             </Box>
@@ -53,14 +133,9 @@ export default observer(function EditStepperSecond(){
                 fullWidth
                 margin="normal"
                 label="Milestone Title"
-                value={milestone.name}
-                inputProps={{ maxLength: 50 }}
-                onChange={(e) => {
-                  runInAction(() => {
-                    milestone.name = e.target.value;
-                  });
-                }}
-                disabled={!isDraft}
+                value={milestone.name || ""}
+                inputProps={{ maxLength: 100 }}
+                onChange={(e) => handleMilestoneChange(milestone.milestoneId, "name", e.target.value)}
                 className="max-w-[500px]"
               />
               <TextField
@@ -68,30 +143,28 @@ export default observer(function EditStepperSecond(){
                 margin="normal"
                 label="Milestone Description"
                 multiline
-                rows={2}
-                value={milestone.description}
-                inputProps={{ maxLength: 100 }}
-                onChange={(e) => {
-                  runInAction(() => {
-                    milestone.description = e.target.value;
-                  });
-                }}
-                disabled={!isDraft}
+                rows={3}
+                value={milestone.description || ""}
+                inputProps={{ maxLength: 250 }}
+                onChange={(e) => handleMilestoneChange(milestone.milestoneId, "description", e.target.value)}
                 className="max-w-[500px]"
               />
               <button
-                onClick={() => addSection(milestoneIndex)}
+                onClick={() => addSection(milestone.milestoneId)}
                 className="my-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Add Section
               </button>
 
-              {milestone.sections?.map((section: Section, sectionIndex: number) => (
-                <Card key={sectionIndex} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
+              {visibleSections(milestone.sections).map((section: any) => (
+                <Card key={section.sectionId} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
                   <CardContent>
                     <Box className="flex justify-between">
-                      <h6 className="font-extrabold text-xl">{section.name || `Section ${sectionIndex + 1}`}</h6>
-                      <IconButton onClick={() => deleteSection(milestoneIndex, sectionIndex)} aria-label="delete section">
+                      <h6 className="font-extrabold text-xl">{section.name || `Section ${section.sectionId}`}</h6>
+                      <IconButton
+                        onClick={() => removeSection(milestone.milestoneId, section.sectionId)}
+                        aria-label="delete section"
+                      >
                         <TrashIcon className="h-5 w-5 text-red-600" />
                       </IconButton>
                     </Box>
@@ -100,15 +173,10 @@ export default observer(function EditStepperSecond(){
                         fullWidth
                         margin="normal"
                         label="Section Title"
-                        value={section.name}
+                        value={section.name || ""}
                         inputProps={{ maxLength: 50 }}
-                        onChange={(e) => {
-                          runInAction(() => {
-                            section.name = e.target.value;
-                          });
-                        }}
+                        onChange={(e) => handleSectionChange(milestone.milestoneId, section.sectionId, "name", e.target.value)}
                         className="max-w-[400px]"
-                        disabled={!isDraft}
                       />
                       <TextField
                         fullWidth
@@ -116,29 +184,24 @@ export default observer(function EditStepperSecond(){
                         label="Section Description"
                         multiline
                         rows={2}
-                        value={section.description}
+                        value={section.description || ""}
                         inputProps={{ maxLength: 100 }}
-                        onChange={(e) => {
-                          runInAction(() => {
-                            section.description = e.target.value;
-                          });
-                        }}
+                        onChange={(e) => handleSectionChange(milestone.milestoneId, section.sectionId, "description", e.target.value)}
                         className="max-w-[400px]"
-                        disabled={!isDraft}
                       />
                       <button
-                        onClick={() => addTask(milestoneIndex, sectionIndex)}
+                        onClick={() => addTask(milestone.milestoneId, section.sectionId)}
                         className="my-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         Add Task
                       </button>
-                      {section.tasks.map((task: Task, taskIndex: number) => (
-                        <Card key={taskIndex} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
+                      {visibleTasks(section.tasks).map((task: any) => (
+                        <Card key={task.taskId} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
                           <CardContent>
                             <Box className="flex justify-between">
-                              <h6 className="font-extrabold text-xl">{task.name || `Task ${taskIndex + 1}`}</h6>
+                              <h6 className="font-extrabold text-xl">{task.name || `Task ${task.taskId}`}</h6>
                               <IconButton
-                                onClick={() => deleteTask(milestoneIndex, sectionIndex, taskIndex)}
+                                onClick={() => removeTask(milestone.milestoneId, section.sectionId, task.taskId)}
                                 aria-label="delete task"
                               >
                                 <TrashIcon className="h-5 w-5 text-red-600" />
@@ -149,27 +212,22 @@ export default observer(function EditStepperSecond(){
                                 fullWidth
                                 margin="normal"
                                 label="Task Title"
-                                value={task.name}
+                                value={task.name || ""}
                                 inputProps={{ maxLength: 50 }}
-                                onChange={(e) => {
-                                  runInAction(() => {
-                                    task.name = e.target.value;
-                                  });
-                                }}
+                                onChange={(e) =>
+                                  handleTaskChange(milestone.milestoneId, section.sectionId, task.taskId, "name", e.target.value)
+                                }
                                 className="max-w-[400px]"
-                                disabled={!isDraft}
                               />
                               <TextField
                                 margin="normal"
                                 type="date"
                                 label="Start Date"
                                 InputLabelProps={{ shrink: true }}
-                                onKeyDown={(e) => e.preventDefault()}
+                                
                                 value={task.dateStart ? new Date(task.dateStart).toISOString().split("T")[0] : ""}
                                 onChange={(e) =>
-                                  runInAction(() => {
-                                    task.dateStart = e.target.value;
-                                  })
+                                  handleTaskChange(milestone.milestoneId, section.sectionId, task.taskId, "dateStart", e.target.value)
                                 }
                                 className="max-w-[400px]"
                               />
@@ -178,12 +236,9 @@ export default observer(function EditStepperSecond(){
                                 type="date"
                                 label="End Date"
                                 InputLabelProps={{ shrink: true }}
-                                onKeyDown={(e) => e.preventDefault()}
                                 value={task.dateEnd ? new Date(task.dateEnd).toISOString().split("T")[0] : ""}
                                 onChange={(e) =>
-                                  runInAction(() => {
-                                    task.dateEnd = e.target.value;
-                                  })
+                                  handleTaskChange(milestone.milestoneId, section.sectionId, task.taskId, "dateEnd", e.target.value)
                                 }
                                 className="max-w-[400px]"
                               />
@@ -199,6 +254,8 @@ export default observer(function EditStepperSecond(){
           </CardContent>
         </Card>
       ))}
-    </Box>
+      </Box>
+      <Button onClick={saveChanges}>SAVE CHANGES</Button>
+    </>
   );
 });
