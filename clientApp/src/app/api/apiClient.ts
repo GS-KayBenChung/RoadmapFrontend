@@ -5,6 +5,7 @@ import { PaginatedAudit } from '../models/paginatedAudit';
 import { PaginatedRoadmap } from '../models/paginatedRoadmap';
 import { DashboardStats } from '../models/dashboardStats';
 import { toast } from 'react-toastify';
+import { Operation } from 'fast-json-patch';
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {

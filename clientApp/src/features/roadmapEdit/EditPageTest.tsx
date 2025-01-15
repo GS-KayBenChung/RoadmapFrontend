@@ -5,10 +5,9 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useStore } from "../../app/stores/store";
-// import { roadmapEditTestStore } from "../../app/stores/roadmapEditTestStore";
 import { toast, ToastContainer } from "react-toastify";
 import axios from "axios";
-import { Roadmap } from "../../app/models/roadmap";
+import NavBar from "../../app/layout/NavBar";
 
 export default observer(function EditPageTest() {
   const { roadmapStore } = useStore();
@@ -19,6 +18,12 @@ export default observer(function EditPageTest() {
   const visibleMilestones = roadmapToEdit?.milestones?.filter((m: any) => !m.isDeleted) || [];
   const visibleSections = (sections: any[]) => sections?.filter((s) => !s.isDeleted) || [];
   const visibleTasks = (tasks: any[]) => tasks?.filter((t) => !t.isDeleted) || [];
+  const [changesPayload, setChangesPayload] = useState<any>({
+    roadmap: {},
+    milestones: [],
+    sections: [],
+    tasks: []
+  });
   
   useEffect(() => {
     if (id) {
@@ -28,14 +33,41 @@ export default observer(function EditPageTest() {
     }
   }, [id, loadRoadmap]);
 
+  const recordChange = (entity: string, id: string, field: string, value: any) => {
+    setChangesPayload((prev: any) => {
+      const updatedPayload = { ...prev };
+      
+      if (entity === 'roadmap') {
+        updatedPayload.roadmap[field] = value;
+      } else {
+        const targetArray = updatedPayload[entity];
+        const existingItemIndex = targetArray.findIndex((item: any) => item[`${entity.slice(0, -1)}Id`] === id);
+        
+        if (existingItemIndex !== -1) {
+          targetArray[existingItemIndex][field] = value;
+        } else {
+          targetArray.push({ [`${entity.slice(0, -1)}Id`]: id, [field]: value });
+        }
+      }
+      
+      return updatedPayload;
+    });
+  };
+
   const handleFieldChange = (field: string, value: string) => {
+    recordChange('roadmap', roadmapStore.selectedRoadmap?.roadmapId || '', field, value);
+    
     setRoadmapToEdit((prev: any) => ({
       ...prev,
       [field]: value,
     }));
+
   };
 
   const handleMilestoneChange = (milestoneId: string, field: string, value: string) => {
+
+    recordChange('milestones', milestoneId, field, value);
+
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) =>
         milestone.milestoneId === milestoneId
@@ -47,6 +79,8 @@ export default observer(function EditPageTest() {
   };
 
   const handleSectionChange = (milestoneId: string, sectionId: string, field: string, value: string) => {
+    recordChange('sections', sectionId, field, value);
+    
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -70,6 +104,19 @@ export default observer(function EditPageTest() {
     field: string,
     value: string | null
   ) => {
+
+    let updatedValue = value;
+
+    if (field === "dateStart" || field === "dateEnd") {
+      if (value) {
+        const date = new Date(value);
+        updatedValue = date.toISOString();
+      } else {
+        updatedValue = null; 
+      }
+    }
+    recordChange('tasks', taskId, field, updatedValue);
+    
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -212,6 +259,7 @@ export default observer(function EditPageTest() {
       return false;
     }
   
+    let lastTaskEndDate: Date | null = null; 
     for (const milestone of roadmapToEdit.milestones) {
       if (milestone.isDeleted) continue;
   
@@ -251,7 +299,7 @@ export default observer(function EditPageTest() {
           if (!task.dateStart || !task.dateEnd || task.dateStart.trim() === "" || task.dateEnd.trim() === "") {
             toast.error(`Start and end dates for task "${task.name}" must be set`);
             return false;
-          }          
+          }
   
           const startDate = new Date(task.dateStart);
           const endDate = new Date(task.dateEnd);
@@ -266,82 +314,40 @@ export default observer(function EditPageTest() {
             return false;
           }
   
-          if (i < tasks.length - 1) {
-            const nextTask = tasks[i + 1];
-            const nextStartDate = new Date(nextTask.dateStart);
-  
-            if (endDate > nextStartDate) {
-              toast.error(`End date of "${task.name}" cannot be after start date of "${nextTask.name}"`);
-              return false;
-            }
+          if (lastTaskEndDate && startDate < lastTaskEndDate) {
+            toast.error(`Start date of task "${task.name}" cannot be before the end date of the previous task`);
+            return false;
           }
+  
+          lastTaskEndDate = endDate;
         }
       }
     }
   
     return true;
   };
-
-  const saveChanges = async () => {
-    const roadmapData = {
-      id: roadmapToEdit?.id,
-      title: roadmapToEdit?.title,
-      description: roadmapToEdit?.description,
-      milestones: roadmapToEdit.milestones.map((milestone: any) => ({
-        milestoneId: milestone.milestoneId,
-        name: milestone.name,
-        description: milestone.description,
-        isDeleted: milestone.isDeleted || false,
-        sections: milestone.sections.map((section: any) => ({
-          sectionId: section.sectionId,
-          name: section.name,
-          description: section.description,
-          isDeleted: section.isDeleted || false,
-          tasks: section.tasks.map((task: any) => ({
-            taskId: task.taskId,
-            name: task.name,
-            dateStart: new Date(task.dateStart).toISOString(),
-            dateEnd: new Date(task.dateEnd).toISOString(),
-            isDeleted: task.isDeleted || false,
-          })),
-        })),
-      })),
-    };
   
+  const EditRoadmap = async (roadmapId: string, roadmapData: any) => {
     try {
-      if (!validateRoadmap()) {
-        return; 
-      }
-      if (roadmapStore.selectedRoadmap?.roadmapId) {
-        await EditRoadmap(roadmapStore.selectedRoadmap.roadmapId, roadmapData);
-      } else {
-        toast.error("Roadmap ID is missing.");
-      }
-      toast.success("Roadmap updated successfully!");
-      navigate("/content");
-    } catch (error: any) {
-      if (error.response) {
-        toast.error(`Error ${error.response.status}: ${error.response.data.message}`);
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
-      toast.error("Update failed:", error);
+      
+      const response = await axios.patch(`/roadmaps/${roadmapId}/roadmap`, roadmapData);
+      return response.data;
+    } catch (error) {
+      toast.error("Error editing roadmap");
+      throw error;
     }
   };  
 
-  const EditRoadmap = async (roadmapId: string, roadmapData: Partial<Roadmap>) => {
-    try {
-      const response = await axios.patch(`/roadmaps/${roadmapId}`, roadmapData);
-
-      console.log("Testing updateRoadmap" + roadmapId + " " + roadmapData);
-      
-      console.log("Response: " + JSON.stringify(response));
-      
-      return response.data;
-    } catch (error) {
-      toast.error("Error editing roadmap:");
-      throw error;
-    }
+  const handleSubmit = async () => {
+    if(!validateRoadmap()) return;
+    EditRoadmap(roadmapStore.selectedRoadmap?.roadmapId || '', changesPayload)
+    .then(() => {
+      toast.success("Roadmap saved successfully");
+      navigate(`/roadmap/${roadmapStore.selectedRoadmap?.roadmapId}`);
+    })
+    .catch((error) => {
+      toast.error(error);
+    });
   };
 
   if(!roadmapToEdit) return <LoadingComponent/>;
@@ -356,12 +362,14 @@ export default observer(function EditPageTest() {
       draggable={true}
       position="top-center"
     />
+    <NavBar/>
     <Box className="m-24">
-    <button 
-      className="my-3 block mx-auto bg-blue-600 text-white py-2 px-4 rounded"
-      onClick={saveChanges}>
+      <button 
+        className="my-3 block mx-auto bg-blue-600 text-white py-2 px-4 rounded"
+        onClick={handleSubmit}
+      >
         SAVE CHANGES  
-    </button>
+      </button>
       <div className="flex flex-col items-center p-3">
         <TextField
           fullWidth
@@ -508,7 +516,6 @@ export default observer(function EditPageTest() {
                                     "dateStart",
                                     e.target.value === "" ? null : e.target.value
                                   )
-                                  // handleTaskChange(milestone.milestoneId, section.sectionId, task.taskId, "dateStart", e.target.value)
                                 }
                                 className="max-w-[400px]"
                               />
@@ -526,7 +533,6 @@ export default observer(function EditPageTest() {
                                     "dateEnd",
                                     e.target.value === "" ? null : e.target.value
                                   )
-                                  // handleTaskChange(milestone.milestoneId, section.sectionId, task.taskId, "dateEnd", e.target.value)
                                 }
                                 className="max-w-[400px]"
                               />
@@ -546,7 +552,7 @@ export default observer(function EditPageTest() {
     </Box>
     <button 
       className="my-3 block mx-auto bg-blue-600 text-white py-2 px-4 rounded"
-      onClick={saveChanges}>
+      onClick={handleSubmit}>
         SAVE CHANGES  
     </button>
     </>

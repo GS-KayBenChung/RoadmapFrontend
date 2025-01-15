@@ -1,7 +1,7 @@
 import { TrashIcon } from "@heroicons/react/16/solid";
 import { Box, Card, CardContent, IconButton, TextField, Button } from "@mui/material";
 import { observer } from "mobx-react-lite";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { roadmapEditTestStore } from "../../app/stores/roadmapEditTestStore";
@@ -15,6 +15,58 @@ export default observer(function EditStepperSecond() {
   const visibleMilestones = roadmapToEdit?.milestones?.filter((m: any) => !m.isDeleted) || [];
   const visibleSections = (sections: any[]) => sections?.filter((s) => !s.isDeleted) || [];
   const visibleTasks = (tasks: any[]) => tasks?.filter((t) => !t.isDeleted) || [];
+
+  const [daysToAdd, setDaysToAdd] = useState<number | null>(null);
+
+  const handleDateChange = (milestoneId: string, sectionId: string, taskId: string, field: string, value: string, isStartDate: boolean) => {
+    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+    const task = section?.tasks.find((t: any) => t.taskId === taskId);
+  
+    if (task) {
+      task[field] = value;
+      
+      if (isStartDate || field === 'dateEnd') {
+        const shouldAddDays = window.confirm("Do you want to add days to all subsequent tasks?");
+        if (shouldAddDays) {
+          const numberOfDays = prompt("How many days would you like to add to the subsequent tasks?", "1");
+          if (numberOfDays && !isNaN(Number(numberOfDays))) {
+            setDaysToAdd(Number(numberOfDays));
+            updateSubsequentTaskDates(milestoneId, sectionId, taskId, Number(numberOfDays));
+          }
+        }
+      }
+  
+      updateRoadmap({ milestones: roadmapToEdit.milestones });
+    }
+  };
+
+  const updateSubsequentTaskDates = (milestoneId: string, sectionId: string, taskId: string, daysToAdd: number) => {
+    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+    const taskIndex = section?.tasks.findIndex((t: any) => t.taskId === taskId);
+  
+    if (taskIndex !== undefined && taskIndex !== -1) {
+      for (let i = taskIndex + 1; i < section.tasks.length; i++) {
+        const task = section.tasks[i];
+        
+        if (task.dateStart) {
+          task.dateStart = addDaysToDate(task.dateStart, daysToAdd);
+        }
+        if (task.dateEnd) {
+          task.dateEnd = addDaysToDate(task.dateEnd, daysToAdd);
+        }
+      }
+    }
+  
+    updateRoadmap({ milestones: roadmapToEdit.milestones });
+  };
+
+  const addDaysToDate = (date: string, days: number): string => {
+    const currentDate = new Date(date);
+    currentDate.setDate(currentDate.getDate() + days);
+    return currentDate.toISOString().split("T")[0];
+  };
   
   useEffect(() => {
     if (id) {
@@ -40,12 +92,16 @@ export default observer(function EditStepperSecond() {
   };
 
   const handleTaskChange = (milestoneId: string, sectionId: string, taskId: string, field: string, value: string) => {
-    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
-    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
-    const task = section?.tasks.find((t: any) => t.taskId === taskId);
-    if (task) {
-      task[field] = value;
-      updateRoadmap({ milestones: roadmapToEdit.milestones });
+    if (field === "dateStart" || field === "dateEnd") {
+      handleDateChange(milestoneId, sectionId, taskId, field, value, field === "dateStart");
+    } else {
+      const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+      const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+      const task = section?.tasks.find((t: any) => t.taskId === taskId);
+      if (task) {
+        task[field] = value;
+        updateRoadmap({ milestones: roadmapToEdit.milestones });
+      }
     }
   };
 
