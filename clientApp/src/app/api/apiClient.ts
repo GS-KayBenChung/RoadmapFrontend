@@ -5,7 +5,6 @@ import { PaginatedAudit } from '../models/paginatedAudit';
 import { PaginatedRoadmap } from '../models/paginatedRoadmap';
 import { DashboardStats } from '../models/dashboardStats';
 import { toast } from 'react-toastify';
-import { Operation } from 'fast-json-patch';
 
 const sleep = (delay: number) => {
   return new Promise((resolve) => {
@@ -37,8 +36,6 @@ const requests = {
 const Roadmaps = {
   updateRoadmap: async (roadmapId: string, roadmapData: Partial<Roadmap>) => {
     try {
-      console.log("Testing updateRoadmap", roadmapId, roadmapData);
-      
       const response = await requests.patch<void>(`/roadmaps/${roadmapId}`, roadmapData);
       return response;
     } catch (error) {

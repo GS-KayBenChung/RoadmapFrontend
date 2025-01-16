@@ -24,6 +24,7 @@ export default observer(function EditPageTest() {
     sections: [],
     tasks: []
   });
+
   
   useEffect(() => {
     if (id) {
@@ -33,10 +34,10 @@ export default observer(function EditPageTest() {
     }
   }, [id, loadRoadmap]);
 
-  const recordChange = (entity: string, id: string, field: string, value: any) => {
+  const recordChange = (entity: string, id: string, field: string, value: any, parentIds?: { milestoneId?: string, sectionId?: string }) => {
     setChangesPayload((prev: any) => {
       const updatedPayload = { ...prev };
-      
+  
       if (entity === 'roadmap') {
         updatedPayload.roadmap[field] = value;
       } else {
@@ -46,14 +47,14 @@ export default observer(function EditPageTest() {
         if (existingItemIndex !== -1) {
           targetArray[existingItemIndex][field] = value;
         } else {
-          targetArray.push({ [`${entity.slice(0, -1)}Id`]: id, [field]: value });
+          const newItem = { [`${entity.slice(0, -1)}Id`]: id, [field]: value, ...parentIds };
+          targetArray.push(newItem);
         }
       }
-      
       return updatedPayload;
     });
   };
-
+  
   const handleFieldChange = (field: string, value: string) => {
     recordChange('roadmap', roadmapStore.selectedRoadmap?.roadmapId || '', field, value);
     
@@ -79,8 +80,8 @@ export default observer(function EditPageTest() {
   };
 
   const handleSectionChange = (milestoneId: string, sectionId: string, field: string, value: string) => {
-    recordChange('sections', sectionId, field, value);
-    
+    recordChange('sections', sectionId, field, value, { milestoneId });
+  
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -104,19 +105,28 @@ export default observer(function EditPageTest() {
     field: string,
     value: string | null
   ) => {
-
     let updatedValue = value;
-
+  
+    let dateChanged = false;
+    let dateDifference: number | null = null;
+  
     if (field === "dateStart" || field === "dateEnd") {
       if (value) {
-        const date = new Date(value);
-        updatedValue = date.toISOString();
+        const newDate = new Date(value);
+        updatedValue = newDate.toISOString();
+  
+        const currentTask = getCurrentTask(milestoneId, sectionId, taskId); 
+        const currentDate = new Date(currentTask[field]);
+  
+        dateDifference = Math.floor((newDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
+        dateChanged = true;
       } else {
-        updatedValue = null; 
+        updatedValue = null;
       }
     }
-    recordChange('tasks', taskId, field, updatedValue);
-    
+  
+    recordChange('tasks', taskId, field, updatedValue, { milestoneId, sectionId });
+  
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -124,7 +134,7 @@ export default observer(function EditPageTest() {
             if (section.sectionId === sectionId) {
               const updatedTasks = section.tasks.map((task: any) =>
                 task.taskId === taskId
-                  ? { ...task, [field]: value }
+                  ? { ...task, [field]: updatedValue }
                   : task
               );
               return { ...section, tasks: updatedTasks };
@@ -139,6 +149,49 @@ export default observer(function EditPageTest() {
     });
   };
   
+  const updateSubsequentTasks = (milestoneId: string, sectionId: string, taskId: string, dateDifference: number) => {
+    let taskFound = false; 
+  
+    setRoadmapToEdit((prev: any) => {
+      const updatedMilestones = prev.milestones.map((milestone: any) => {
+        const updatedSections = milestone.sections.map((section: any) => {
+          const updatedTasks = section.tasks.map((task: any) => {
+            if (taskFound) {
+              const updatedTask = { ...task };
+  
+              if (updatedTask.dateStart) {
+                updatedTask.dateStart = new Date(new Date(updatedTask.dateStart).getTime() + dateDifference * 24 * 60 * 60 * 1000).toISOString();
+              }
+  
+              if (updatedTask.dateEnd) {
+                updatedTask.dateEnd = new Date(new Date(updatedTask.dateEnd).getTime() + dateDifference * 24 * 60 * 60 * 1000).toISOString();
+              }
+  
+              return updatedTask;
+            }
+  
+            if (task.taskId === taskId) {
+              taskFound = true; 
+            }
+  
+            return task;
+          });
+          return { ...section, tasks: updatedTasks };
+        });
+        return { ...milestone, sections: updatedSections };
+      });
+      return { ...prev, milestones: updatedMilestones };
+    });
+  };
+  
+  const getCurrentTask = (milestoneId: string, sectionId: string, taskId: string) => {
+    const milestone = roadmapToEdit.milestones.find((m: any) => m.milestoneId === milestoneId);
+    if (!milestone) return null;
+    const section = milestone.sections.find((s: any) => s.sectionId === sectionId);
+    if (!section) return null;
+    return section.tasks.find((t: any) => t.taskId === taskId);
+  };
+
   const addMilestone = () => {
     setRoadmapToEdit((prev: any) => {
       const newMilestone = {
@@ -198,6 +251,7 @@ export default observer(function EditPageTest() {
   };
   
   const removeMilestone = (milestoneId: string) => {
+    recordChange('milestones', milestoneId, 'isDeleted', true);
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) =>
         milestone.milestoneId === milestoneId
@@ -209,6 +263,7 @@ export default observer(function EditPageTest() {
   };
   
   const removeSection = (milestoneId: string, sectionId: string) => {
+    recordChange('sections', sectionId, 'isDeleted', true, { milestoneId });
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -226,6 +281,7 @@ export default observer(function EditPageTest() {
   };
   
   const removeTask = (milestoneId: string, sectionId: string, taskId: string) => {
+    recordChange('tasks', taskId, 'isDeleted', true, { milestoneId, sectionId });
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -329,7 +385,7 @@ export default observer(function EditPageTest() {
   
   const EditRoadmap = async (roadmapId: string, roadmapData: any) => {
     try {
-      
+      console.log(roadmapData);
       const response = await axios.patch(`/roadmaps/${roadmapId}/roadmap`, roadmapData);
       return response.data;
     } catch (error) {

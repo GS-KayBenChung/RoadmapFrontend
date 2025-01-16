@@ -8,7 +8,6 @@ import { observer } from 'mobx-react-lite';
 import { useParams } from 'react-router-dom';
 import LoadingComponent from '../../app/layout/LoadingComponent';
 import { useNavigate } from 'react-router-dom';
-import ConfirmDeleteModal from '../../app/layout/ConfirmationModel';
 import { runInAction } from 'mobx';
 import ConfirmUncheck from '../../app/layout/ConfirmationUncheck';
 import ConfirmModal from '../../app/layout/ConfirmationModel';
@@ -142,7 +141,6 @@ export default observer( function RoadmapDetails() {
       index,
       parentIndex
     );
-  
     setConfirmationTarget(null);
     setShowConfirm(false);
   };
@@ -283,7 +281,6 @@ export default observer( function RoadmapDetails() {
       toast.error('Failed to publish the roadmap.');
     }
   };
-  
 
   const validateRoadmapBeforePublish = () => {
     const hasTasks = selectedRoadmap.milestones.some((milestone: any) =>
