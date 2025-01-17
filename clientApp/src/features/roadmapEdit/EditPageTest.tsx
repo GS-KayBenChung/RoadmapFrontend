@@ -106,7 +106,6 @@ export default observer(function EditPageTest() {
     value: string | null
   ) => {
     let updatedValue = value;
-  
     let dateChanged = false;
     let dateDifference: number | null = null;
   
@@ -115,27 +114,65 @@ export default observer(function EditPageTest() {
         const newDate = new Date(value);
         updatedValue = newDate.toISOString();
   
-        const currentTask = getCurrentTask(milestoneId, sectionId, taskId); 
+        const currentTask = getCurrentTask(milestoneId, sectionId, taskId);
         const currentDate = new Date(currentTask[field]);
   
         dateDifference = Math.floor((newDate.getTime() - currentDate.getTime()) / (1000 * 3600 * 24));
-        dateChanged = true;
+  
+        if (dateDifference !== 0) {
+          dateChanged = true;
+  
+          // 🔥 Auto-update the END DATE when START DATE is changed
+          if (field === "dateStart" && currentTask.dateEnd) {
+            const newEndDate = new Date(new Date(currentTask.dateEnd).getTime() + dateDifference * 24 * 60 * 60 * 1000).toISOString();
+  
+            // Record the end date change
+            recordChange("tasks", taskId, "dateEnd", newEndDate, { milestoneId, sectionId });
+  
+            // Update the task's end date in state
+            setRoadmapToEdit((prev: any) => {
+              const updatedMilestones = prev.milestones.map((milestone: any) => {
+                if (milestone.milestoneId === milestoneId) {
+                  const updatedSections = milestone.sections.map((section: any) => {
+                    if (section.sectionId === sectionId) {
+                      const updatedTasks = section.tasks.map((task: any) =>
+                        task.taskId === taskId ? { ...task, dateEnd: newEndDate } : task
+                      );
+                      return { ...section, tasks: updatedTasks };
+                    }
+                    return section;
+                  });
+                  return { ...milestone, sections: updatedSections };
+                }
+                return milestone;
+              });
+              return { ...prev, milestones: updatedMilestones };
+            });
+          }
+  
+          // ⚡ Prompt to update subsequent tasks
+          const action = dateDifference > 0 ? "increase" : "decrease";
+          const confirmMessage = `Do you want to ${action} all subsequent task dates by ${Math.abs(dateDifference)} day(s)?`;
+  
+          if (window.confirm(confirmMessage)) {
+            updateSubsequentTasks(milestoneId, sectionId, taskId, dateDifference);
+          }
+        }
       } else {
         updatedValue = null;
       }
     }
   
-    recordChange('tasks', taskId, field, updatedValue, { milestoneId, sectionId });
+    recordChange("tasks", taskId, field, updatedValue, { milestoneId, sectionId });
   
+    // 🔄 Update the current task's field (start or end date)
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
           const updatedSections = milestone.sections.map((section: any) => {
             if (section.sectionId === sectionId) {
               const updatedTasks = section.tasks.map((task: any) =>
-                task.taskId === taskId
-                  ? { ...task, [field]: updatedValue }
-                  : task
+                task.taskId === taskId ? { ...task, [field]: updatedValue } : task
               );
               return { ...section, tasks: updatedTasks };
             }
@@ -149,8 +186,14 @@ export default observer(function EditPageTest() {
     });
   };
   
-  const updateSubsequentTasks = (milestoneId: string, sectionId: string, taskId: string, dateDifference: number) => {
-    let taskFound = false; 
+  
+  const updateSubsequentTasks = (
+    milestoneId: string,
+    sectionId: string,
+    taskId: string,
+    dateDifference: number
+  ) => {
+    let taskFound = false;
   
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
@@ -158,20 +201,25 @@ export default observer(function EditPageTest() {
           const updatedTasks = section.tasks.map((task: any) => {
             if (taskFound) {
               const updatedTask = { ...task };
-  
               if (updatedTask.dateStart) {
-                updatedTask.dateStart = new Date(new Date(updatedTask.dateStart).getTime() + dateDifference * 24 * 60 * 60 * 1000).toISOString();
+                updatedTask.dateStart = new Date(
+                  new Date(updatedTask.dateStart).getTime() +
+                    dateDifference * 24 * 60 * 60 * 1000
+                ).toISOString();
               }
-  
               if (updatedTask.dateEnd) {
-                updatedTask.dateEnd = new Date(new Date(updatedTask.dateEnd).getTime() + dateDifference * 24 * 60 * 60 * 1000).toISOString();
+                updatedTask.dateEnd = new Date(
+                  new Date(updatedTask.dateEnd).getTime() +
+                    dateDifference * 24 * 60 * 60 * 1000
+                ).toISOString();
               }
-  
+              recordChange("tasks", updatedTask.taskId, "dateStart", updatedTask.dateStart, { milestoneId, sectionId });
+              recordChange("tasks", updatedTask.taskId, "dateEnd", updatedTask.dateEnd, { milestoneId, sectionId });
               return updatedTask;
             }
   
             if (task.taskId === taskId) {
-              taskFound = true; 
+              taskFound = true;
             }
   
             return task;
@@ -180,6 +228,7 @@ export default observer(function EditPageTest() {
         });
         return { ...milestone, sections: updatedSections };
       });
+  
       return { ...prev, milestones: updatedMilestones };
     });
   };
