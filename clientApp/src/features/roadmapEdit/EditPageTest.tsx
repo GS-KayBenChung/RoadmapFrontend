@@ -24,7 +24,6 @@ export default observer(function EditPageTest() {
     sections: [],
     tasks: []
   });
-
   
   useEffect(() => {
     if (id) {
@@ -106,10 +105,10 @@ export default observer(function EditPageTest() {
     value: string | null
   ) => {
     let updatedValue = value;
-    let dateChanged = false;
     let dateDifference: number | null = null;
   
     if (field === "dateStart" || field === "dateEnd") {
+      let dateChanged = false;
       if (value) {
         const newDate = new Date(value);
         updatedValue = newDate.toISOString();
@@ -122,14 +121,11 @@ export default observer(function EditPageTest() {
         if (dateDifference !== 0) {
           dateChanged = true;
   
-          // 🔥 Auto-update the END DATE when START DATE is changed
           if (field === "dateStart" && currentTask.dateEnd) {
             const newEndDate = new Date(new Date(currentTask.dateEnd).getTime() + dateDifference * 24 * 60 * 60 * 1000).toISOString();
   
-            // Record the end date change
             recordChange("tasks", taskId, "dateEnd", newEndDate, { milestoneId, sectionId });
   
-            // Update the task's end date in state
             setRoadmapToEdit((prev: any) => {
               const updatedMilestones = prev.milestones.map((milestone: any) => {
                 if (milestone.milestoneId === milestoneId) {
@@ -150,7 +146,6 @@ export default observer(function EditPageTest() {
             });
           }
   
-          // ⚡ Prompt to update subsequent tasks
           const action = dateDifference > 0 ? "increase" : "decrease";
           const confirmMessage = `Do you want to ${action} all subsequent task dates by ${Math.abs(dateDifference)} day(s)?`;
   
@@ -165,7 +160,6 @@ export default observer(function EditPageTest() {
   
     recordChange("tasks", taskId, field, updatedValue, { milestoneId, sectionId });
   
-    // 🔄 Update the current task's field (start or end date)
     setRoadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
@@ -185,7 +179,6 @@ export default observer(function EditPageTest() {
       return { ...prev, milestones: updatedMilestones };
     });
   };
-  
   
   const updateSubsequentTasks = (
     milestoneId: string,
