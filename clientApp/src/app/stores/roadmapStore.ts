@@ -32,9 +32,23 @@ export default class RoadmapStore {
     return Array.from(this.roadmapRegistry.values());
   }
 
+  // updateTaskCompletionStatus2 = async (  ) => {
+  //   try {
+      
+  
+  //     console.log('Payload before sending:', JSON.stringify(payload, null, 2));
+  
+  //     await apiClient.Roadmaps.updateCheck(payload);
+  
+  //   } catch (error) {
+  //     console.error("Error updating completion status:", error);
+  //     toast.error("Error updating completion status");
+  //   }
+  // };
+  
   updateTaskCompletionStatus = async (
     id: string, 
-    type: 'roadmap' | 'milestone' | 'section' | 'task', 
+    type: 'roadmap' | 'milestone' | 'section' | 'task' , 
     isChecked: boolean, 
     index?: number, 
     parentIndex?: number, 
@@ -49,7 +63,9 @@ export default class RoadmapStore {
         parentIndex,
         grandParentIndex
       };
-      await apiClient.Roadmaps.updateCheck(body);
+      console.log(body);
+      
+      // await apiClient.Roadmaps.updateCheck(body);
       runInAction(() => {
         if (type === 'roadmap') {
           this.selectedRoadmap!.isCompleted = isChecked;

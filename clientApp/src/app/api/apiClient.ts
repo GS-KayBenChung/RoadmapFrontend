@@ -49,10 +49,11 @@ const Roadmaps = {
   create: (roadmap: Roadmap) => requests.post<void>('/roadmaps', roadmap),
   update: (roadmap: any) => requests.put<void>(`/roadmaps/${roadmap.roadmapId}`, roadmap),
   delete: (id: string) => requests.delete<void>(`/roadmaps/${id}`),
-  // updateCheck: (body: { id: string, type: 'roadmap' | 'milestone' | 'section' | 'task', isChecked: boolean, index?: string, parentIndex?: string }) => 
-  //   requests.put<void>(`/roadmaps/checkboxes/${body.id}`, body),
-  updateCheck: (body: { id: string, type: 'roadmap' | 'milestone' | 'section' | 'task', isChecked: boolean }) =>
-    requests.put<void>(`/roadmaps/checkboxes/${body.id}`, body),
+
+  // updateCheck: (body: any) => requests.patch<void>(`/roadmaps/completionStatus`, body), WORKING
+  updateCompletion: (entityType: string, data: Partial<{ id: string, IsCompleted?: boolean, Progress: number }>) =>
+    requests.patch<void>(`/roadmaps/${entityType}/completion`, data),
+
   getLogs: async (query: string) => requests.get<PaginatedAudit<AuditLogs>>(`/roadmaps/logs?${query}`),
   googleLogin: (token: string) => requests.post<{ id: string; username: string; email: string; token: string; createdAt: string }>(
     `/authentication/googleresponse`,
