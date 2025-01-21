@@ -16,6 +16,28 @@ export default observer(function StepperThird() {
 
   const [openPreview, setOpenPreview] = useState(false);
 
+  const calculateOverallDuration = () => {
+    if (milestones.length === 0) return 0;
+  
+    const allTasks = milestones.flatMap(milestone => 
+      milestone.sections.flatMap(section => section.tasks)
+    );
+  
+    if (allTasks.length === 0) return 0;
+  
+    const startDates = allTasks.map(task => new Date(task.startDate));
+    const endDates = allTasks.map(task => new Date(task.endDate));
+  
+    const minStartDate = new Date(Math.min(...startDates.map(date => date.getTime())));
+    const maxEndDate = new Date(Math.max(...endDates.map(date => date.getTime())));
+  
+    const durationInMilliseconds = maxEndDate.getTime() - minStartDate.getTime();
+    const durationInDays = Math.ceil(durationInMilliseconds / (1000 * 60 * 60 * 24));
+  
+    return durationInDays;
+  };
+  
+
   const handleSubmit = async (isDraft: boolean) => {
 
     const roadmapData: any = {
@@ -23,7 +45,7 @@ export default observer(function StepperThird() {
       description: roadmapDescription,
       createdBy: "0e7d3f8c-845c-4c69-b50d-9f07c0c7b98f",  
       overall_progress: 0, 
-      overall_duration: 0, 
+      overallDuration: calculateOverallDuration(), 
       isCompleted: false, 
       isDraft: isDraft, 
       isDeleted: false, 
