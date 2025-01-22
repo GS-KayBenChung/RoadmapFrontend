@@ -34,6 +34,9 @@ const requests = {
 }
 
 const Roadmaps = {
+
+  updateTestRoadmap: async (roadmapId: string, roadmapData: Partial<Roadmap>) => requests.patch<void>(`/roadmaps/${roadmapId}/roadmap`, roadmapData),
+
   updateRoadmap: async (roadmapId: string, roadmapData: Partial<Roadmap>) => {
     try {
       const response = await requests.patch<void>(`/roadmaps/${roadmapId}`, roadmapData);
@@ -49,17 +52,19 @@ const Roadmaps = {
   create: (roadmap: Roadmap) => requests.post<void>('/roadmaps', roadmap),
   update: (roadmap: any) => requests.put<void>(`/roadmaps/${roadmap.roadmapId}`, roadmap),
   delete: (id: string) => requests.delete<void>(`/roadmaps/${id}`),
-
-  // updateCheck: (body: any) => requests.patch<void>(`/roadmaps/completionStatus`, body), WORKING
   updateCompletion: (entityType: string, data: Partial<{ id: string, IsCompleted?: boolean, Progress: number }>) =>
     requests.patch<void>(`/roadmaps/${entityType}/completion`, data),
-
   getLogs: async (query: string) => requests.get<PaginatedAudit<AuditLogs>>(`/roadmaps/logs?${query}`),
   googleLogin: (token: string) => requests.post<{ id: string; username: string; email: string; token: string; createdAt: string }>(
     `/authentication/googleresponse`,
     { credential: token }
   ),
   publishRoadmap: async (roadmapId: string) => requests.patch<void>(`/roadmaps/${roadmapId}/publish`, {}),
+
+
+
+
+  createLog: (log: AuditLogs) => requests.post<void>('/roadmaps/createlogs', log),
 }
 
 const apiClient = {

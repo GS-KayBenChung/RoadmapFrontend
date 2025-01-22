@@ -191,10 +191,15 @@ export default class RoadmapStore {
     }
   };
 
-  deleteRoadmap = async (id: string, navigate: (path: string) => void) => {
+  deleteRoadmap = async (id: string, title: string, navigate: (path: string) => void) => {
     this.submitting = true;
+    const logData = {
+      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      activityAction: `Deleted Roadmap: ${title}`,  
+    };
     try {
       await apiClient.Roadmaps.delete(id);
+      await apiClient.Roadmaps.createLog(logData);
       this.roadmapRegistry.delete(id);
       navigate('/content');
     } catch (error) {

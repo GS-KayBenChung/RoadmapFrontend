@@ -6,8 +6,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useStore } from "../../app/stores/store";
 import { toast, ToastContainer } from "react-toastify";
-import axios from "axios";
 import NavBar from "../../app/layout/NavBar";
+import apiClient from "../../app/api/apiClient";
 
 export default observer(function EditPageTest() {
   const { roadmapStore } = useStore();
@@ -426,10 +426,17 @@ export default observer(function EditPageTest() {
   };
   
   const EditRoadmap = async (roadmapId: string, roadmapData: any) => {
+
+    const logData = {
+      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      activityAction: roadmapToEdit.isDraft 
+        ? `Updated draft roadmap: ${roadmapToEdit.title}` 
+        : `Updated published roadmap: ${roadmapToEdit.title}`,  
+    };
+
     try {
-      console.log(roadmapData);
-      const response = await axios.patch(`/roadmaps/${roadmapId}/roadmap`, roadmapData);
-      return response.data;
+      await apiClient.Roadmaps.updateTestRoadmap(roadmapId, roadmapData);
+      await apiClient.Roadmaps.createLog(logData);
     } catch (error) {
       toast.error("Error editing roadmap");
       throw error;
@@ -478,6 +485,7 @@ export default observer(function EditPageTest() {
           onChange={(e) => handleFieldChange("title", e.target.value)}
           inputProps={{ maxLength: 50 }}
           className="max-w-[600px]"
+          disabled = {!roadmapToEdit?.isDraft}
         />
         <TextField
           fullWidth
@@ -490,6 +498,7 @@ export default observer(function EditPageTest() {
           onChange={(e) => handleFieldChange("description", e.target.value)}
           inputProps={{ maxLength: 100 }}
           className="max-w-[600px]"
+          disabled = {!roadmapToEdit?.isDraft}
         />
       </div>
       <button
@@ -518,6 +527,7 @@ export default observer(function EditPageTest() {
                 inputProps={{ maxLength: 100 }}
                 onChange={(e) => handleMilestoneChange(milestone.milestoneId, "name", e.target.value)}
                 className="max-w-[500px]"
+                disabled = {!roadmapToEdit?.isDraft}
               />
               <TextField
                 fullWidth
@@ -529,6 +539,7 @@ export default observer(function EditPageTest() {
                 inputProps={{ maxLength: 250 }}
                 onChange={(e) => handleMilestoneChange(milestone.milestoneId, "description", e.target.value)}
                 className="max-w-[500px]"
+                disabled = {!roadmapToEdit?.isDraft}
               />
               <button
                 onClick={() => addSection(milestone.milestoneId)}
@@ -558,6 +569,7 @@ export default observer(function EditPageTest() {
                         inputProps={{ maxLength: 50 }}
                         onChange={(e) => handleSectionChange(milestone.milestoneId, section.sectionId, "name", e.target.value)}
                         className="max-w-[400px]"
+                        disabled = {!roadmapToEdit?.isDraft}
                       />
                       <TextField
                         fullWidth
@@ -569,6 +581,7 @@ export default observer(function EditPageTest() {
                         inputProps={{ maxLength: 100 }}
                         onChange={(e) => handleSectionChange(milestone.milestoneId, section.sectionId, "description", e.target.value)}
                         className="max-w-[400px]"
+                        disabled = {!roadmapToEdit?.isDraft}
                       />
                       <button
                         onClick={() => addTask(milestone.milestoneId, section.sectionId)}
@@ -599,6 +612,7 @@ export default observer(function EditPageTest() {
                                   handleTaskChange(milestone.milestoneId, section.sectionId, task.taskId, "name", e.target.value)
                                 }
                                 className="max-w-[400px]"
+                                disabled = {!roadmapToEdit?.isDraft}
                               />
                               <TextField
                                 margin="normal"

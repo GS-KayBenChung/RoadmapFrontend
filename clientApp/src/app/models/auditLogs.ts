@@ -1,7 +1,7 @@
 export interface AuditLogs {
-    logId: string
+    logId?: string
     userId: string
-    userName: string
+    userName?: string
     activityAction: string
-    createdAt: string
+    createdAt?: string
 }

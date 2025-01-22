@@ -76,10 +76,17 @@ export default observer(function StepperThird() {
         })),
       })),
     };
+
+    const logData = {
+      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      activityAction: isDraft 
+        ? `Created draft roadmap: ${roadmapTitle}` 
+        : `Created published roadmap: ${roadmapTitle}`,  
+    };
         
     try {
       await apiClient.Roadmaps.create(roadmapData);
-  
+      await apiClient.Roadmaps.createLog(logData);
       toast.success("Roadmap created successfully!");
       roadmapCreateStore.reset();
       navigate('/content');

@@ -68,7 +68,7 @@ export default observer( function RoadmapDetails() {
 
   const confirmDelete = async () => {
     if (roadmapToDelete) {
-      await roadmapStore.deleteRoadmap(roadmapToDelete, navigate);
+      await roadmapStore.deleteRoadmap(roadmapToDelete, selectedRoadmap.title , navigate);
     }
     setShowModal(false); 
   };
@@ -149,8 +149,13 @@ export default observer( function RoadmapDetails() {
   };
   
   const confirmPublish = async () => {
+    const logData = {
+      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      activityAction: `Published roadmap: ${selectedRoadmap.title}`,  
+    };
     try {
       await roadmapStore.publishRoadmap(id!);
+      await apiClient.Roadmaps.createLog(logData);
       setShowPublishConfirm(false);
       navigate(`/roadmap/${id}`);
     } catch (error) {

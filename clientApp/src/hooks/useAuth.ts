@@ -15,11 +15,13 @@ export const useAuth = () => {
     const login = (user: any) => {
         userStore.setUser(user);
         setIsAuthenticated(true);
+        //call
     };
 
     const logout = () => {
         userStore.logout();
         setIsAuthenticated(false);
+        //call
     };
 
     return {
