@@ -501,6 +501,8 @@ export default observer(function EditPageTest() {
           disabled = {!roadmapToEdit?.isDraft}
         />
       </div>
+
+      {roadmapToEdit?.isDraft && (
       <button
          onClick={() => {
           addMilestone();
@@ -509,6 +511,8 @@ export default observer(function EditPageTest() {
       >
         Add Milestone
       </button>
+      )}
+      
       {visibleMilestones.map((milestone: any) => (
         <Card key={milestone.milestoneId} className="mb-3 p-2 mt-8 border-2 border-black">
           <CardContent>
@@ -541,12 +545,15 @@ export default observer(function EditPageTest() {
                 className="max-w-[500px]"
                 disabled = {!roadmapToEdit?.isDraft}
               />
+
+              {roadmapToEdit?.isDraft && (
               <button
                 onClick={() => addSection(milestone.milestoneId)}
                 className="my-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 Add Section
               </button>
+              )}
 
               {visibleSections(milestone.sections).map((section: any) => (
                 <Card key={section.sectionId} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
@@ -583,12 +590,16 @@ export default observer(function EditPageTest() {
                         className="max-w-[400px]"
                         disabled = {!roadmapToEdit?.isDraft}
                       />
+
+                      {roadmapToEdit?.isDraft && (
                       <button
                         onClick={() => addTask(milestone.milestoneId, section.sectionId)}
                         className="my-3 block mx-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         Add Task
                       </button>
+                      )}
+
                       {visibleTasks(section.tasks).map((task: any) => (
                         <Card key={task.taskId} className="w-3/5 mt-3 ml-2 p-3 border border-black text-black rounded">
                           <CardContent>

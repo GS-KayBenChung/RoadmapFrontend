@@ -26,15 +26,23 @@ export default observer(function RoadmapsPage() {
   const { loadRoadmaps, roadmaps, loadingInitial, dashboardStats } = roadmapStore;
   const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
-  const [viewType, setViewType] = useState<string>("card");
+  // const [viewType, setViewType] = useState<string>("card");
+  const [viewType, setViewType] = useState<string>(() => {
+    return localStorage.getItem("roadmapViewType") || "card";
+  });
+  
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [pageSize, setPageSize] =useState<number>(PaginationConfig.defaultPageSize)
   const [sortBy, setSortBy] = useState(PaginationConfig.defaultRoadmapSortBy);
   const [asc, setAsc] = useState(PaginationConfig.defaultAsc);
   const pageSizeOptions = [5, 10, 20, 50];
+  
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [loadingTable, setLoadingTable] = useState<boolean>(false);
+
 
   const handleClear = () => {
     setSearch("");
@@ -66,6 +74,8 @@ export default observer(function RoadmapsPage() {
     sortBy?: string;
     asc?: number;
   }) => {
+    setLoadingTable(true); 
+  
     const queryParams = new URLSearchParams({
       ...(filter && { filter }),
       ...(search && { search }),
@@ -73,10 +83,11 @@ export default observer(function RoadmapsPage() {
       page: (page || PaginationConfig.defaultPage).toString(),
       pageSize: (pageSize || PaginationConfig.defaultPageSize).toString(),
       sortBy: sortBy || PaginationConfig.defaultRoadmapSortBy,
-      asc: (asc || PaginationConfig.defaultAsc).toString()
+      asc: (asc || PaginationConfig.defaultAsc).toString(),
     }).toString();
     
     navigate(`?${queryParams}`);
+    
     loadRoadmaps(
       filter || undefined,
       search || undefined,
@@ -85,7 +96,12 @@ export default observer(function RoadmapsPage() {
       pageSize || PaginationConfig.defaultPageSize,
       sortBy || PaginationConfig.defaultRoadmapSortBy,
       asc || PaginationConfig.defaultAsc
-    );
+    ).finally(() => setLoadingTable(false)); 
+  };
+  
+  const handleViewTypeChange = (type: string) => {
+    setViewType(type);
+    localStorage.setItem("roadmapViewType", type);
   };
   
   const handleFilterChange = (event: any) => {
@@ -203,11 +219,13 @@ export default observer(function RoadmapsPage() {
     setPageSize(pageSizeParam);
     setSortBy(sortByParam);
     setAsc(ascParam);
-    loadRoadmaps(filterParam, searchParam, dateParam, pageParam, pageSizeParam, sortByParam, ascParam);
+
+    setLoadingTable(true);
+
+    loadRoadmaps(filterParam, searchParam, dateParam, pageParam, pageSizeParam, sortByParam, ascParam)
+    .finally(() => setLoadingTable(false)); 
   }, [location.search, loadRoadmaps, dashboardStats]);
   
-  if (loadingInitial) return <LoadingComponent />;
-
   return (
     <>
       <NavBar />
@@ -279,7 +297,7 @@ export default observer(function RoadmapsPage() {
                 </NavLink>
                 
                 <button
-                  onClick={() => setViewType('card')}
+                  onClick={() => handleViewTypeChange('card')}
                   className={`px-3 py-3 rounded ${
                     viewType === 'card' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
                   } hover:bg-blue-600`}
@@ -288,7 +306,7 @@ export default observer(function RoadmapsPage() {
                 </button>
 
                 <button
-                  onClick={() => setViewType('list')}
+                  onClick={() => handleViewTypeChange('list')}
                   className={`px-3 py-3 rounded ${
                     viewType === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700'
                   } hover:bg-blue-600`}
@@ -333,7 +351,12 @@ export default observer(function RoadmapsPage() {
             </div>
           </div>
 
-          {viewType === "card" ? (
+
+          {loadingTable ? (
+            <div className="flex justify-center items-center py-10">
+              <LoadingComponent />
+            </div>
+          ) : viewType === "card" ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 md:mx-12 lg:grid-cols-5 gap-12 p-4">
               {roadmaps.length > 0 ? (
                 roadmaps.map((roadmap) => (
@@ -370,7 +393,7 @@ export default observer(function RoadmapsPage() {
                           <TableCell>{roadmap.title}</TableCell>
                           <TableCell>{roadmap.description}</TableCell>
                           <TableCell>{roadmap.overallProgress}%</TableCell>
-                          <TableCell>{roadmap.overallDuration}days</TableCell>
+                          <TableCell>{roadmap.overallDuration} days</TableCell>
                           <TableCell>{formatDate(roadmap.updatedAt)}</TableCell>
                           <TableCell>
                             <NavLink to={`/roadmap/${roadmap.roadmapId}`} className="text-blue-500 underline">
@@ -391,6 +414,7 @@ export default observer(function RoadmapsPage() {
               </TableContainer>
             </div>
           )}
+          
           <div className="flex justify-center mt-6">
             <Pagination
               count={roadmapStore.totalPages} 

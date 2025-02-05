@@ -85,6 +85,40 @@ export default class RoadmapStore {
     }
   };
 
+  // loadLogs = async (
+  //   filter?: string,
+  //   search?: string,
+  //   date?: string,
+  //   pageNumber: number = 1,
+  //   pageSize: number = 10,
+  //   sortBy: string = "Date",
+  //   asc: number = 1
+  // ) => {
+  //   this.loadingInitial = true;
+  //   try {
+  //     const params = new URLSearchParams();
+  //     if (filter) params.append("filter", filter);
+  //     if (search) params.append("search", search);
+  //     if (date) params.append("date", date);
+  //     params.append("pageNumber", pageNumber.toString());
+  //     params.append("pageSize", pageSize.toString());
+  //     params.append("sortBy", sortBy.toLowerCase());
+  //     params.append("asc", asc.toString());
+  //     const result = await apiClient.Roadmaps.getLogs(params.toString());
+  //     runInAction(() => {
+  //       this.logs = result.items; 
+  //       this.currentPage = pageNumber;
+  //       this.totalPages = result.totalPages; 
+  //       pageSize = result.pageSize;
+
+  //       this.loadingInitial = false;
+  //     });
+  //   } catch (error) {
+  //     toast.error("Failed to load logs:");
+  //     this.loadingInitial = false;
+  //   }
+  // };
+
   loadLogs = async (
     filter?: string,
     search?: string,
@@ -95,6 +129,8 @@ export default class RoadmapStore {
     asc: number = 1
   ) => {
     this.loadingInitial = true;
+    console.log("loadLogs called with params:", { filter, search, date, pageNumber, pageSize, sortBy, asc });
+  
     try {
       const params = new URLSearchParams();
       if (filter) params.append("filter", filter);
@@ -104,21 +140,26 @@ export default class RoadmapStore {
       params.append("pageSize", pageSize.toString());
       params.append("sortBy", sortBy.toLowerCase());
       params.append("asc", asc.toString());
+  
+      console.log("API Request URL:", params.toString());
+  
       const result = await apiClient.Roadmaps.getLogs(params.toString());
+  
       runInAction(() => {
-        this.logs = result.items; 
+        this.logs = result.items;
         this.currentPage = pageNumber;
-        this.totalPages = result.totalPages; 
-        pageSize = result.pageSize;
-
-        this.loadingInitial = false;
+        this.totalPages = result.totalPages;
+        this.loadingInitial = false;  // ✅ Reset loading state
+        console.log("Logs loaded successfully.");
       });
     } catch (error) {
-      toast.error("Failed to load logs:");
-      this.loadingInitial = false;
+      runInAction(() => {
+        this.loadingInitial = false;  // ✅ Prevents infinite loading
+      });
+      console.error("Failed to load logs:", error);
     }
   };
-
+  
   loadRoadmaps = async (
     filter?: string,
     search?: string,
@@ -158,19 +199,35 @@ export default class RoadmapStore {
     }
   };
 
+  // loadDashboardStats = async () => {
+  //   this.loadingInitial = true;
+  //   try {
+  //     const result = await apiClient.Roadmaps.getDashboard();
+  //     runInAction(() => {
+  //       this.dashboardStats = result;  
+  //       this.loadingInitial = false;
+  //     });
+  //   } catch (error) {
+  //     toast.error("Failed to load dashboard stats:");
+  //   }
+  // };
+ 
   loadDashboardStats = async () => {
     this.loadingInitial = true;
     try {
       const result = await apiClient.Roadmaps.getDashboard();
       runInAction(() => {
-        this.dashboardStats = result;  
-        this.loadingInitial = false;
+        this.dashboardStats = result;
       });
     } catch (error) {
-      toast.error("Failed to load dashboard stats:");
+      toast.error("Failed to load dashboard stats. Please try again.");
+    } finally {
+      runInAction(() => {
+        this.loadingInitial = false;
+      });
     }
   };
- 
+
   EditRoadmap = async (roadmap: Roadmap) => {
     this.submitting = true;
     try {

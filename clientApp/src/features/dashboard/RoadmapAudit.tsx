@@ -1,19 +1,19 @@
-import { XMarkIcon, MagnifyingGlassIcon } from "@heroicons/react/16/solid";
-import NavBar from "../../app/layout/NavBar";
-import ScreenTitleName from "../ScreenTitleName";
 import { useState, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { useStore } from "../../app/stores/store";
-import { FormControl, InputLabel, Select, MenuItem, TextField, InputAdornment, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Pagination } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { FormControl, InputLabel, Select, MenuItem, TextField, IconButton, InputAdornment } from "@mui/material";
+import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/16/solid";
+import NavBar from "../../app/layout/NavBar";
+import ScreenTitleName from "../ScreenTitleName";
 import LoadingComponent from "../../app/layout/LoadingComponent";
+import { useStore } from "../../app/stores/store";
+import AuditTable from "../../app/layout/AuditTable";
 
 const PaginationConfig = {
   defaultPage: parseInt(import.meta.env.VITE_DEFAULT_PAGE || "1", 10),
   defaultPageSize: parseInt(import.meta.env.VITE_DEFAULT_PAGE_SIZE || "10", 10),
   defaultAuditSortBy: import.meta.env.VITE_DEFAULT_AUDIT_SORT_BY || "CreatedAt",
   defaultAsc: parseInt(import.meta.env.VITE_DEFAULT_ASC || "0", 10),
-  pageSizeOptions: (import.meta.env.VITE_PAGE_SIZE_OPTIONS || "10")
 };
 
 export default observer(function RoadmapAudit() {
@@ -193,7 +193,7 @@ export default observer(function RoadmapAudit() {
     );
   };
 
-  if (loadingInitial) return <LoadingComponent />;
+  // if (roadmapStore.loadingInitial) return <LoadingComponent />;
 
   return (
     <>
@@ -281,53 +281,7 @@ export default observer(function RoadmapAudit() {
           </div>
         </div>
 
-        <TableContainer className="shadow-md rounded-lg overflow-hidden min-w-full">
-          <Table className="text-sm">
-            <TableHead>
-              <TableRow className="border-black border-2">
-                <TableCell className="font-semibold text-gray-700 text-right">UserName</TableCell>
-                <TableCell className="font-semibold text-gray-700 text-right">Action</TableCell>
-                <TableCell className="font-semibold text-gray-700 text-right">Date</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody className="border-2 border-black">
-            {logs.length > 0 ? (
-              logs.map((log) => (
-                <TableRow key={log.logId} className="hover:bg-gray-100">
-                  <TableCell>{log.userName}</TableCell>
-                  <TableCell>{log.activityAction}</TableCell>
-                  <TableCell>
-                    {new Date(log.createdAt).toLocaleString('en-GB', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      second: '2-digit',
-                      hour12: false,
-                    })}
-                  </TableCell>
-                </TableRow>
-              ))
-            ): (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center text-gray-500">
-                    No Audit Logs found
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <div className="flex justify-center mt-6">
-          <Pagination
-            count={roadmapStore.totalPages} 
-            page={roadmapStore.currentPage}
-            onChange={handlePageChange}
-            color="primary"
-          />
-        </div>
+        <AuditTable filter={filter} search={search} selectedDate={selectedDate} pageSize={pageSize} sortBy={sortBy} asc={asc} page={pageSize} onPageChange={setPageSize} />
       </div>
     </>
   );
