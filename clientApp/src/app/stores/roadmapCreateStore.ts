@@ -5,6 +5,7 @@ class RoadmapCreateStore {
   activeStep = 0;
   roadmapTitle = "";
   roadmapDescription = "";
+  isTitleAndDescriptionValid = false; 
   milestones = [] as Array<{
     title: string;
     description: string;
@@ -25,11 +26,21 @@ class RoadmapCreateStore {
     });
   };
 
-  validateRoadmap = (): boolean => {
+  validateTitleAndDescription(): boolean {
     if (!this.roadmapTitle.trim() || !this.roadmapDescription.trim()) {
       toast.warning("Roadmap Title and Description are required.");
+      this.isTitleAndDescriptionValid = false; 
       return false;
     }
+    this.isTitleAndDescriptionValid = true; 
+    return true;
+  }
+
+  validateRoadmap = (): boolean => {
+    // if (!this.roadmapTitle.trim() || !this.roadmapDescription.trim()) {
+    //   toast.warning("Roadmap Title and Description are required.");
+    //   return false;
+    // }
   
     const sortedMilestones = [...this.milestones].sort((a, b) => {
       const aStartDates = a.sections.flatMap(section => section.tasks.map(task => new Date(task.startDate)));

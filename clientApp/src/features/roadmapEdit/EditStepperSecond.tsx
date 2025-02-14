@@ -107,11 +107,15 @@ export default observer(function EditStepperSecond() {
 
   const removeMilestone = (milestoneId: string) => {
     roadmapToEdit((prev: any) => {
-      const updatedMilestones = prev.milestones.map((milestone: any) =>
-        milestone.milestoneId === milestoneId
-          ? { ...milestone, isDeleted: true }
-          : milestone
-      );
+      // const updatedMilestones = prev.milestones.map((milestone: any) =>
+      //   milestone.milestoneId === milestoneId
+      //     ? { ...milestone, isDeleted: true }
+      //     : milestone
+      // );
+      const updatedMilestones = prev.milestones.filter((milestone: any) => {
+        const isNewMilestone = !milestone.name && !milestone.description && (!milestone.sections || milestone.sections.length === 0);
+        return !(isNewMilestone && milestone.milestoneId === milestoneId); 
+      });
       return { ...prev, milestones: updatedMilestones };
     });
   };
@@ -120,11 +124,15 @@ export default observer(function EditStepperSecond() {
     roadmapToEdit((prev: any) => {
       const updatedMilestones = prev.milestones.map((milestone: any) => {
         if (milestone.milestoneId === milestoneId) {
-          const updatedSections = milestone.sections.map((section: any) =>
-            section.sectionId === sectionId
-              ? { ...section, isDeleted: true }
-              : section
-          );
+          // const updatedSections = milestone.sections.map((section: any) =>
+          //   section.sectionId === sectionId
+          //     ? { ...section, isDeleted: true }
+          //     : section
+          // );
+          const updatedSections = milestone.sections.filter((section: any) => {
+            const isNewSection = !section.name && !section.description && (!section.tasks || section.tasks.length === 0);
+            return !(isNewSection && section.sectionId === sectionId);
+          });
           return { ...milestone, sections: updatedSections };
         }
         return milestone;
@@ -139,11 +147,15 @@ export default observer(function EditStepperSecond() {
         if (milestone.milestoneId === milestoneId) {
           const updatedSections = milestone.sections.map((section: any) => {
             if (section.sectionId === sectionId) {
-              const updatedTasks = section.tasks.map((task: any) =>
-                task.taskId === taskId
-                  ? { ...task, isDeleted: true }
-                  : task
-              );
+              // const updatedTasks = section.tasks.map((task: any) =>
+              //   task.taskId === taskId
+              //     ? { ...task, isDeleted: true }
+              //     : task
+              // );
+              const updatedTasks = section.tasks.filter((task: any) => {
+                const isNewTask = !task.name && !task.dateStart && !task.dateEnd;
+                return !(isNewTask && task.taskId === taskId);
+              });
               return { ...section, tasks: updatedTasks };
             }
             return section;

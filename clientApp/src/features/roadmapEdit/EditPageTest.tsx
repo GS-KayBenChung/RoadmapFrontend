@@ -293,57 +293,102 @@ export default observer(function EditPageTest() {
   };
   
   const removeMilestone = (milestoneId: string) => {
-    recordChange('milestones', milestoneId, 'isDeleted', true);
-    setRoadmapToEdit((prev: any) => {
-      const updatedMilestones = prev.milestones.map((milestone: any) =>
-        milestone.milestoneId === milestoneId
-          ? { ...milestone, isDeleted: true }
-          : milestone
-      );
-      return { ...prev, milestones: updatedMilestones };
-    });
+    const milestone = roadmapToEdit?.milestones.find((m: any) => m.milestoneId === milestoneId);
+
+    if (milestone && !milestone.name && !milestone.description && (!milestone.sections || milestone.sections.length === 0)) {
+        setRoadmapToEdit((prev: any) => ({
+          ...prev,
+          milestones: prev.milestones.filter((m: any) => m.milestoneId !== milestoneId), 
+        }));
+        return; 
+    }
+
+    recordChange("milestones", milestoneId, "isDeleted", true);
+
+    setRoadmapToEdit((prev: any) => ({
+      ...prev,
+      milestones: prev.milestones.map((m: any) =>
+        m.milestoneId === milestoneId ? { ...m, isDeleted: true } : m
+      ),
+    }));
   };
-  
+
   const removeSection = (milestoneId: string, sectionId: string) => {
-    recordChange('sections', sectionId, 'isDeleted', true, { milestoneId });
-    setRoadmapToEdit((prev: any) => {
-      const updatedMilestones = prev.milestones.map((milestone: any) => {
-        if (milestone.milestoneId === milestoneId) {
-          const updatedSections = milestone.sections.map((section: any) =>
-            section.sectionId === sectionId
-              ? { ...section, isDeleted: true }
-              : section
-          );
-          return { ...milestone, sections: updatedSections };
+    const milestone = roadmapToEdit?.milestones.find((m: any) => m.milestoneId === milestoneId);
+    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+
+    if (section && !section.name && !section.description && (!section.tasks || section.tasks.length === 0)) {
+      setRoadmapToEdit((prev: any) => ({
+        ...prev,
+        milestones: prev.milestones.map((m: any) =>
+          m.milestoneId === milestoneId? {
+            ...m,
+            sections: m.sections.filter((s: any) => s.sectionId !== sectionId), 
+          }
+          : m
+        ),
+      }));
+      return; 
+    }
+
+    recordChange("sections", sectionId, "isDeleted", true, { milestoneId });
+
+    setRoadmapToEdit((prev: any) => ({
+      ...prev,
+      milestones: prev.milestones.map((m: any) =>
+        m.milestoneId === milestoneId? {
+          ...m,
+          sections: m.sections.map((s: any) =>
+            s.sectionId === sectionId ? { ...s, isDeleted: true } : s
+          ),
         }
-        return milestone;
-      });
-      return { ...prev, milestones: updatedMilestones };
-    });
+        : m
+      ),
+    }));
   };
-  
+
   const removeTask = (milestoneId: string, sectionId: string, taskId: string) => {
-    recordChange('tasks', taskId, 'isDeleted', true, { milestoneId, sectionId });
-    setRoadmapToEdit((prev: any) => {
-      const updatedMilestones = prev.milestones.map((milestone: any) => {
-        if (milestone.milestoneId === milestoneId) {
-          const updatedSections = milestone.sections.map((section: any) => {
-            if (section.sectionId === sectionId) {
-              const updatedTasks = section.tasks.map((task: any) =>
-                task.taskId === taskId
-                  ? { ...task, isDeleted: true }
-                  : task
-              );
-              return { ...section, tasks: updatedTasks };
-            }
-            return section;
-          });
-          return { ...milestone, sections: updatedSections };
-        }
-        return milestone;
-      });
-      return { ...prev, milestones: updatedMilestones };
-    });
+    const milestone = roadmapToEdit?.milestones.find((m: any) => m.milestoneId === milestoneId);
+    const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
+    const task = section?.tasks.find((t: any) => t.taskId === taskId);
+
+    if (task && !task.name && !task.dateStart && !task.dateEnd) {
+      setRoadmapToEdit((prev: any) => ({
+        ...prev,
+        milestones: prev.milestones.map((milestone: any) =>
+          milestone.milestoneId === milestoneId? {
+            ...milestone,
+            sections: milestone.sections.map((section: any) =>
+              section.sectionId === sectionId? {
+                ...section,
+                tasks: section.tasks.filter((t: any) => t.taskId !== taskId), 
+              }
+              : section
+            ),
+          }
+          : milestone
+        ),
+      }));
+      return; 
+    }
+
+    recordChange("tasks", taskId, "isDeleted", true, { milestoneId, sectionId });
+
+    setRoadmapToEdit((prev: any) => ({
+      ...prev,
+      milestones: prev.milestones.map((milestone: any) =>
+        milestone.milestoneId === milestoneId? {...milestone, sections: milestone.sections.map((section: any) =>
+          section.sectionId === sectionId? {
+            ...section,
+            tasks: section.tasks.map((t: any) =>
+              t.taskId === taskId ? { ...t, isDeleted: true } : t
+            ),
+          }
+          : section
+        ),}
+        : milestone
+      ),
+    }));
   };
 
   const validateRoadmap = (): boolean => {

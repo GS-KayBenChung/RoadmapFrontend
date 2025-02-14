@@ -43,7 +43,8 @@ export default observer(function StepperThird() {
     const roadmapData: any = {
       title: roadmapTitle,
       description: roadmapDescription,
-      createdBy: "0e7d3f8c-845c-4c69-b50d-9f07c0c7b98f",  
+      createdBy: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9", 
+      createdAt: new Date().toISOString(), 
       overall_progress: 0, 
       overallDuration: calculateOverallDuration(), 
       isCompleted: false, 

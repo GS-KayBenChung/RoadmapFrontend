@@ -1,7 +1,7 @@
 import { Stepper, Step, StepLabel, Box } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 
 interface Props {
   steps: string[];
@@ -9,9 +9,14 @@ interface Props {
 }
 
 export default observer(function StepperComponent({ steps, activeStep }: Props) {
-  const { setActiveStep, roadmapTitle, roadmapDescription } = roadmapCreateStore;
+  // const { setActiveStep, roadmapTitle, roadmapDescription } = roadmapCreateStore;
+  const { setActiveStep } = roadmapCreateStore;
+
 
   const handleNext = () => {
+    if (activeStep === 0 && !roadmapCreateStore.validateTitleAndDescription()) {
+      return; 
+    }
     if (!roadmapCreateStore.validateRoadmap()) {
       return; 
     }
