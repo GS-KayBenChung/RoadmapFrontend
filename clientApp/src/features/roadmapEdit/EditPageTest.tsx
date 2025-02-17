@@ -396,7 +396,6 @@ export default observer(function EditPageTest() {
     const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
     const task = section?.tasks.find((t: any) => t.taskId === taskId);
 
-    // 🚀 If task is new (never saved to backend), remove it from UI without recording
     if (task && !task.name && !task.dateStart && !task.dateEnd) {
         setRoadmapToEdit((prev: any) => ({
             ...prev,
@@ -413,15 +412,14 @@ export default observer(function EditPageTest() {
                     : m
             ),
         }));
-        return; // ✅ Skip backend update
+        return; 
     }
 
-    // ✅ If task exists, mark it as deleted but keep dateStart & dateEnd to pass backend validation
     recordChange("tasks", taskId, "isDeleted", true, {
         milestoneId,
         sectionId,
-        dateStart: task.dateStart, // ✅ Keep original start date
-        dateEnd: task.dateEnd, // ✅ Keep original end date
+        dateStart: task.dateStart, 
+        dateEnd: task.dateEnd,
     });
 
     setRoadmapToEdit((prev: any) => ({
@@ -450,7 +448,6 @@ export default observer(function EditPageTest() {
     const milestone = roadmapToEdit?.milestones.find((m: any) => m.milestoneId === milestoneId);
     const section = milestone?.sections.find((s: any) => s.sectionId === sectionId);
 
-    // 🚀 If section is new & empty, remove it from UI
     if (section && !section.name && !section.description && (!section.tasks || section.tasks.length === 0)) {
         setRoadmapToEdit((prev: any) => ({
             ...prev,
@@ -460,10 +457,9 @@ export default observer(function EditPageTest() {
                     : m
             ),
         }));
-        return; // ✅ Skip backend update
+        return; 
     }
 
-    // ✅ If section exists, mark it as deleted
     recordChange("sections", sectionId, "isDeleted", true, { milestoneId });
 
     setRoadmapToEdit((prev: any) => ({
@@ -484,16 +480,14 @@ export default observer(function EditPageTest() {
   const removeMilestone = (milestoneId: string) => {
     const milestone = roadmapToEdit?.milestones.find((m: any) => m.milestoneId === milestoneId);
 
-    // 🚀 If milestone is new & empty, remove it from UI
     if (milestone && !milestone.name && !milestone.description && (!milestone.sections || milestone.sections.length === 0)) {
         setRoadmapToEdit((prev: any) => ({
             ...prev,
             milestones: prev.milestones.filter((m: any) => m.milestoneId !== milestoneId),
         }));
-        return; // ✅ Skip backend update
+        return; 
     }
 
-    // ✅ If milestone exists, mark it as deleted
     recordChange("milestones", milestoneId, "isDeleted", true);
 
     setRoadmapToEdit((prev: any) => ({
@@ -505,55 +499,133 @@ export default observer(function EditPageTest() {
   };
 
 
+  // const validateRoadmap = (): boolean => {
+  //   if (!roadmapToEdit?.title?.trim()) {
+  //     toast.error("Roadmap title cannot be empty");
+  //     return false;
+  //   }
+  
+  //   if (!roadmapToEdit?.description?.trim()) {
+  //     toast.error("Roadmap description cannot be empty");
+  //     return false;
+  //   }
+  
+  //   let lastTaskEndDate: Date | null = null; 
+  //   for (const milestone of roadmapToEdit.milestones) {
+  //     if (milestone.isDeleted) continue;
+  
+  //     if (!milestone.name.trim()) {
+  //       toast.error("Milestone title cannot be empty");
+  //       return false;
+  //     }
+  
+  //     if (!milestone.description.trim()) {
+  //       toast.error(`Description for milestone "${milestone.name}" cannot be empty`);
+  //       return false;
+  //     }
+  
+  //     for (const section of milestone.sections) {
+  //       if (section.isDeleted) continue;
+  
+  //       if (!section.name.trim()) {
+  //         toast.error(`Section title in milestone "${milestone.name}" cannot be empty`);
+  //         return false;
+  //       }
+  
+  //       if (!section.description.trim()) {
+  //         toast.error(`Description for section "${section.name}" cannot be empty`);
+  //         return false;
+  //       }
+  
+  //       const tasks = section.tasks.filter((task: any) => !task.isDeleted);
+  
+  //       for (let i = 0; i < tasks.length; i++) {
+  //         const task = tasks[i];
+  
+  //         if (!task.name.trim()) {
+  //           toast.error(`Task title in section "${section.name}" cannot be empty`);
+  //           return false;
+  //         }
+  
+  //         if (!task.dateStart || !task.dateEnd || task.dateStart.trim() === "" || task.dateEnd.trim() === "") {
+  //           toast.error(`Start and end dates for task "${task.name}" must be set`);
+  //           return false;
+  //         }
+  
+  //         const startDate = new Date(task.dateStart);
+  //         const endDate = new Date(task.dateEnd);
+  
+  //         if (startDate.getTime() === endDate.getTime()) {
+  //           toast.error(`Start and end dates cannot be the same for task "${task.name}"`);
+  //           return false;
+  //         }
+  
+  //         if (startDate > endDate) {
+  //           toast.error(`Start date cannot be after end date for task "${task.name}"`);
+  //           return false;
+  //         }
+  
+  //         if (lastTaskEndDate && startDate < lastTaskEndDate) {
+  //           toast.error(`Start date of task "${task.name}" cannot be before the end date of the previous task`);
+  //           return false;
+  //         }
+  
+  //         lastTaskEndDate = endDate;
+  //       }
+  //     }
+  //   }
+  
+  //   return true;
+  // };
+  
+
   const validateRoadmap = (): boolean => {
-    if (!roadmapToEdit?.title?.trim()) {
+    if (!roadmapToEdit?.title || typeof roadmapToEdit.title !== "string" || roadmapToEdit.title.trim() === "") {
       toast.error("Roadmap title cannot be empty");
       return false;
     }
   
-    if (!roadmapToEdit?.description?.trim()) {
+    if (!roadmapToEdit?.description || typeof roadmapToEdit.description !== "string" || roadmapToEdit.description.trim() === "") {
       toast.error("Roadmap description cannot be empty");
       return false;
     }
   
-    let lastTaskEndDate: Date | null = null; 
-    for (const milestone of roadmapToEdit.milestones) {
+    let lastTaskEndDate: Date | null = null;
+    for (const milestone of roadmapToEdit.milestones || []) {
       if (milestone.isDeleted) continue;
   
-      if (!milestone.name.trim()) {
+      if (!milestone.name || typeof milestone.name !== "string" || milestone.name.trim() === "") {
         toast.error("Milestone title cannot be empty");
         return false;
       }
   
-      if (!milestone.description.trim()) {
+      if (!milestone.description || typeof milestone.description !== "string" || milestone.description.trim() === "") {
         toast.error(`Description for milestone "${milestone.name}" cannot be empty`);
         return false;
       }
   
-      for (const section of milestone.sections) {
+      for (const section of milestone.sections || []) {
         if (section.isDeleted) continue;
   
-        if (!section.name.trim()) {
+        if (!section.name || typeof section.name !== "string" || section.name.trim() === "") {
           toast.error(`Section title in milestone "${milestone.name}" cannot be empty`);
           return false;
         }
   
-        if (!section.description.trim()) {
+        if (!section.description || typeof section.description !== "string" || section.description.trim() === "") {
           toast.error(`Description for section "${section.name}" cannot be empty`);
           return false;
         }
   
-        const tasks = section.tasks.filter((task: any) => !task.isDeleted);
+        const tasks = section.tasks?.filter((task: any) => !task.isDeleted) || [];
   
-        for (let i = 0; i < tasks.length; i++) {
-          const task = tasks[i];
-  
-          if (!task.name.trim()) {
+        for (const task of tasks) {
+          if (!task.name || typeof task.name !== "string" || task.name.trim() === "") {
             toast.error(`Task title in section "${section.name}" cannot be empty`);
             return false;
           }
   
-          if (!task.dateStart || !task.dateEnd || task.dateStart.trim() === "" || task.dateEnd.trim() === "") {
+          if (!task.dateStart || !task.dateEnd || typeof task.dateStart !== "string" || typeof task.dateEnd !== "string") {
             toast.error(`Start and end dates for task "${task.name}" must be set`);
             return false;
           }
@@ -584,6 +656,7 @@ export default observer(function EditPageTest() {
     return true;
   };
   
+
   const EditRoadmap = async (roadmapId: string, roadmapData: any) => {
 
     const logData = {
@@ -603,6 +676,8 @@ export default observer(function EditPageTest() {
   };  
 
   const handleSubmit = async () => {
+    console.log("changesPayload", changesPayload);
+    
     if(!validateRoadmap()) return;
     EditRoadmap(roadmapStore.selectedRoadmap?.roadmapId || '', changesPayload)
     .then(() => {
