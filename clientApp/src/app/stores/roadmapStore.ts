@@ -4,8 +4,10 @@ import { AuditLogs } from "../models/auditLogs";
 import apiClient from "../api/apiClient";
 import {v4 as uuid} from 'uuid'
 import { toast } from "react-toastify";
+import UserStore from "./userStore";
 
 export default class RoadmapStore {
+  userStore: UserStore;
   logs: AuditLogs[] = [];
   totalCount = 0;
   currentPage = 1;
@@ -24,7 +26,8 @@ export default class RoadmapStore {
     overdueRoadmaps: 0,
   };
 
-  constructor() {
+  constructor(userStore: UserStore) {
+    this.userStore = userStore;
     makeAutoObservable(this);
   }
 
@@ -85,40 +88,6 @@ export default class RoadmapStore {
     }
   };
 
-  // loadLogs = async (
-  //   filter?: string,
-  //   search?: string,
-  //   date?: string,
-  //   pageNumber: number = 1,
-  //   pageSize: number = 10,
-  //   sortBy: string = "Date",
-  //   asc: number = 1
-  // ) => {
-  //   this.loadingInitial = true;
-  //   try {
-  //     const params = new URLSearchParams();
-  //     if (filter) params.append("filter", filter);
-  //     if (search) params.append("search", search);
-  //     if (date) params.append("date", date);
-  //     params.append("pageNumber", pageNumber.toString());
-  //     params.append("pageSize", pageSize.toString());
-  //     params.append("sortBy", sortBy.toLowerCase());
-  //     params.append("asc", asc.toString());
-  //     const result = await apiClient.Roadmaps.getLogs(params.toString());
-  //     runInAction(() => {
-  //       this.logs = result.items; 
-  //       this.currentPage = pageNumber;
-  //       this.totalPages = result.totalPages; 
-  //       pageSize = result.pageSize;
-
-  //       this.loadingInitial = false;
-  //     });
-  //   } catch (error) {
-  //     toast.error("Failed to load logs:");
-  //     this.loadingInitial = false;
-  //   }
-  // };
-
   loadLogs = async (
     filter?: string,
     search?: string,
@@ -140,23 +109,17 @@ export default class RoadmapStore {
       params.append("pageSize", pageSize.toString());
       params.append("sortBy", sortBy.toLowerCase());
       params.append("asc", asc.toString());
-  
-      console.log("API Request URL:", params.toString());
-  
       const result = await apiClient.Roadmaps.getLogs(params.toString());
-  
       runInAction(() => {
         this.logs = result.items;
         this.currentPage = pageNumber;
         this.totalPages = result.totalPages;
-        this.loadingInitial = false;  // ✅ Reset loading state
-        console.log("Logs loaded successfully.");
+        this.loadingInitial = false;  
       });
     } catch (error) {
       runInAction(() => {
-        this.loadingInitial = false;  // ✅ Prevents infinite loading
+        this.loadingInitial = false;  
       });
-      console.error("Failed to load logs:", error);
     }
   };
   
@@ -250,8 +213,15 @@ export default class RoadmapStore {
 
   deleteRoadmap = async (id: string, title: string, navigate: (path: string) => void) => {
     this.submitting = true;
+    const userId = this.userStore.userId; 
+    
+    if (!userId) {
+      toast.error("You must be logged in to delete a roadmap.");
+      return;
+    }
+
     const logData = {
-      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      userId, 
       activityAction: `Deleted Roadmap: ${title}`,  
     };
     try {
@@ -287,6 +257,8 @@ export default class RoadmapStore {
 
   publishRoadmap = async(id: string) => {
     try {
+
+
       await apiClient.Roadmaps.publishRoadmap(id);
       runInAction(() => {
         this.selectedRoadmap!.isDraft = false;
@@ -296,7 +268,6 @@ export default class RoadmapStore {
       toast.error("Failed to publish the roadmap.");
     }
   }
-  
   
   private getRoadmap = (id: string) => {
     return this.roadmapRegistry.get(id)

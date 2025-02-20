@@ -127,49 +127,6 @@ class RoadmapEditTestStore {
     this.roadmapToEdit = { ...this.roadmapToEdit, milestones: updatedMilestones };
   };
 
-  // saveChanges = async () => {
-  //   try {
-  //     const roadmapData = {
-  //       title: this.roadmapToEdit.title,
-  //       description: this.roadmapToEdit.description,
-  //       milestones: this.roadmapToEdit.milestones,
-  //     };
-  //     await EditRoadmap(this.roadmapToEdit.roadmapId, roadmapData);
-  //   } catch (error) {
-  //   }
-  // };
-  
-  
-  // updateMilestone(milestoneId: string, field: string, value: any) {
-  //   const milestone = this.newRoadmap?.milestones?.find(
-  //     (m: any) => m.milestoneId === milestoneId
-  //   );
-  //   if (milestone) {
-  //     milestone[field] = value;
-  //   }
-  // }
-
-  // updateSection(milestoneId: string, sectionId: string, field: string, value: any) {
-  //   const milestone = this.newRoadmap?.milestones?.find(
-  //     (m: any) => m.milestoneId === milestoneId
-  //   );
-  //   const section = milestone?.sections?.find((s: any) => s.sectionId === sectionId);
-  //   if (section) {
-  //     section[field] = value;
-  //   }
-  // }
-
-  // updateTask(milestoneId: string, sectionId: string, taskId: string, field: string, value: any) {
-  //   const milestone = this.newRoadmap?.milestones?.find(
-  //     (m: any) => m.milestoneId === milestoneId
-  //   );
-  //   const section = milestone?.sections?.find((s: any) => s.sectionId === sectionId);
-  //   const task = section?.tasks?.find((t: any) => t.taskId === taskId);
-  //   if (task) {
-  //     task[field] = value;
-  //   }
-  // }
-
   reset() {
   }
 }

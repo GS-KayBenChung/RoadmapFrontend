@@ -1,15 +1,18 @@
 import { Box, Modal } from "@mui/material";
 import { observer } from "mobx-react-lite";
 import { roadmapCreateStore } from "../../app/stores/roadmapCreateStore";
-import { formatDate, formatDateOnly } from "../DateTimeFormat";
+import { formatDateOnly } from "../DateTimeFormat";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import ScreenTitleName from "../ScreenTitleName";
 import { toast } from "react-toastify";
 import apiClient from "../../app/api/apiClient";
 import axios from "axios";
+import { useStore } from "../../app/stores/store";
 
 export default observer(function StepperThird() {
+  const { userStore } = useStore();
+  const userId = userStore.userId;
 
   const navigate = useNavigate();
   const { roadmapTitle, roadmapDescription, milestones } = roadmapCreateStore;
@@ -39,47 +42,34 @@ export default observer(function StepperThird() {
   
 
   const handleSubmit = async (isDraft: boolean) => {
-
+    if (!userId) {
+      toast.error("You must be logged in to create a roadmap.");
+      return;
+    }
     const roadmapData: any = {
       title: roadmapTitle,
       description: roadmapDescription,
-      createdBy: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9", 
+      createdBy: userId,
       createdAt: new Date().toISOString(), 
-      overall_progress: 0, 
       overallDuration: calculateOverallDuration(), 
-      isCompleted: false, 
       isDraft: isDraft, 
-      isDeleted: false, 
       milestones: milestones.map((milestone) => ({
         name: milestone.title,
         description: milestone.description,
-        milestone_progress: 0, 
-        isCompleted: false, 
-        isDeleted: false, 
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
         sections: milestone.sections.map((section) => ({
           name: section.title,
           description: section.description,
-          isCompleted: false, 
-          isDeleted: false, 
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
           tasks: section.tasks.map((task) => ({
             name: task.title,
             dateStart: new Date(task.startDate).toISOString(), 
             dateEnd: new Date(task.endDate).toISOString(),
-            isCompleted: false, 
-            isDeleted: false, 
-            created_at: new Date().toISOString(),
-            updated_at: formatDate(new Date()),
           })),
         })),
       })),
     };
 
     const logData = {
-      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      userId: userId,  
       activityAction: isDraft 
         ? `Created draft roadmap: ${roadmapTitle}` 
         : `Created published roadmap: ${roadmapTitle}`,  

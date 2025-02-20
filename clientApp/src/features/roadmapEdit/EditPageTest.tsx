@@ -10,6 +10,8 @@ import NavBar from "../../app/layout/NavBar";
 import apiClient from "../../app/api/apiClient";
 
 export default observer(function EditPageTest() {
+  const { userStore } = useStore();
+  const userId = userStore.userId;
   const { roadmapStore } = useStore();
   const { loadRoadmap } = roadmapStore;
   const { id } = useParams();
@@ -658,9 +660,12 @@ export default observer(function EditPageTest() {
   
 
   const EditRoadmap = async (roadmapId: string, roadmapData: any) => {
-
+    if (!userId) {
+      toast.error("You must be logged in to create a roadmap.");
+      return;
+    }
     const logData = {
-      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      userId: userId,  
       activityAction: roadmapToEdit.isDraft 
         ? `Updated draft roadmap: ${roadmapToEdit.title}` 
         : `Updated published roadmap: ${roadmapToEdit.title}`,  

@@ -37,8 +37,6 @@ export default observer(function AuditTable({
   const { logs, loadLogs, loadingInitial } = roadmapStore;
 
   useEffect(() => {
-    console.log("Fetching logs...");
-    
     loadLogs(
       filter,
       search,

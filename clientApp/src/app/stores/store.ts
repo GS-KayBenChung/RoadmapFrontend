@@ -11,7 +11,7 @@ interface Store {
 
 export const store: Store = {
   userStore: new UserStore(),
-  roadmapStore: new RoadmapStore(),
+  roadmapStore: new RoadmapStore(new UserStore()),
   // roadmapEditTestStore: new RoadmapEditTestStore(),
 };
 

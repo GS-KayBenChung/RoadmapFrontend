@@ -31,6 +31,8 @@ interface Section{
 const formatDate = (date: string) => new Date(date).toISOString().split("T")[0];
 
 export default observer( function RoadmapDetails() {
+  const { userStore } = useStore();
+  const userId = userStore.userId;
   const {roadmapStore} = useStore();
   const {selectedRoadmap, loadRoadmap, loadingInitial} = roadmapStore;
   const {id} = useParams();
@@ -149,8 +151,12 @@ export default observer( function RoadmapDetails() {
   };
   
   const confirmPublish = async () => {
+    if (!userId) {
+      toast.error("You must be logged in to create a roadmap.");
+      return;
+    }
     const logData = {
-      userId: "8f89fd27-b2e7-4849-8ded-1d208c8b06d9",  
+      userId: userId,  
       activityAction: `Published roadmap: ${selectedRoadmap.title}`,  
     };
     try {

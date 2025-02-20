@@ -22,6 +22,7 @@ export default observer(function RoadmapAudit() {
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
+  const [page, setPage] = useState<number>(PaginationConfig.defaultPage);
   const [pageSize, setPageSize] = useState<number>(PaginationConfig.defaultPageSize);
   const [sortBy, setSortBy] = useState<string>(PaginationConfig.defaultAuditSortBy);
   const [asc, setAsc] = useState<number>(PaginationConfig.defaultAsc);
@@ -281,7 +282,7 @@ export default observer(function RoadmapAudit() {
           </div>
         </div>
 
-        <AuditTable filter={filter} search={search} selectedDate={selectedDate} pageSize={pageSize} sortBy={sortBy} asc={asc} page={pageSize} onPageChange={setPageSize} />
+        <AuditTable filter={filter} search={search} selectedDate={selectedDate} pageSize={pageSize} sortBy={sortBy} asc={asc} page={page} onPageChange={setPage} />
       </div>
     </>
   );
