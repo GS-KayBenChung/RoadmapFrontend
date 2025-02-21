@@ -10,12 +10,50 @@ export const useGoogleAuth = () => {
   const navigate = useNavigate();
   const { userStore } = useStore();
 
+  // const handleGoogleLogin = async (credentialResponse: any) => {
+  //   try {
+  //     const token = credentialResponse.credential;
+  //     //sending crediential
+
+  //     const data = await apiClient.Roadmaps.googleLogin(token);
+
+  //     if (!data) {
+  //       throw new Error("Failed to authenticate with Google");
+  //     }
+
+  //     const user = {
+  //       id: data.id,
+  //       username: data.username,
+  //       email: data.email,
+  //       token: data.token,//not token is credientals
+
+  //       //NOTES : WRONG WAY TO DO IT should serialized it (id, username, email)
+  //       //serializedToken: data.serializedToken,
+
+  //       createdAt: data.createdAt,
+  //     };
+
+  //     login(user);
+
+  //     if (userStore.isLoggedIn) {
+  //       navigate("/dashboard");
+  //     } else {
+  //       navigate("/");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error during Google login:");
+  //   }
+  // };
+
   const handleGoogleLogin = async (credentialResponse: any) => {
     try {
-      const token = credentialResponse.credential;
-      //sending crediential
+      const googleIdToken = credentialResponse.credential;
 
-      const data = await apiClient.Roadmaps.googleLogin(token);
+      console.log("Sent to Backend: ", googleIdToken); 
+
+      const data = await apiClient.Roadmaps.googleLogin(googleIdToken);
+
+      console.log("Backend Response: ", data); 
 
       if (!data) {
         throw new Error("Failed to authenticate with Google");
@@ -25,25 +63,20 @@ export const useGoogleAuth = () => {
         id: data.id,
         username: data.username,
         email: data.email,
-        token: data.token,//not token is credientals
-
-        //NOTES : WRONG WAY TO DO IT should serialized it (id, username, email)
-        //serializedToken: data.serializedToken,
-
+        token: data.token,
         createdAt: data.createdAt,
       };
 
       login(user);
 
-      if (userStore.isLoggedIn) {
-        navigate("/dashboard");
-      } else {
-        navigate("/");
-      }
+      localStorage.setItem("appToken", data.token);
+      navigate("/dashboard");
     } catch (error) {
-      toast.error("Error during Google login:");
+      console.error("Error during Google login:", error);
+      toast.error("Error during Google login.");
     }
   };
+
 
   return {
     handleGoogleLogin,

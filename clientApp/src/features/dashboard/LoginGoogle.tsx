@@ -11,6 +11,7 @@ export default observer(function Login() {
   const {loadingInitial} = roadmapStore;
 
   const handleSuccess = (credentialResponse: any) => {
+    console.log("FRO MloginGOogleGoogle Login Success, Token:", credentialResponse.credential);
     handleGoogleLogin(credentialResponse);        
   };
 
@@ -35,6 +36,18 @@ export default observer(function Login() {
               onError={handleError}
               useOneTap
             />
+            {/* <GoogleLogin
+              onSuccess={(credentialResponse) => {
+                console.log("Google Login Success, Token:", credentialResponse.credential);
+                handleGoogleLogin(credentialResponse);
+              }}
+              onError={() => {
+                console.error("Google Login Failed");
+                toast.error("Google Login Failed");
+              }}
+              useOneTap
+            /> */}
+
           </div>
         </div>
       </div>

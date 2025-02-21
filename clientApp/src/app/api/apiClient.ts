@@ -23,6 +23,14 @@ axios.interceptors.response.use(async response => {
   }
 })
 
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("appToken"); 
+  if (token) {
+      config.headers.Authorization = `Bearer ${token}`; 
+  }
+  return config;
+});
+
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
 const requests = {
