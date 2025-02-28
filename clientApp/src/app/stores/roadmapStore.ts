@@ -34,20 +34,6 @@ export default class RoadmapStore {
   get roadmaps() {
     return Array.from(this.roadmapRegistry.values());
   }
-
-  // updateTaskCompletionStatus2 = async (  ) => {
-  //   try {
-      
-  
-  //     console.log('Payload before sending:', JSON.stringify(payload, null, 2));
-  
-  //     await apiClient.Roadmaps.updateCheck(payload);
-  
-  //   } catch (error) {
-  //     console.error("Error updating completion status:", error);
-  //     toast.error("Error updating completion status");
-  //   }
-  // };
   
   updateTaskCompletionStatus = async (
     id: string, 
@@ -66,7 +52,6 @@ export default class RoadmapStore {
         parentIndex,
         grandParentIndex
       };
-      console.log(body);
       
       // await apiClient.Roadmaps.updateCheck(body);
       runInAction(() => {
@@ -98,7 +83,6 @@ export default class RoadmapStore {
     asc: number = 1
   ) => {
     this.loadingInitial = true;
-    console.log("loadLogs called with params:", { filter, search, date, pageNumber, pageSize, sortBy, asc });
   
     try {
       const params = new URLSearchParams();

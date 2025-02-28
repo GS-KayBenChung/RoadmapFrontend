@@ -5,7 +5,6 @@ import { FormControl, InputLabel, Select, MenuItem, TextField, IconButton, Input
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/16/solid";
 import NavBar from "../../app/layout/NavBar";
 import ScreenTitleName from "../ScreenTitleName";
-import LoadingComponent from "../../app/layout/LoadingComponent";
 import { useStore } from "../../app/stores/store";
 import AuditTable from "../../app/layout/AuditTable";
 
@@ -18,7 +17,7 @@ const PaginationConfig = {
 
 export default observer(function RoadmapAudit() {
   const { roadmapStore } = useStore();
-  const { logs, loadLogs, loadingInitial } = roadmapStore;
+  const { loadLogs } = roadmapStore;
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [filter, setFilter] = useState<string>("");
   const [search, setSearch] = useState<string>("");
@@ -87,17 +86,17 @@ export default observer(function RoadmapAudit() {
     loadLogs(filter, "");
   };
 
-  const handlePageChange = (_: any, newPage: number) => {
-    updateQueryAndLoadLogs({
-      filter,
-      search,
-      date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
-      page: newPage,
-      pageSize,
-      sortBy,
-      asc,
-    });
-  };
+  // const handlePageChange = (_: any, newPage: number) => {
+  //   updateQueryAndLoadLogs({
+  //     filter,
+  //     search,
+  //     date: selectedDate ? new Date(selectedDate).toISOString() : undefined,
+  //     page: newPage,
+  //     pageSize,
+  //     sortBy,
+  //     asc,
+  //   });
+  // };
 
   const handleSortByChange = (event: any) => {
     const newSortBy = event.target.value;
